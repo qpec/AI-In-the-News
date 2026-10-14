@@ -148,6 +148,7 @@ class Research:
             "heldout_demo": self._heldout_demo,
             "propose_groups": self._propose_groups,
             "verify_legacy": self._verify_legacy,
+            "prepare_legacy_pilot": self._prepare_legacy_pilot,
         }
         if operation not in handlers:
             raise ResearchError("Unsupported research operation")
@@ -247,9 +248,16 @@ class Research:
         if not isinstance(articles, list) or not 0 < len(articles) <= self.config.max_articles:
             raise ResearchError("Article count exceeds the registered working limit")
         retrieval = data.get("retrieval", {})
-        if not retrieval.get("source") or not retrieval.get("retrieved_at") or "parameters" not in retrieval:
-            raise ResearchError("Retrieval source, observed timestamp and parameters are required")
-        if datetime.fromisoformat(retrieval["retrieved_at"].replace("Z", "+00:00")).tzinfo is None:
+        if not retrieval.get("source") or "retrieved_at" not in retrieval or "parameters" not in retrieval:
+            raise ResearchError("Retrieval source, timestamp state and parameters are required")
+        if retrieval["retrieved_at"] is None:
+            protocol = self.ledger.get(context.versions["protocol"], "protocol")["content"]
+            reason = retrieval.get("unavailable_reason")
+            if not reason or reason != protocol.get("unavailable_retrieval_reason"):
+                raise ResearchError(
+                    "Unknown historical retrieval requires a matching registered protocol reason"
+                )
+        elif datetime.fromisoformat(retrieval["retrieved_at"].replace("Z", "+00:00")).tzinfo is None:
             raise ResearchError("Retrieval timestamps require an explicit timezone")
         normalized: list[Json] = []
         for article in articles:
@@ -662,3 +670,10 @@ class Research:
         )
         result = {**verify(root), "input_inventory": inventory_ref, "versions": context.versions}
         return {"id": self.ledger.record(session, "legacy_verification", str(uuid.uuid4()), result), **result}
+
+    @audited_handler
+    def _prepare_legacy_pilot(self, session: str, context: Context, data: Json) -> Json:
+        from .preparation import prepare_legacy_pilot
+
+        self._require(context, {"protocol", "selection", "question", "profile"})
+        return prepare_legacy_pilot(self, session, context, data)

@@ -57,6 +57,7 @@ def main() -> int:
             "evaluate",
             "resolve_attempt",
             "verify_legacy",
+            "prepare_legacy_pilot",
         ],
     )
     run.add_argument("--input", type=Path, required=True)

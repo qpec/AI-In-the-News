@@ -384,6 +384,7 @@ class Ledger:
             "model.attempt.intended": ["request"],
             "model.attempt.completed": ["response"],
             "export.write_intended": ["artifact"],
+            "preparation.artifact.saved": ["artifact"],
         }
         for row in self.db.execute("SELECT * FROM events ORDER BY seq"):
             count += 1

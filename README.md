@@ -71,3 +71,13 @@ uv run --frozen python scripts/verify_sources.py --data-root ../AI-In-the-News-D
 ```
 
 The compatibility verifier now registers its method, selection and question and stores the result in the protected audit. It checks hashes, counts, text availability and duplicate article IDs without changing legacy files or calling an API. It also reports `article.eventUri` coverage across all archived records and per bundle: populated, absent, null, empty/whitespace and invalid-type values, with exact distinct populated values counted but never listed. These are metadata diagnostics, not dossier or incident counts. Pass `--actor codex:metadata-inspection` when Codex performs the check. The earlier [research plan](docs/research-plan.md) remains as a marked historical note.
+
+## Prepare the incident-method pilot
+
+```powershell
+uv run --frozen python scripts/prepare_incident_pilot.py --data-root ../AI-In-the-News-Data --limit 20000 --actor codex:pilot-preparation
+```
+
+This registers the exact [agreed method](docs/INCIDENT_DOSSIER_METHOD.md), checks the entire archive, and selects up to 20,000 records using proportional cohort quotas and a fixed SHA-256 ranking seed. The runtime saves selected/excluded record manifests, exact original selected JSONL bytes, normalized sources, stable passages, and 1,600-character embedding input chunks with 200-character overlap in protected storage. It reports missing text and `eventUri` coverage, preserves unknown historical retrieval metadata explicitly, and verifies the resulting audit. It creates no embeddings, event identities or dossiers and calls no model or network service.
+
+The printed `context_path` can be used as `newsresearch --versions` input for later audited inspection. The preparation record contains the private chunk artifact references. Repeating the identical version-bound preparation re-verifies the archive and records explicit reuse. Changing methods, selection, code or input hashes creates a separate preparation. The pilot is a development set; an independently annotated held-out set and an event-based data model remain required before substantive evaluation.
