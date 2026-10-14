@@ -1,0 +1,22 @@
+# Collected data and generated datasets belong in the private repository.
+/data/
+/datasets/
+/raw/
+/processed/
+/downloads/
+/exports/
+/output/
+/outputs/
+/private-data/
+/AI-In-the-News-Data/
+
+# Local credentials and configuration.
+.env
+.env.*
+!.env.example
+/secrets/
+/credentials/
+
+# Operating system files.
+.DS_Store
+Thumbs.db
