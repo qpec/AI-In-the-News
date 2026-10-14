@@ -45,6 +45,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 ## Protocol and verification
 
 - [User-specified method: from news articles to incident dossiers](docs/INCIDENT_DOSSIER_METHOD.md)
+- [Selected OpenAI embeddings, offline cost planning and per-run approval](docs/OPENAI_EMBEDDINGS.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)
@@ -55,7 +56,7 @@ uv run --frozen ruff check src tests scripts
 uv run --frozen mypy src
 ```
 
-Live NewsAPI collection and real model transports remain disabled and unfinished. Population estimation, independent scientific validation, authenticated multi-user review and externally anchored tamper detection are also unfinished. Synthetic tests verify software invariants only.
+Live NewsAPI collection and substantive dossier-model transports remain unfinished. An OpenAI embedding transport is implemented behind offline defaults and explicit plan-bound paid-run permission; selecting a provider or creating a cost plan sends no model requests. Population estimation, independent scientific validation, authenticated multi-user review and externally anchored tamper detection are also unfinished. Synthetic tests verify software invariants only.
 
 ## Existing repositories
 

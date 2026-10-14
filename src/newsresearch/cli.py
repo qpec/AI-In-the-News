@@ -58,6 +58,8 @@ def main() -> int:
             "resolve_attempt",
             "verify_legacy",
             "prepare_legacy_pilot",
+            "plan_embeddings",
+            "embed",
         ],
     )
     run.add_argument("--input", type=Path, required=True)

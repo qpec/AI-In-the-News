@@ -40,6 +40,7 @@ VERSION_KINDS = {
     "note",
     "export_policy",
     "evaluation",
+    "embedding_profile",
 }
 FULL_BINDINGS = {
     "dataset",
@@ -149,6 +150,8 @@ class Research:
             "propose_groups": self._propose_groups,
             "verify_legacy": self._verify_legacy,
             "prepare_legacy_pilot": self._prepare_legacy_pilot,
+            "plan_embeddings": self._plan_embeddings,
+            "embed": self._embed,
         }
         if operation not in handlers:
             raise ResearchError("Unsupported research operation")
@@ -213,6 +216,7 @@ class Research:
             "dossier_definition": "unit",
             "prompt": "instructions",
             "profile": "mode",
+            "embedding_profile": "model",
         }
         if kind in required_fields and not data["content"].get(required_fields[kind]):
             raise ResearchError("Versioned research methods cannot be empty")
@@ -692,3 +696,15 @@ class Research:
 
         self._require(context, {"protocol", "selection", "question", "profile"})
         return prepare_legacy_pilot(self, session, context, data)
+
+    @audited_handler
+    def _plan_embeddings(self, session: str, context: Context, data: Json) -> Json:
+        self._require(context, {"dataset", "protocol", "question", "selection", "profile"})
+        return self.gateway.plan_embeddings(session, context, data)
+
+    @audited_handler
+    def _embed(self, session: str, context: Context, data: Json) -> Json:
+        self._require(
+            context, {"dataset", "protocol", "question", "selection", "profile", "embedding_profile"}
+        )
+        return self.gateway.embed(session, context, data)

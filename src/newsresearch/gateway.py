@@ -356,6 +356,16 @@ class Gateway:
         run_id = ledger.record(session, "batch_run", str(uuid.uuid4()), reconciliation)
         return {"id": run_id, **reconciliation}
 
+    def plan_embeddings(self, session: str, context: Context, data: Json) -> Json:
+        from .embeddings import plan
+
+        return plan(self.engine, session, context, data)
+
+    def embed(self, session: str, context: Context, data: Json) -> Json:
+        from .embeddings import execute
+
+        return execute(self.engine, session, context, data)
+
     def review(self, session: str, context: Context, data: Json) -> Json:
         if session not in self.engine._active:
             raise AuditError("Review requires an active audited operation")

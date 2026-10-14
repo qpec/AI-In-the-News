@@ -72,3 +72,16 @@ The added tests cover exact provider-event metadata preservation, explicit field
 The real-data run exposed credential-shaped content in selected source records. The first attempted preparation failed closed. The registered v2 method retains those selected records as metadata-only placeholders with a separate quarantine manifest, without storing flagged raw/text values or substituting other articles. A synthetic regression test verifies absence of the flagged value from every created artifact. Quarantine is a retention limitation, not evidence of a real credential or a scientific finding; detailed counts and provenance remain in protected storage. Source text availability remains incomplete and must be carried into later processing coverage.
 
 The current article-to-dossier membership model and dossier-dependent model gateway still need event-mention and event-level extensions to implement the agreed method. No independent human gold labels, real embeddings, event clusters or incident dossiers were created by this preparation. The earlier synthetic benchmark does not establish throughput for this full-text corpus; final integrity preflight scans retained sources, passages and artifacts and has a larger cost.
+
+## OpenAI embedding integration follow-up — 2026-10-14
+
+The shared gateway now supports an offline plan and an explicitly approved OpenAI embedding run. The selected model and contract are documented in [OPENAI_EMBEDDINGS](OPENAI_EMBEDDINGS.md). Project defaults remain offline. This supersedes the earlier statement that no live model transport is implemented; substantive dossier-model transports and vector search remain unfinished.
+
+| Check | Observed result |
+| --- | --- |
+| `uv run --frozen pytest -q` | **73 passed in 57.26 seconds** |
+| `uv run --frozen ruff check src tests scripts` | All checks passed |
+| `uv run --frozen mypy src` | No issues in 13 source files |
+| `git diff --check` | Passed |
+
+The additional synthetic tests cover exact request bodies and complete manifests, offline/permission gates, cost reservations, partial execution and version-bound cache reuse, unknown timeout recovery, invalid indices/nonfinite/zero/wrong-width vectors, missing-artifact preflight failure, missing-tokenizer-cache rejection, fixed-endpoint transport and redirect rejection, failed durable intent preventing a send, and failed response auditing blocking retries. All transport tests use synthetic responses; no paid API call or live API-account validation occurred.

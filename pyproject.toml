@@ -7,7 +7,11 @@ name = "ai-in-the-news-research"
 version = "0.1.0"
 description = "Offline-first, dossier-based news research with enforced audit provenance"
 requires-python = ">=3.12,<3.14"
-dependencies = ["jsonschema>=4.23,<5", "matplotlib>=3.9,<4"]
+dependencies = [
+    "jsonschema>=4.23,<5",
+    "matplotlib>=3.9,<4",
+    "tiktoken>=0.12,<1",
+]
 
 [project.scripts]
 newsresearch = "newsresearch.cli:main"

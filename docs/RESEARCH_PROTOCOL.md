@@ -19,7 +19,8 @@ Register these objects using `version` before the relevant operation:
 | `codebook` | `labels`: distinct controlled identifiers; also document definitions and boundary cases |
 | `prompt` | `instructions`; optional JSON `details_schema` for question-specific extraction |
 | `profile` | `mode: exploratory` or `systematic`; scope and `population_estimate: false` |
-| `policy` | A versioned automatic acceptance method; only `synthetic-only-v1` is implemented |
+| `policy` | Automatic acceptance (`synthetic-only-v1`) or concrete embedding-run permission (`embedding-run-approval-v1`); run permission never accepts findings |
+| `embedding_profile` | `model`: provider, dimensions, tokenizer, batching limits, price basis and retrieval-only purpose |
 | `exclusion` | `dossier_ids`, `reason`, plus any study-specific decision metadata |
 | `evaluation` | `split: held_out`, prior method and `items` containing dossier IDs/gold labels |
 | `export_policy` | `allowed_labels`, `minimum_cell_size`, `allow_restricted_aggregates` |
@@ -109,7 +110,9 @@ Search results are exploratory coverage, not corpus-wide prevalence. Register pr
 
 `batch` requires dataset, dossiers, protocol, question, selection, dossier_definition, codebook, prompt and profile bindings. It accepts distinct `dossier_ids`, `task_kind` (`classification`, `extraction`, `grouping`, `summarization`, `retrieval_judgement`), exact application `parameters`, and optional `max_items`. All task kinds share the same manifest, request, attempt, validation and review path. Optional prompt `details_schema` validates question-specific structured fields.
 
-The only shipped provider is a local deterministic **software mock**. It searches for a fixture phrase and otherwise returns uncertainty. Task-type support validates the shared contract; it does not imply scientifically useful extraction, summaries or grouping. No live provider or paid call is enabled, even if `offline` is set false. Provider extensions must implement `Provider.complete`, preserve permitted exact payloads and observable metadata, and retain gateway enforcement. Concrete authorization, credential isolation, payload retention policies and transport tests must precede activation.
+The dossier-interpretation provider is a local deterministic **software mock**. It searches for a fixture phrase and otherwise returns uncertainty. Task-type support validates the shared contract; it does not imply scientifically useful extraction, summaries or grouping. Substantive provider extensions must implement `Provider.complete`, preserve permitted exact payloads and observable metadata, and retain gateway enforcement.
+
+The shared gateway also implements OpenAI embeddings under the separate [embedding contract](OPENAI_EMBEDDINGS.md). `plan_embeddings` registers an embedding profile, verifies exact chunk references and writes a complete request manifest with local token/cost estimates, without model calls. `embed` requires that exact plan and version context, unchanged implementation, a registered concrete paid-run approval with a budget and expiry, process-local online mode and an environment-held API key. All requests and attempts retain the shared intent, artifact and recovery boundary. Vectors are retrieval representations, never accepted findings. Vector search and held-out retrieval evaluation remain unfinished.
 
 Before execution the full intended work manifest is committed. Stable task keys bind versions, evidence, instructions, schema, parameters, provider/model and implementation/lock digest. Resubmit the same work to resume; successful matching outputs are explicitly logged as cache reuse. Failed attempts remain, with bounded retries. An interrupted intent with no durable completion is an unknown outcome: inspect it and use `resolve_attempt` with an explicit reason before retrying. It is never a negative finding.
 
