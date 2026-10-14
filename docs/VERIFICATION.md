@@ -99,3 +99,9 @@ A masked Windows Forms dialog now stores the OpenAI key in the current user's Wi
 The user's approval for the prepared OpenAI pilot and USD 5 estimated-cost budget was registered through the audited runtime, bound to the existing exact plan. A conservative 24-hour execution window was recorded. Approval evidence and identifiers remain protected, separate from credentials.
 
 The launcher now reports compact progress only after completed audit transactions, without exposing request/response contents. Request bodies, source code and lockfile bindings for the existing plan are unchanged. `uv run --frozen pytest -q` passed **77 tests in 53.66 seconds**; Ruff, mypy (13 source files) and `git diff --check` passed. Two added tests check that audit completion precedes reporting, private payload fields are omitted, transaction/projection arguments are preserved, and an audit failure produces no successful progress message.
+
+## First authorized live embedding request — 2026-10-14
+
+The Windows credential launcher completed the first bounded request under the registered user approval. OpenAI returned HTTP 200; the shared gateway validated vector coverage, indices, dimensions, finite/nonzero values, returned model and usage structure, then saved the result and completed the durable attempt. Exact inputs, raw output, usage, request identity and source mappings remain in protected storage. The recorded cost reservation was below the approved limit.
+
+This establishes actual service access and the embedding transport's behavior for that request, superseding the earlier account-access limitation. It does not establish complete pilot coverage, retrieval quality, event identity or incident dossier validity. The remaining requests are still unprocessed at this checkpoint; a continuation will explicitly reuse the completed result.
