@@ -14,3 +14,7 @@ Read [RESEARCH_PROTOCOL](docs/RESEARCH_PROTOCOL.md) and [AUDITABILITY](docs/AUDI
 - Preserve existing work and global settings. Project hooks are supplementary; their trust/coverage limitations cannot replace runtime enforcement. Run the documented tests before delivery and report unfinished integrations candidly.
 
 Reusable workflows: `.agents/skills/research-operations`, `research-review`, and `research-measurement`. Setup and tested commands: [README](README.md).
+
+# Commit checkpoints
+
+Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
