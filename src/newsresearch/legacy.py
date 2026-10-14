@@ -10,6 +10,32 @@ import zipfile
 from .common import Json
 
 
+EVENT_URI_STATES = ("populated", "absent", "null", "empty", "invalid_type")
+
+
+def event_uri_state(article: Json) -> str:
+    if "eventUri" not in article:
+        return "absent"
+    value = article["eventUri"]
+    if value is None:
+        return "null"
+    if not isinstance(value, str):
+        return "invalid_type"
+    return "populated" if value.strip() else "empty"
+
+
+def event_uri_summary(counts: Counter[str], values: set[str]) -> Json:
+    return {
+        "field_path": "article.eventUri",
+        "method": "event-uri-metadata-v1",
+        "unit": "article records; provider IDs are not validated dossiers or incidents",
+        "denominator": sum(counts.values()),
+        "counts": {state: counts[state] for state in EVENT_URI_STATES},
+        "distinct_populated_values": len(values),
+        "value_rule": "Non-whitespace strings; distinct values use exact stored strings without normalization",
+    }
+
+
 def sha256(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -56,12 +82,16 @@ def verify(data_root: Path) -> Json:
     bundle_reports = []
     totals: Counter[str] = Counter()
     languages: Counter[str] = Counter()
+    event_counts: Counter[str] = Counter()
+    event_values: set[str] = set()
     for entry in sorted(bundles, key=lambda item: item["path"]):
         name = Path(entry["path"]).name
         declared = expected[name]
         if entry["sha256"] != declared["sha256"]:
             raise ValueError(f"Inventory differs from the upstream checksum: {name}")
         counts: Counter[str] = Counter()
+        bundle_event_counts: Counter[str] = Counter()
+        bundle_event_values: set[str] = set()
         with zipfile.ZipFile(within(data_root, entry["path"])) as archive:
             with archive.open("artikelen.jsonl") as stream:
                 for line_number, line in enumerate(stream, 1):
@@ -77,6 +107,10 @@ def verify(data_root: Path) -> Json:
                     duplicates += identifier in seen
                     seen.add(identifier)
                     counts["records"] += 1
+                    state = event_uri_state(article)
+                    bundle_event_counts[state] += 1
+                    if state == "populated":
+                        bundle_event_values.add(article["eventUri"])
                     body = article.get("body")
                     counts["with_text" if isinstance(body, str) and body.strip() else "without_text"] += 1
                     languages[str(article.get("lang") or "missing")] += 1
@@ -90,7 +124,16 @@ def verify(data_root: Path) -> Json:
                     f"{actual_key} differs from upstream manifest for {name}: {counts[actual_key]} != {declared[expected_key]}"
                 )
         totals.update(counts)
-        bundle_reports.append({"path": entry["path"], "cohort": declared["deelcollectie"], **dict(counts)})
+        event_counts.update(bundle_event_counts)
+        event_values.update(bundle_event_values)
+        bundle_reports.append(
+            {
+                "path": entry["path"],
+                "cohort": declared["deelcollectie"],
+                **dict(counts),
+                "event_uri": event_uri_summary(bundle_event_counts, bundle_event_values),
+            }
+        )
         print(f"{name}: {counts['records']} records verified.", flush=True)
     if duplicates:
         raise ValueError(f"Found {duplicates} duplicate article identifiers across bundles.")
@@ -108,5 +151,6 @@ def verify(data_root: Path) -> Json:
         "with_text": totals["with_text"],
         "without_text": totals["without_text"],
         "languages": dict(languages),
+        "event_uri": event_uri_summary(event_counts, event_values),
         "bundles": bundle_reports,
     }

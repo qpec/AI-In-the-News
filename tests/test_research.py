@@ -494,7 +494,7 @@ def test_original_source_version_and_passage_stay_available(prepared: Any) -> No
 
 def test_stored_eventregistry_response_import_is_offline_and_exact(engine: Research, tmp_path: Path) -> None:
     versions = baseline(engine, "test")
-    raw = b'{ "articles": {"results": [{"uri":"synthetic-001", "body":"A synthetic service outage."}]}}'
+    raw = b'{ "articles": {"results": [{"uri":"synthetic-001", "eventUri":"synthetic-event", "body":"A synthetic service outage."}]}}'
     path = tmp_path / "response.json"
     path.write_bytes(raw)
     result = engine.execute(
@@ -517,6 +517,7 @@ def test_stored_eventregistry_response_import_is_offline_and_exact(engine: Resea
     )
     assert engine.ledger.artifacts.read_bytes(source_row["original_artifact"]) == raw
     assert source_row["retrieval"]["network_calls"] == 0
+    assert source_row["raw_record"]["eventUri"] == "synthetic-event"
 
 
 def test_held_out_evaluation_and_review_queue(prepared: Any) -> None:

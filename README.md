@@ -69,4 +69,4 @@ The previous archive is preserved unchanged, including its existing private Git 
 uv run --frozen python scripts/verify_sources.py --data-root ../AI-In-the-News-Data
 ```
 
-The compatibility verifier now registers its method and stores the result in the protected audit. It checks hashes, counts, text availability and duplicate article IDs without changing legacy files or calling an API. The earlier [research plan](docs/research-plan.md) remains as a marked historical note.
+The compatibility verifier now registers its method, selection and question and stores the result in the protected audit. It checks hashes, counts, text availability and duplicate article IDs without changing legacy files or calling an API. It also reports `article.eventUri` coverage across all archived records and per bundle: populated, absent, null, empty/whitespace and invalid-type values, with exact distinct populated values counted but never listed. These are metadata diagnostics, not dossier or incident counts. Pass `--actor codex:metadata-inspection` when Codex performs the check. The earlier [research plan](docs/research-plan.md) remains as a marked historical note.

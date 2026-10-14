@@ -73,6 +73,10 @@ Sources are immutable content-addressed versions. A changed body or retrieval id
 
 Legacy `AI-In-the-News-Data` archives were committed before this foundation. They are preserved unchanged and are **not** the protected working store. This implementation does not remove them from private Git history. Future restricted sources and audits stay outside both Git repositories. The compatibility command `uv run --frozen python scripts/verify_sources.py --data-root ../AI-In-the-News-Data` now registers a method and saves its verification report in the protected audit, without rewriting the legacy archive.
 
+The verifier registers protocol, selection and question versions before scanning every inventoried archive record. Its `event-uri-metadata-v1` diagnostic reports `article.eventUri` coverage per bundle and across the archive, using all scanned article records as the denominator. The mutually exclusive states are absent key, explicit null, empty/whitespace string, non-string value and populated string. Distinct populated values use exact original strings without normalization; IDs themselves are not included in the report. The input inventory and file hashes bind the scan, with code identity, version bindings and results in protected storage. These technical metadata counts are not dossier measurements or estimates of incidents. No source text is returned, no live collection or model inference occurs, and a failed scan produces no successful verification report. `--actor` identifies the operator explicitly.
+
+For permitted imports, the provider identifier remains at `raw_record.eventUri` in the immutable source payload. The current `metadata_only` importer omits the entire raw record and does not separately retain `eventUri`; do not infer its availability in that mode from archive coverage.
+
 ## Dossiers, duplicates and lineage
 
 `dossiers` requires dataset/protocol/dossier-definition bindings. Input:
