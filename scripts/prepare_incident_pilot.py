@@ -34,7 +34,7 @@ def main() -> int:
                 "method_document_sha256": hashlib.sha256(method_bytes).hexdigest(),
                 "preparation_method": METHOD,
                 "unavailable_retrieval_reason": RETRIEVAL_UNKNOWN,
-                "authorization": "User requested offline data preparation and selected a pilot of up to 20,000 articles.",
+                "authorized_scope": "User requested offline data preparation and selected a pilot of up to 20,000 articles.",
             },
             "selection": {
                 "rules": "All inventoried article bundles form the frame; allocate by cohort with proportional "

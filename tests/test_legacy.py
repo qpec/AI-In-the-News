@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 from typing import Any
 import zipfile
 
@@ -286,3 +288,38 @@ def test_unknown_retrieval_cannot_be_used_without_registered_reason(engine: Rese
             actor="test",
             versions=versions,
         )
+
+
+def test_pilot_command_registers_the_exact_method_before_preparation(tmp_path: Path) -> None:
+    root = tmp_path / "archive"
+    make_archive(root, with_text=True)
+    project = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(project / "scripts/prepare_incident_pilot.py"),
+            "--data-root",
+            str(root),
+            "--workspace",
+            str(tmp_path / "command-audit"),
+            "--limit",
+            "5",
+            "--actor",
+            "test:command",
+        ],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert '"selected_records": 5' in result.stdout
+    assert '"status": "verified"' in result.stdout
+    assert '"model_calls": 0' in result.stdout
+    engine = Research(tmp_path / "command-audit")
+    try:
+        protocol = engine.ledger.db.execute("SELECT payload FROM records WHERE kind='protocol'").fetchone()[0]
+        assert json.loads(protocol)["content"]["method"] == (
+            project / "docs/INCIDENT_DOSSIER_METHOD.md"
+        ).read_bytes().decode("utf-8")
+    finally:
+        engine.close()
