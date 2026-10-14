@@ -219,6 +219,21 @@ class Research:
         if kind == "profile" and data["content"]["mode"] not in {"exploratory", "systematic"}:
             raise ResearchError("Profile mode must distinguish exploration from systematic measurement")
         parent = data.get("supersedes")
+        if data.get("amend_latest"):
+            if parent or not data.get("reason"):
+                raise ResearchError("Automatic amendment needs a reason and no explicit parent")
+            latest = self.ledger.db.execute(
+                "SELECT id FROM records WHERE kind=? AND logical_key=? ORDER BY created_event DESC LIMIT 1",
+                (kind, data["key"]),
+            ).fetchone()
+            if latest:
+                previous = self.ledger.get(latest[0], kind)
+                if previous["content"] == data["content"] and previous["branch"] == data.get(
+                    "branch", "main"
+                ):
+                    self.ledger.append(session, "record.reused", {"record": latest[0]})
+                    return {"id": latest[0], "kind": kind}
+                parent = latest[0]
         if parent:
             self.ledger.get(parent, kind)
             if not data.get("reason"):

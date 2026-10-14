@@ -36,6 +36,8 @@ Unavailable request IDs, usage or model metadata remain null. Local timestamps a
 
 Credential fields and recognizable secret formats are rejected, rather than silently redacting and misrepresenting a request as exact. No environment dump, auth files, transcripts or provider credentials are logged. Pattern detection cannot recognize every possible secret: keep credentials outside research payloads. No credential-bearing live adapter is shipped.
 
+The registered offline pilot preparation handles a credential-flagged selected archive row by retaining only its already-validated locator metadata and hash as a metadata-only source. It persists no matched value, raw row, provider record or text from that row. A separate quarantine manifest preserves its selected membership and unprocessed status; the record is not silently replaced. This is a versioned retention exclusion, not redaction of a supposedly exact payload or a determination that the source contains a real credential. The legacy archive is not changed.
+
 ## Storage and local tamper detection
 
 Working data live outside Git. New Windows roots remove inherited broad grants and use the current user's SID plus SYSTEM; local Administrators/owner rights can remain. Preflight rejects broad ACLs and links/junctions. POSIX roots require owner-only permissions. Artifact names are SHA-256 of their bytes. Files are flushed and fsynced; SQLite uses WAL, `synchronous=FULL`, foreign keys and append-only UPDATE/DELETE triggers for evidence/audit tables. Schema changes are not automatically repaired.

@@ -39,7 +39,9 @@ def main() -> int:
             "selection": {
                 "rules": "All inventoried article bundles form the frame; allocate by cohort with proportional "
                 "largest remainders (ties by cohort name). Rank by SHA-256 of canonical JSON {seed, article_uri}, "
-                "ties by article URI. Retain missing text. Record every exclusion outside each cohort quota.",
+                "ties by article URI. Retain missing text. Record every exclusion outside each cohort quota. "
+                "Keep credential-flagged selected records as metadata-only placeholders; never replace them "
+                "or retain flagged text, raw rows or matched values.",
                 "method": METHOD,
                 "limit": args.limit,
                 "seed": args.seed,
@@ -62,7 +64,14 @@ def main() -> int:
         for kind, content in definitions.items():
             versions[kind] = engine.execute(
                 "version",
-                {"kind": kind, "key": "incident-pilot-v1-" + kind, "content": content},
+                {
+                    "kind": kind,
+                    "key": "incident-pilot-v1-" + kind,
+                    "content": content,
+                    "amend_latest": True,
+                    "reason": "Register the current method; retain prior versions and amend changed preparation "
+                    "rules to preserve credential-flagged selections as metadata-only with explicit missingness.",
+                },
                 objective="Register the exact user method and deterministic offline pilot before preparation",
                 actor=args.actor,
             )["id"]

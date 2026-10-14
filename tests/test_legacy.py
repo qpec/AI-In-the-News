@@ -15,7 +15,7 @@ from newsresearch.common import AuditError, ResearchError, digest
 from newsresearch.preparation import METHOD, RETRIEVAL_UNKNOWN, allocate, chunks
 
 
-def make_archive(root: Path, with_text: bool = False) -> None:
+def make_archive(root: Path, with_text: bool = False, credential_like: bool = False) -> None:
     """Synthetic provider metadata, including missingness and cross-bundle reuse."""
     root.mkdir()
     files = []
@@ -61,6 +61,8 @@ def make_archive(root: Path, with_text: bool = False) -> None:
             for number, article in enumerate(articles)
         ]
         path = root / name
+        if credential_like and index == 0:
+            rows[0]["article"]["body"] = "Synthetic credential-shaped fixture: " + "sk-" + "x" * 24
         with zipfile.ZipFile(path, "w") as archive:
             archive.writestr("artikelen.jsonl", "\n".join(json.dumps(row) for row in rows))
         entry = inventory_entry(path, "article-bundle")
@@ -323,3 +325,52 @@ def test_pilot_command_registers_the_exact_method_before_preparation(tmp_path: P
         ).read_bytes().decode("utf-8")
     finally:
         engine.close()
+
+
+def test_flagged_record_is_kept_as_metadata_without_persisting_flagged_text(
+    engine: Research, tmp_path: Path
+) -> None:
+    root = tmp_path / "archive"
+    make_archive(root, with_text=True, credential_like=True)
+    result = run_pilot(engine, root, pilot_versions(engine, 11))
+    assert result["selected_records"] == 11
+    assert result["credential_quarantined_records"] == 1
+    assert result["text_unavailable_records"] == result["missing_text_records"] + 1
+    assert result["event_uri"]["denominator"] == 10
+    assert result["event_uri_records_not_inspected"] == 1
+    row = engine.ledger.db.execute(
+        "SELECT payload FROM sources WHERE source_key='eventregistry:0-0'"
+    ).fetchone()[0]
+    source = json.loads(row)
+    assert source["retention"] == "metadata_only" and source["body"] == ""
+    assert "raw_record" not in source and "original_artifact" not in source
+    assert source["text_unavailable_reason"] == "credential_like_content"
+    forbidden = ("sk-" + "x" * 24).encode()
+    assert all(forbidden not in path.read_bytes() for path in engine.ledger.artifacts.root.iterdir())
+    engine.execute("status", objective="Verify quarantined selection keeps audit integrity", actor="test")
+
+
+def test_method_amendment_preserves_parent_and_reuses_unchanged_content(engine: Research) -> None:
+    def register(method: str) -> Any:
+        return engine.execute(
+            "version",
+            {
+                "kind": "protocol",
+                "key": "amendment-test",
+                "content": {"method": method},
+                "amend_latest": True,
+                "reason": "Explicit development amendment",
+            },
+            objective="Check versioned method amendment",
+            actor="test",
+        )
+
+    first = register("Original method")
+    amended = register("Method with quarantined text coverage")
+    assert first["id"] != amended["id"]
+    parent = engine.ledger.db.execute(
+        "SELECT supersedes FROM records WHERE id=?", (amended["id"],)
+    ).fetchone()[0]
+    assert parent == first["id"]
+    assert register("Method with quarantined text coverage")["id"] == amended["id"]
+    assert engine.ledger.get(first["id"], "protocol")["content"]["method"] == "Original method"

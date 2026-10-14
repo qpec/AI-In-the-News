@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .runtime import Research
 
 
-METHOD = "legacy-pilot-v1"
+METHOD = "legacy-pilot-v2"
 CHUNK_METHOD = "unicode-window-1600-overlap-200-v1"
 RETRIEVAL_UNKNOWN = (
     "Historical provider retrieval timestamps and query parameters have not been linked to individual "
@@ -149,6 +149,7 @@ def prepare_legacy_pilot(engine: Research, session: str, context: Context, data:
     event_counts: Counter[str] = Counter()
     event_values: set[str] = set()
     missing_text = []
+    quarantined = []
     for bundle in bundles:
         original = bytearray()
         articles = []
@@ -156,10 +157,27 @@ def prepare_legacy_pilot(engine: Research, session: str, context: Context, data:
             location = (bundle["path"], number)
             if location not in lookup:
                 continue
-            require_no_credentials(row)
             locator = lookup[location]
             if hashlib.sha256(raw).hexdigest() != locator["row_sha256"]:
                 raise ResearchError("Selected archive row changed between selection and import")
+            try:
+                require_no_credentials(row)
+            except ResearchError:
+                # Retain only the already-validated locator, never a matched value or raw row.
+                quarantined.append({**locator, "reason": "credential_like_content", "review_required": True})
+                prepared[location] = {
+                    "source_key": "eventregistry:" + locator["article_uri"],
+                    "body": "",
+                    "has_text": False,
+                    "retention": "metadata_only",
+                    "synthetic": False,
+                    "collection_cohort": locator["cohort"],
+                    "archive_provenance": locator,
+                    "original_sha256": locator["row_sha256"],
+                    "text_unavailable_reason": "credential_like_content",
+                    "event_uri_state": "not_retained_credential_quarantine",
+                }
+                continue
             record = row["article"]
             body = record.get("body")
             if body is not None and not isinstance(body, str):
@@ -253,6 +271,10 @@ def prepare_legacy_pilot(engine: Research, session: str, context: Context, data:
         "selection_manifest": selected_ref,
         "exclusion_manifest": excluded_ref,
         "missing_text_records": len(missing_text),
+        "credential_quarantined_records": len(quarantined),
+        "quarantine_manifest": artifact("credential_quarantined_records", quarantined),
+        "text_unavailable_records": len(missing_text) + len(quarantined),
+        "event_uri_records_not_inspected": len(quarantined),
         "missing_text_manifest": artifact("missing_text", missing_text),
         "event_uri": event_uri_summary(event_counts, event_values),
         "passages": passage_count,
