@@ -53,3 +53,22 @@ To activate supplementary hooks in a future local Codex session, trust this proj
 ## Remaining work
 
 Live collection/model transports, independent scientific evaluation, useful semantic grouping/retrieval, sampling-based population estimates, authenticated review identities, external tamper checkpoints/backups and stronger publication privacy controls are not implemented. Native Codex inference and arbitrary tools outside the runtime are not captured. Detailed limitations and the unchanged legacy Git archive are documented in [AUDITABILITY](AUDITABILITY.md).
+
+## Incident-method preparation follow-up — 2026-10-14
+
+The exact user-specified four-stage method is preserved in [INCIDENT_DOSSIER_METHOD](INCIDENT_DOSSIER_METHOD.md). It is also registered verbatim, with its file hash, in the protected protocol record before preparation. Preparation retains articles, stable paragraphs and deterministic embedding-input chunks; it does not perform semantic extraction, embeddings, coreference or incident linking.
+
+| Check | Observed result |
+| --- | --- |
+| `uv run --frozen pytest -q` | **59 passed in 46.45 seconds** |
+| `uv run --frozen ruff check src tests scripts` | All checks passed |
+| `uv run --frozen mypy src` | No issues in 12 source files |
+| Full audited archive verifier | Source checksums and bundle verification passed; event-identifier diagnostics retained in protected storage |
+| `uv run --frozen python scripts/prepare_incident_pilot.py --data-root ../AI-In-the-News-Data --limit 20000 --actor codex:pilot-preparation` | Completed the authorized offline pilot and final audit verification; no model attempts or accepted findings |
+| Git archive handling | Original source files preserved; only data-repository instructions and documentation changed |
+
+The added tests cover exact provider-event metadata preservation, explicit field missingness, cross-bundle distinct values, archive hash rejection, complete disjoint selection/exclusion manifests, proportional deterministic selection, original selected row bytes, Unicode chunk offsets/overlap, unknown historical retrieval registration, version-bound reuse, missing-chunk audit failure, command-level method registration, and parent-preserving method amendments.
+
+The real-data run exposed credential-shaped content in selected source records. The first attempted preparation failed closed. The registered v2 method retains those selected records as metadata-only placeholders with a separate quarantine manifest, without storing flagged raw/text values or substituting other articles. A synthetic regression test verifies absence of the flagged value from every created artifact. Quarantine is a retention limitation, not evidence of a real credential or a scientific finding; detailed counts and provenance remain in protected storage. Source text availability remains incomplete and must be carried into later processing coverage.
+
+The current article-to-dossier membership model and dossier-dependent model gateway still need event-mention and event-level extensions to implement the agreed method. No independent human gold labels, real embeddings, event clusters or incident dossiers were created by this preparation. The earlier synthetic benchmark does not establish throughput for this full-text corpus; final integrity preflight scans retained sources, passages and artifacts and has a larger cost.
