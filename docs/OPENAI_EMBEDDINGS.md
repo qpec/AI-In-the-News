@@ -38,6 +38,26 @@ Approval identities are self-asserted local records, not authenticated human sig
 
 Set `OPENAI_API_KEY` securely in the execution environment; never put it in chat, research inputs, files committed to Git or logged payloads. The transport reads it only when sending a permitted request. API account permissions, billing, rate limits and suitability of external source processing must be resolved for the concrete run. Only the fixed HTTPS endpoint is supported; redirects are rejected and the transport has no hidden SDK retries.
 
+### Local Windows key entry
+
+For a masked local entry window, run:
+
+```powershell
+powershell.exe -NoProfile -STA -File scripts/set_openai_key.ps1
+```
+
+Paste the replacement key into that window and select **Save key**. The helper stores it in the current user's Windows Credential Manager under `AI-In-the-News/OpenAI`, persistent on this computer. It does not send the key through chat, put it in command arguments, create a plaintext key file, change global environment variables, call the API, or approve a paid run. Cancel leaves the stored credential unchanged. Windows Credential Manager can also remove the application's saved entry. Treat keys previously posted into chat as exposed and rotate them.
+
+`powershell.exe -NoProfile -File scripts/set_openai_key.ps1 -Check` reports only whether the credential exists; it does not print or return its value. Do not inspect or screenshot the entry field, dump the credential, or enable value-level debugging around these helpers. Credential storage is setup, outside research payload/audit storage. Other software running as the same Windows user can access the stored key; this is not isolation from that user or the execution process.
+
+For an approved plan, the launcher loads the key only into its process environment and invokes the existing audited Python entry point, restoring the previous process environment afterward:
+
+```powershell
+powershell.exe -NoProfile -File scripts/run_embeddings_with_key.ps1 -Context PATH_TO_EMBEDDING_CONTEXT -Plan PLAN_ID -ApprovalPolicy POLICY_ID -AllowPaidExecution -MaxRequests 1
+```
+
+The launcher retains all plan/version/approval/offline safeguards in the Python gateway. Saving a key is not approval for paid processing. Native credential tests use a separate random test target, remove it afterward and never load the application's real credential.
+
 ```powershell
 uv run --frozen python scripts/run_embeddings.py --context PATH_TO_EMBEDDING_CONTEXT --plan PLAN_ID --approval-policy POLICY_ID --allow-paid-execution --max-requests 1 --actor codex:embedding-execution
 ```
