@@ -1,4 +1,4 @@
-# Collected data and generated datasets belong in the private repository.
+# Restricted data and generated research artifacts belong outside every Git repository.
 /data/
 /datasets/
 /raw/
@@ -24,3 +24,17 @@ Thumbs.db
 # Local Python bytecode.
 __pycache__/
 *.py[cod]
+
+# Research payloads and credentials must stay outside Git.
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.sqlite*
+*.db
+*.jsonl
+*.zip
+*.parquet
+/artifacts/
+/runs/
+/private/

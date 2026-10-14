@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-in-the-news-research"
+version = "0.1.0"
+description = "Offline-first, dossier-based news research with enforced audit provenance"
+requires-python = ">=3.12,<3.14"
+dependencies = ["jsonschema>=4.23,<5", "matplotlib>=3.9,<4"]
+
+[project.scripts]
+newsresearch = "newsresearch.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.3,<10", "mypy>=1.14,<2", "types-jsonschema>=4.23", "ruff>=0.9,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/newsresearch"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

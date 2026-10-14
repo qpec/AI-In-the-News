@@ -1,5 +1,7 @@
 # Research plan
 
+Historical planning note, superseded on 2026-10-14 by [RESEARCH_PROTOCOL](RESEARCH_PROTOCOL.md) and [AUDITABILITY](AUDITABILITY.md). The active unit is the dossier, and new restricted working data must stay outside Git. The earlier private-repository layout below describes the preserved legacy import, not the current runtime.
+
 Status: source organization and validation. The research question and analysis protocol are still to be agreed.
 
 ## Decisions before analysis

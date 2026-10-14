@@ -1,0 +1,7 @@
+schema_version = 1
+offline = true
+max_articles = 20000
+max_attempts_per_run = 3
+# Storage defaults to LOCALAPPDATA/AI-In-the-News/research on Windows,
+# or ~/.local/share/AI-In-the-News/research elsewhere. It must be outside Git.
+# Override per command with --workspace; never store credentials here.
