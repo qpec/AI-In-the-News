@@ -6,6 +6,8 @@ This is the operational contract for AI In the News. Root `AGENTS.md` makes it m
 
 The primary counting unit is a **dossier**: a versioned collection of reporting about a proposed shared event or research subject. An article is a source version, never automatically an incident. Register the concrete dossier definition for each study; two reports about the same event do not create two incidents.
 
+The agreed development method is preserved verbatim in [INCIDENT_DOSSIER_METHOD](INCIDENT_DOSSIER_METHOD.md). It distinguishes article-level sources, evidence-backed event mentions, event identity and incident dossiers containing related but distinct events. Existing source-to-dossier grouping is not yet a complete implementation of that method.
+
 Register these objects using `version` before the relevant operation:
 
 | Kind | Required content / purpose |

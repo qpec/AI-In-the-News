@@ -44,6 +44,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 
 ## Protocol and verification
 
+- [User-specified method: from news articles to incident dossiers](docs/INCIDENT_DOSSIER_METHOD.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)
