@@ -64,6 +64,8 @@ uv run --frozen python scripts/run_embeddings.py --context PATH_TO_EMBEDDING_CON
 
 The online override applies only to that process and leaves project/global settings unchanged. Begin with an explicitly approved bounded smoke run; increase `--max-requests` within the same approval only when authorized. A changed implementation or version-bound plan requires a new plan and permission.
 
+The launcher prints a small progress message after the first durable completed attempt, every 25 completed attempts and any invalid attempt. It reports only the new-attempt count, status and HTTP status, after the original audit transaction succeeds. It does not alter request construction, gateway validation, approval or persistence. The final console summary reports the number of missing tasks; the complete manifest and task identifiers remain in protected storage.
+
 ## Attempts, results and limitations
 
 Every send has a durable intent, exact body, client request ID, timestamp and cost reservation. Successful/HTTP-error JSON payloads are retained exactly when they pass the credential guard, with observable HTTP status, provider request ID, model, usage and validation. Unparseable or credential-flagged bodies are not retained; their absence is explicit. Vectors use base64-encoded little-endian float32 values. Validation checks indices, count, dimensions, finite/nonzero vectors, returned model and usage structure. Raw vector responses are stored once; parsed validation and index-to-chunk mappings reference them.

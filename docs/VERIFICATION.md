@@ -93,3 +93,9 @@ The offline planner then completed against the prepared real pilot through `Rese
 A masked Windows Forms dialog now stores the OpenAI key in the current user's Windows Credential Manager. A separate launcher injects it into the existing audited embedding process without putting it in command arguments, global environment settings or research payloads. Key setup sends no API request and grants no paid-run approval.
 
 `uv run --frozen pytest -q` passed **75 tests in 57.45 seconds**; Ruff, mypy (13 source files), PowerShell parser checks for both helpers and `git diff --check` passed. Native credential tests covered save/read/replacement/removal under a unique synthetic target, rejected unrelated targets and checked that the real entry's presence was unchanged. A launcher test verified that missing paid-execution permission fails before credential access. Tests never loaded the real application's key or contacted the API. Credential tests run only on Windows; actual account access remains unverified.
+
+## Paid-run launcher readiness — 2026-10-14
+
+The user's approval for the prepared OpenAI pilot and USD 5 estimated-cost budget was registered through the audited runtime, bound to the existing exact plan. A conservative 24-hour execution window was recorded. Approval evidence and identifiers remain protected, separate from credentials.
+
+The launcher now reports compact progress only after completed audit transactions, without exposing request/response contents. Request bodies, source code and lockfile bindings for the existing plan are unchanged. `uv run --frozen pytest -q` passed **77 tests in 53.66 seconds**; Ruff, mypy (13 source files) and `git diff --check` passed. Two added tests check that audit completion precedes reporting, private payload fields are omitted, transaction/projection arguments are preserved, and an audit failure produces no successful progress message.
