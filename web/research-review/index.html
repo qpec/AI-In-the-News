@@ -12,7 +12,7 @@
   <a class="skip-link" href="#article-detail">Skip to selected answer</a>
   <header class="masthead">
     <a class="brand" href="/" aria-label="AI in the News reading room"><span class="brand-mark" aria-hidden="true">ai<span>n</span></span><span>AI IN THE NEWS<span class="brand-sub">RESEARCH READING ROOM</span></span></a>
-    <div class="private-label"><span aria-hidden="true" class="status-dot"></span>LOCAL · PRIVATE</div>
+    <div class="masthead-actions"><div class="private-label"><span aria-hidden="true" class="status-dot"></span>LOCAL · PRIVATE</div><button type="button" id="open-conversation" class="conversation-trigger" aria-haspopup="dialog" disabled>Ask a follow-up <span aria-hidden="true">↗</span></button></div>
   </header>
   <section class="intro" aria-labelledby="page-title">
     <div class="intro-heading"><div><p class="eyebrow">FROM THE CORPUS</p><h1 id="page-title">Decisions around AI incidents</h1></div><div class="progress-box"><span id="progress-label">Reading progress</span><strong id="progress-count">—</strong><div class="progress-track"><span id="progress-bar"></span></div></div></div>
@@ -42,6 +42,25 @@
     <button type="button" id="mobile-next" disabled>Next <span aria-hidden="true">→</span></button>
   </nav>
   <footer class="page-footer"><span>Model answers are provisional and have not been human validated. Article counts are not incident counts.</span><span class="keyboard-hint"><kbd>J</kbd><kbd>K</kbd> browse <kbd>S</kbd> save <kbd>R</kbd> read</span></footer>
+  <dialog id="conversation-dialog" class="conversation-dialog" aria-labelledby="conversation-title">
+    <div class="conversation-shell">
+      <header class="conversation-header"><div><p class="eyebrow">ASK THE EVIDENCE</p><h2 id="conversation-title">Keep the research moving.</h2></div><button type="button" id="close-conversation" class="conversation-close" aria-label="Close conversation">×</button></header>
+      <div class="conversation-context"><strong>Start with the current retrieval.</strong><p id="conversation-context">Checking whether audited follow-ups are available…</p></div>
+      <div id="conversation-thread" class="conversation-thread" role="log" aria-label="Research conversation" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
+      <div id="conversation-job-status" class="conversation-job-status" role="status" hidden></div>
+      <div id="conversation-error" class="conversation-error" role="alert" hidden></div>
+      <div id="conversation-disabled" class="conversation-disabled" hidden><strong>Reading mode</strong><p id="conversation-disabled-reason">Audited follow-ups are not enabled on this server. You can continue browsing the saved answers.</p></div>
+      <form id="conversation-form" class="conversation-form" hidden>
+        <fieldset class="conversation-scopes"><legend>Where to look</legend><label><input type="radio" name="conversation-scope" value="current" checked><span>Current evidence<small>Reuse the latest retrieval</small></span></label><label><input type="radio" name="conversation-scope" id="conversation-search-scope" value="search"><span>Search corpus again<small>Explicit local keyword search</small></span></label></fieldset>
+        <p id="conversation-scope-note" class="conversation-scope-note">Follow-ups reuse the latest retrieval within a bounded context. They do not run a new corpus search or create new embeddings.</p>
+        <div id="conversation-query-field" class="conversation-field" hidden><label for="conversation-query">Keyword search query <span>optional; defaults to your question</span></label><input id="conversation-query" type="text" maxlength="2000" autocomplete="off" placeholder="Words to search in the corpus"></div>
+        <div id="conversation-actor-field" class="conversation-field" hidden><label for="conversation-actor">Your research identity <span>recorded with this request</span></label><input id="conversation-actor" type="text" maxlength="200" autocomplete="off" placeholder="Your name or researcher ID"></div>
+        <label class="conversation-question-label" for="conversation-question">Your follow-up question</label><textarea id="conversation-question" rows="3" maxlength="4000" required placeholder="What can these sources tell us about the decisions involved?"></textarea>
+        <p id="conversation-authorization" class="conversation-authorization">Submitting authorizes one audited Codex account answer using the chosen evidence scope. No paid API or new embedding request.</p>
+        <div class="conversation-submit-row"><span>Source citations · coverage · audit trail</span><button type="submit" id="conversation-submit">Ask Codex <span aria-hidden="true">↑</span></button></div>
+      </form>
+    </div>
+  </dialog>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Enable JavaScript to browse the saved local results.</p></noscript>
 </body>

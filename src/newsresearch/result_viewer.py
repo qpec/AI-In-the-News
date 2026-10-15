@@ -1,7 +1,7 @@
-"""Read-only local presentation of an already-produced RAG result file.
+"""Local presentation of an already-produced RAG result file.
 
 This is a document viewer, not a research query, export, review or model entry
-point. It never opens the research database or modifies an assessment.
+point by default. An explicit research workspace enables audited conversations.
 """
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ def saved_result(path: Path) -> bytes:
 
 def create_server(result: bytes, assets: Path, port: int = 8787, *,
                   listen: str = "127.0.0.1", pairing_key: str | None = None,
-                  session_seconds: int = 7200) -> ThreadingHTTPServer:
+                  session_seconds: int = 7200, conversation: Any = None) -> ThreadingHTTPServer:
     """Serve one immutable in-memory document and a fixed static-file allowlist."""
     try:
         address = ipaddress.IPv4Address(listen)
@@ -113,6 +113,27 @@ def create_server(result: bytes, assets: Path, port: int = 8787, *,
             if not self._request_allowed(post=True):
                 self._send(403, b"Forbidden", "text/plain", False)
                 return
+            if self.path == "/api/conversation":
+                if not self._authenticated():
+                    self._send(401, b"Pairing required", "text/plain", False)
+                    return
+                if conversation is None:
+                    self._send(404, b"Conversation mode is disabled", "text/plain", False)
+                    return
+                try:
+                    length = int(self.headers.get("Content-Length", "0"))
+                    if not 1 <= length <= 16384 or self.headers.get("Transfer-Encoding"):
+                        raise ValueError("Invalid request size")
+                    if self.headers.get("Content-Type", "").split(";", 1)[0] != "application/json":
+                        raise ValueError("Expected JSON")
+                    data = json.loads(self.rfile.read(length))
+                    response = conversation.submit(data)
+                except (ValueError, ResearchError, UnicodeError, RecursionError):
+                    self._send(400, b'{"error":"Invalid, conflicting or busy conversation request. Check the question, actor and authorization."}',
+                        "application/json", False)
+                    return
+                self._send(202, json.dumps(response).encode("utf-8"), "application/json", False)
+                return
             if self.path not in {"/api/pair", "/api/pair-local"} or pairing_key is None:
                 self._send(404, b"Not found", "text/plain", False)
                 return
@@ -154,6 +175,21 @@ def create_server(result: bytes, assets: Path, port: int = 8787, *,
                     self._send(401, b"Scan the pairing QR on your computer", "text/plain", head)
                 else:
                     self._send(200, result, "application/json; charset=utf-8", head, etag)
+                return
+            if path == "/api/conversation" or path.startswith("/api/conversation/jobs/"):
+                if not self._authenticated():
+                    self._send(401, b"Pairing required", "text/plain", head)
+                    return
+                if conversation is None:
+                    value = {"enabled": False, "turns": []} if path == "/api/conversation" else None
+                elif path == "/api/conversation":
+                    value = conversation.snapshot()
+                else:
+                    value = conversation.job(path.removeprefix("/api/conversation/jobs/"))
+                if value is None:
+                    self._send(404, b"Not found", "text/plain", head)
+                else:
+                    self._send(200, json.dumps(value, ensure_ascii=True).encode("utf-8"), "application/json", head)
                 return
             if path in {"/pairing", "/pairing.svg", "/pairing.js"}:
                 if (pairing_key is None or self.client_address[0] != listen or time.monotonic() >= expires):
@@ -216,16 +252,28 @@ def main() -> int:
     parser.add_argument("--result", type=Path, required=True)
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--listen", default="127.0.0.1", help="Specific private IPv4 address for phone access")
+    parser.add_argument("--research-workspace", type=Path,
+        help="Explicitly enable audited conversations using this protected store; no research occurs until submission")
+    parser.add_argument("--codex-model", default="gpt-6.1-sol", help="Pinned Codex account model for authorized answers")
+    parser.add_argument("--codex-executable", default="codex")
     args = parser.parse_args()
     if not 0 <= args.port <= 65535:
         parser.error("Choose a valid local port")
     result = saved_result(args.result)
+    conversation = None
+    if args.research_workspace is not None:
+        from .conversation_controller import ConversationController
+
+        conversation = ConversationController(args.research_workspace, json.loads(result),
+            model=args.codex_model, executable=args.codex_executable)
     assets = Path(__file__).resolve().parents[2] / "web/research-review"
     pairing_key = None if ipaddress.ip_address(args.listen).is_loopback else secrets.token_urlsafe(32)
-    server = create_server(result, assets, args.port, listen=args.listen, pairing_key=pairing_key)
+    server = create_server(result, assets, args.port, listen=args.listen, pairing_key=pairing_key,
+        conversation=conversation)
     print(json.dumps({"url": f"http://{args.listen}:{server.server_port}",
         "pairing_page": f"http://{args.listen}:{server.server_port}/pairing" if pairing_key else None,
-        "mode": "read-only saved-result viewer", "research_calls": 0}), flush=True)
+        "mode": "audited conversation reader" if conversation else "read-only saved-result viewer",
+        "research_calls_at_startup": 0}), flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

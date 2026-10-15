@@ -29,3 +29,11 @@ Phone mode generates a high-entropy key in memory. The QR uses a URL fragment, w
 On narrow screens, use **Articles** and **Read answer** to switch views, or **Previous / Articles / Next** in the fixed bottom bar. Selecting an article opens its answer; returning to the list preserves the browsing position. Controls are sized for touch. Saved/read markers stay in each browser and do not synchronize between devices.
 
 Keep result JSON, source quotations and screenshots in protected storage outside Git. Commit only the generic viewer, tests and documentation. This reader does not provide an authenticated multi-user research review workflow.
+
+## Optional audited follow-up questions
+
+Enable **Ask a follow-up** with `--research-workspace C:/protected/research` and a pinned `--codex-model gpt-6.1-sol`. The store must contain the immutable result identified by the saved JSON. Enabling the panel opens no research store and performs no model call; each submitted form explicitly authorizes one audited Codex account answer. **Current evidence** reuses the latest retrieved passages without a new embedding or corpus scoring. If more evidence is needed, the answer says so. **Search corpus again** explicitly runs local keyword retrieval (up to 20 articles); it is not semantic vector search and needs no embedding or paid API.
+
+Answers show citations, context coverage and exact recorded presentations. Questions, evidence and attempts are retained through `Research.execute()` and the shared gateway; all integrity checks remain in place. GET status/polling and ordinary reading remain free of research execution. See [the conversation method, audit contract and limitations](CONVERSATIONAL_RAG.md).
+
+On Windows, supply `--codex-executable` with the absolute installed native `codex.exe` path when the command on PATH is a PowerShell/npm shim. Keep any machine-specific startup scripts outside Git. The native executable and configured model are recorded with the model attempt.

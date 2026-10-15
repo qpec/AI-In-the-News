@@ -133,8 +133,12 @@ def render(result: Json) -> str:
     for row in result["source_rows"]:
         title = escaped(row.get("title") or row["source_version"])
         url = row.get("url")
-        if isinstance(url, str) and urlsplit(url).scheme in {"http", "https"} and not any(c in url for c in "\r\n<>"):
-            title = f"[{title}](<{url}>)"
+        try:
+            if (isinstance(url, str) and urlsplit(url).scheme in {"http", "https"}
+                    and urlsplit(url).netloc and not any(c in url for c in "\r\n<>")):
+                title = f"[{title}](<{url}>)"
+        except ValueError:
+            pass
         lines.append(f"{row['rank']}. {title} — BM25 {row['score']:.6g}; source `{row['source_version']}`")
     if not result["source_rows"]:
         lines.append("No keyword matches. No evidence available for an answer from this search.")

@@ -171,6 +171,9 @@ class Research:
             "record_presentation": self._record_presentation,
             "adaptive_cutoff": self._adaptive_cutoff,
             "rag_query": self._rag_query,
+            "conversation": self._conversation,
+            "conversation_search": self._conversation_search,
+            "conversation_chat": self._conversation_chat,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -835,6 +838,24 @@ class Research:
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:
         return self.gateway.plan_tags(session, context, data)
+
+    @audited_handler
+    def _conversation(self, session: str, context: Context, data: Json) -> Json:
+        from .conversation import execute
+
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _conversation_search(self, session: str, context: Context, data: Json) -> Json:
+        from .conversation_search import execute
+
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _conversation_chat(self, session: str, context: Context, data: Json) -> Json:
+        from .conversation_chat import execute
+
+        return execute(self, session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:

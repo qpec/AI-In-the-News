@@ -85,6 +85,13 @@ def start_from_evidence(engine: Research, session: str, context: Context, data: 
     require_active(engine, session)
     if not isinstance(data.get("key"), str) or not data["key"].strip():
         raise ResearchError("Conversation needs a stable key")
+    # Register the deterministic inspection/selection method before opening any
+    # source passages. The immutable origin binds the exact original ranking.
+    protocol = _register(engine, session, context, "protocol", "frozen-retrieval-conversation-v1", METHOD)
+    selection = _register(engine, session, context, "selection", data["key"] + "-frozen-evidence", {
+        "rules": {"origin": data["origin"], "dataset": context.versions.get("dataset"),
+            "selection": METHOD["selection"], "evidence_bytes_max": EVIDENCE_BYTES,
+            "excluded_passages": "Keep whole-passage exclusions and represented-source counts explicitly"}})
     origin, source_rows, supplied = _origin_material(engine, data["origin"])
     if any(name in data and data[name] != origin.get(name) for name in ("query", "question")):
         raise AuditError("Conversation retrieval text differs from its immutable origin")
@@ -100,7 +107,8 @@ def start_from_evidence(engine: Research, session: str, context: Context, data: 
     if not set(source_ids) <= allowed_sources:
         raise AuditError("Conversation source lies outside the bound dataset")
     versions = dict(origin["versions"])
-    versions["protocol"] = _register(engine, session, context, "protocol", "frozen-retrieval-conversation-v1", METHOD)
+    versions["protocol"] = protocol
+    versions["selection"] = selection
     verified = []
     seen = set()
     for item in supplied:

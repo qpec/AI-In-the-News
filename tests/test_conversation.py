@@ -99,8 +99,16 @@ def test_start_freezes_original_passages_and_followups_reuse_without_embedding(c
     def forbidden_embedding(*args: Any, **kwargs: Any) -> Any:
         raise AssertionError("Conversation must never request a query embedding")
     monkeypatch.setattr(state["engine"].gateway, "embed", forbidden_embedding)
+    evidence_reader = state["engine"]._evidence
+    def registered_before_inspection(identifier: str) -> Any:
+        assert state["engine"].ledger.db.execute("SELECT 1 FROM records WHERE kind='selection' AND "
+            "json_extract(payload,'$.content.rules.origin.id')=?", (state["original"]["id"],)).fetchone()
+        return evidence_reader(identifier)
+    monkeypatch.setattr(state["engine"], "_evidence", registered_before_inspection)
     selected = start(state)
     assert selected["included_passages"] > 0 and selected["selected_articles"] == 5
+    selection = state["engine"].ledger.get(selected["versions"]["selection"], "selection")
+    assert selection["content"]["rules"]["origin"]["id"] == state["original"]["id"]
     first = ask(state, selected["definition"])
     second = ask(state, selected["definition"], "turn-two", "And what happened next?")
     assert first["processing_status"] == second["processing_status"] == "valid"
