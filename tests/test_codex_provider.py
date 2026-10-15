@@ -101,6 +101,16 @@ def test_existing_key_presence_refused_without_reading_value(tmp_path, request_p
         CodexCLIProvider(tmp_path).prepare(request_packet)
 
 
+def test_rag_task_uses_registered_answer_instruction_without_score_leakage(request_packet):
+    from newsresearch.rag_answers import TASK_INSTRUCTION, TASK_KIND, answer_schema
+
+    request_packet.update(task_kind=TASK_KIND, schema=answer_schema())
+    packet = json.loads(build_prompt(request_packet))
+    assert packet["task"] == TASK_INSTRUCTION
+    assert "score" not in packet and "cutoff" not in packet
+    assert packet["inclusion"] == request_packet["inclusion"]
+
+
 def test_success_captures_exact_command_payload_and_observable_usage(tmp_path, request_packet):
     calls = []
     output = stream()

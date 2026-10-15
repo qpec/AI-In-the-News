@@ -16,6 +16,7 @@ RESULT_KINDS = {
     "article_query_overview", "article_query_chart", "article_query_inspection",
     "article_query_manifest", "tag_retrieval",
     "adaptive_cutoff_result", "adaptive_cutoff_plan",
+    "rag_query_result",
 }
 
 

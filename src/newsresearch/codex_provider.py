@@ -163,6 +163,10 @@ def build_prompt(request: Json) -> str:
         "evidence": [{"id": item["id"], "text": item["text"]} for item in request["evidence"]],
         "schema": request["schema"],
     }
+    if request.get("task_kind") == "rag_organizational_decisions":
+        from .rag_answers import TASK_INSTRUCTION as answer_instruction
+
+        packet["task"] = answer_instruction
     return json.dumps(packet, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 

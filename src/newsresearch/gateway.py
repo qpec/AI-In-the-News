@@ -377,6 +377,11 @@ class Gateway:
 
         return execute(self.engine, session, context, data)
 
+    def rag_query(self, session: str, context: Context, data: Json) -> Json:
+        from .rag_query import execute
+
+        return execute(self.engine, session, context, data)
+
     def codex_dispatch(self, session: str, provider: Any, invocations: list[tuple[Any, str]],
                        workers: int) -> Iterator[tuple[int, ProviderResponse]]:
         if session not in self.engine._active:
