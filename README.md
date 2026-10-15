@@ -6,6 +6,8 @@ An offline-first, auditable foundation for studying AI news through **versioned 
 
 Progress through the existing embedding work is [archived as a development checkpoint](docs/EMBEDDING_CHECKPOINT.md). Data, saved vectors and the audit foundation remain in place. A bounded [AWS clustering evaluation](docs/AWS_CLUSTERING_EVALUATION.md) tests the pinned numerical core locally; no cloud deployment is implied.
 
+The [event-pair cutoff study](docs/EVENT_PAIR_CUTOFF_STUDY.md) prepares a frozen comparison using saved embeddings, with explicit uncertainty and a separate held-out check. It does not resume the shelved relevance-tagging workflow or establish a cutoff merely by preparing samples.
+
 The subsequent [corrected event-vector comparison](docs/EVENT_CLUSTERING_COMPARISON.md) reuses the exact saved pilot, checks complete memberships and batch/order behavior, and compares compact geometric groups. Independent same-event validation remains outstanding.
 
 ## Run the working demonstration

@@ -81,6 +81,7 @@ def main() -> int:
             "conversation_chat",
             "evaluate_aws_clustering",
             "evaluate_event_clustering",
+            "plan_event_pairs",
             "plan_tags",
             "tag",
             "tag_inspect",

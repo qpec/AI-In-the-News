@@ -22,6 +22,7 @@ RESULT_KINDS = {
     "conversation_turn", "conversation_retrieval",
     "embedding_checkpoint_result", "aws_clustering_evaluation",
     "event_clustering_evaluation",
+    "event_pair_plan",
 }
 
 

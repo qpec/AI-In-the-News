@@ -175,10 +175,24 @@ def build_prompt(request: Json) -> str:
         packet["history"] = request.get("history", [])
         packet["evidence"] = [{"id": item["id"], "source_version": item["source_id"],
                                "text": item["text"]} for item in request["evidence"]]
+    elif request.get("task_kind") == "event_pair_identity":
+        from .event_pair_answers import TASK_INSTRUCTION as pair_instruction, validate_request
+
+        validate_request(request)
+        packet["task"] = pair_instruction
+        packet["articles"] = [{"role": article["role"], "source_version": article["source_version"],
+                               "title": article["title"], "published_at": article["published_at"]}
+                              for article in request["articles"]]
+        packet["evidence"] = [{"id": item["id"], "source_id": item["source_id"], "text": item["text"]}
+                              for item in request["evidence"]]
     return json.dumps(packet, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def _worker_rules(request: Json) -> str:
+    if request.get("task_kind") == "event_pair_identity":
+        from .event_pair_answers import WORKER_RULES as pair_rules
+
+        return pair_rules
     if request.get("task_kind") == "rag_conversation_answer":
         from .conversation_answers import WORKER_RULES as conversation_rules
 

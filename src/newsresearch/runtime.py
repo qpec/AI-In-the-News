@@ -178,6 +178,7 @@ class Research:
             "conversation_chat": self._conversation_chat,
             "evaluate_aws_clustering": self._evaluate_aws_clustering,
             "evaluate_event_clustering": self._evaluate_event_clustering,
+            "plan_event_pairs": self._plan_event_pairs,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -884,6 +885,17 @@ class Research:
         from .event_clustering_evaluation import execute
 
         return execute(self, session, context, data)
+
+    @audited_handler
+    def _plan_event_pairs(self, session: str, context: Context, data: Json) -> Json:
+        from .event_pair_study import prepare, render
+
+        result = prepare(self, session, context, data)
+        from .presentation import record
+        presentation = record(self, session, Context(context.objective, context.actor, result["versions"]), {
+            "results": [{"kind": "event_pair_plan", "id": result["id"]}],
+            "markdown": render(result), "destination": "codex_chat"})
+        return {**result, "presentation": presentation}
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:
