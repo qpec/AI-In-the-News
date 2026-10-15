@@ -18,6 +18,19 @@ from test_embeddings import approval, embedding_plan as _embedding_plan, mock_tr
 embedding_plan = _embedding_plan
 
 
+@pytest.mark.parametrize("magnitude", [3e38, 1e-45, 1.0])
+def test_normalization_retains_unit_length_for_extreme_finite_vectors(magnitude: float) -> None:
+    result = retrieval.normalize_vector(np.array([magnitude, magnitude], dtype=np.float32))
+    assert np.isfinite(result).all()
+    assert np.linalg.norm(result.astype(np.float64)) == pytest.approx(1.0, abs=1e-7)
+
+
+@pytest.mark.parametrize("values", [[0.0, 0.0], [float("nan"), 1.0], [float("inf"), 1.0]])
+def test_normalization_rejects_invalid_vectors(values: list[float]) -> None:
+    with pytest.raises(ResearchError, match="Invalid vector norm"):
+        retrieval.normalize_vector(np.array(values, dtype=np.float32))
+
+
 @pytest.fixture
 def indexed(embedding_plan: Any, monkeypatch: Any) -> tuple[Any, Any, Any]:
     engine, plan = embedding_plan

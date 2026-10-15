@@ -72,6 +72,16 @@ def implementation(engine: Research) -> str:
     )
 
 
+def normalize_vector(values: Any) -> Any:
+    # Divide in float64 too: a finite float32 vector's norm can overflow float32,
+    # while a subnormal norm can round enough to produce a non-unit result.
+    wide = values.astype(np.float64)
+    norm = float(np.linalg.norm(wide))
+    if not np.isfinite(norm) or norm <= 0:
+        raise ResearchError("Invalid vector norm")
+    return (wide / norm).astype("<f4")
+
+
 def save(engine: Research, session: str, value: Any, *, binary_file: bool = False) -> str:
     reference = engine.ledger.artifacts.put_file(value) if binary_file else engine.ledger.artifacts.put(value)
     engine.ledger.append(session, "retrieval.artifact.saved", {"artifact": reference})
@@ -201,10 +211,7 @@ def build(engine: Research, session: str, context: Context, data: Json) -> Json:
                         raise ResearchError("Duplicate or out-of-frame vector")
                     seen.add(chunk["id"])
                     values = np.frombuffer(base64.b64decode(vector["embedding"], validate=True), dtype="<f4")
-                    norm = float(np.linalg.norm(values.astype(np.float64)))
-                    if not np.isfinite(norm) or norm <= 0:
-                        raise ResearchError("Invalid vector norm")
-                    output.write((values / norm).astype("<f4").tobytes())
+                    output.write(normalize_vector(values).tobytes())
                     rows.append(chunk)
                 ledger.append(
                     session,
@@ -628,6 +635,8 @@ def inspect_candidates(engine: Research, session: str, context: Context, data: J
             if len(selected) < limit:
                 selected.append({"id": identifier, **item})
         if wanted is None and len(selected) == limit:
+            break
+        if wanted is not None and found == wanted:
             break
     if wanted is not None and found != wanted:
         raise ResearchError("Requested source has no result in this candidate run")
