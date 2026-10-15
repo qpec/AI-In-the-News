@@ -52,7 +52,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Query-driven tags for every article, threshold calibration and execution commands](docs/QUERY_TAGGING.md)
 - [Default local similarity tagging and per-article SQLite audit contract](docs/SIMILARITY_TAG_AUDIT.md)
 - [Adaptive cutoff design with Codex-agent judges, shared inclusion criteria and a 100–200 attempt ceiling](docs/ADAPTIVE_LLM_CUTOFF.md) — v2 method specification; [gateway handoff](docs/CODEX_JUDGE_TRANSPORT.md) and execution adapter not yet implemented.
-- [Required search-result presentation and exact presentation audit](docs/RESULT_PRESENTATION.md)
+- [Always show research results and preserve supported presentations](docs/RESULT_PRESENTATION.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)
