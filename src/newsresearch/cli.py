@@ -74,6 +74,7 @@ def main() -> int:
             "article_query_rows",
             "article_query_overview",
             "record_presentation",
+            "adaptive_cutoff",
             "plan_tags",
             "tag",
             "tag_inspect",

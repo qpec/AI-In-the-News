@@ -169,6 +169,7 @@ class Research:
             "article_query_rows": self._article_query_rows,
             "article_query_overview": self._article_query_overview,
             "record_presentation": self._record_presentation,
+            "adaptive_cutoff": self._adaptive_cutoff,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -821,6 +822,10 @@ class Research:
         from .presentation import record
 
         return record(self, session, context, data)
+
+    @audited_handler
+    def _adaptive_cutoff(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.adaptive_cutoff(session, context, data)
 
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:

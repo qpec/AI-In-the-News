@@ -33,6 +33,7 @@ Use the same `--workspace` as the original run. Replay invokes no provider.
 - Audited FTS retrieval and inspection, question-specific work manifests, resumable batches, explicit version-dependent cache reuse, bounded retries and preserved failures.
 - Local passage-vector indexing and article candidate search over saved embeddings, full precision reranking, separate provider-ID signals, preserved missingness and exact-neighbor numerical checks. See [local candidate search](docs/LOCAL_CANDIDATE_SEARCH.md).
 - [Embedding-based query tagging and SQL audit](docs/SIMILARITY_TAG_AUDIT.md): embed the query once, score every article locally, log query/score/answer/evidence/provenance per article, and calibrate a recall-focused binary cutoff with a separate held-out check. Missing articles remain unprocessed. Per-article LLM assessment is an explicit optional mode.
+- [Bounded adaptive Codex-agent calibration](docs/ADAPTIVE_LLM_CUTOFF.md): a shared-gateway CLI adapter reuses the exact original literal-query input, records adaptive sampling probabilities, freezes the candidate before held-out judging and enforces a 100/200 article-dispatch ceiling across resume/retries. A passing model-reference check permits provisional tags; it is not human validation.
 - One instrumented model gateway for all research task types; strict result/evidence/coverage checks; separate interpretations, reviews and accepted findings; append-only corrections.
 - Dossier-level SQL snapshots with denominator, exclusions and missingness; linked PNG charts; deterministic stored-output replay; allowlisted aggregate exports.
 - Protected artifacts, SQLite FULL-synchronous transactions, a hash-linked append-only journal, fail-closed audit writes, single-writer locking and integrity preflight on every supported command.
@@ -42,7 +43,7 @@ Use the same `--workspace` as the original run. Replay invokes no provider.
 
 Root [AGENTS.md](AGENTS.md) carries mandatory project-wide research rules. Three repository skills cover operations, review and measurement. `.codex/config.toml` configures supported supplementary lifecycle hooks.
 
-Verified against installed **Codex CLI 0.162.1**. Codex must trust the project and the exact local hook commands through its own review UI (`/hooks`); no global settings were changed. Hooks are currently awaiting that review. Commands remain audited without them. Native Codex inference and arbitrary external tool activity are outside the model gateway; [audit coverage](docs/AUDITABILITY.md#coverage-limitations) describes the boundary.
+Verified against installed **Codex CLI 0.162.1**. Codex must trust the project and the exact local hook commands through its own review UI (`/hooks`); no global settings were changed. Hooks are currently awaiting that review. Commands remain audited without them. Native conversational Codex inference and arbitrary external tool activity are outside the model gateway. The dedicated article-judge CLI transport preserves its application-controlled inputs and visible outputs through the gateway; [audit coverage](docs/AUDITABILITY.md#coverage-limitations) describes the remaining boundary.
 
 ## Protocol and verification
 
@@ -51,7 +52,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Local candidate search, saved-vector indexing and exact-search checks](docs/LOCAL_CANDIDATE_SEARCH.md)
 - [Query-driven tags for every article, threshold calibration and execution commands](docs/QUERY_TAGGING.md)
 - [Default local similarity tagging and per-article SQLite audit contract](docs/SIMILARITY_TAG_AUDIT.md)
-- [Adaptive cutoff design with Codex-agent judges, shared inclusion criteria and a 100–200 attempt ceiling](docs/ADAPTIVE_LLM_CUTOFF.md) — v2 method specification; [gateway handoff](docs/CODEX_JUDGE_TRANSPORT.md) and execution adapter not yet implemented.
+- [Adaptive cutoff with Codex-agent judges, shared inclusion criteria and a 100–200 attempt ceiling](docs/ADAPTIVE_LLM_CUTOFF.md) — implemented v3 literal-query adapter and [gateway transport](docs/CODEX_JUDGE_TRANSPORT.md); earlier v1/v2 designs remain preserved. See verification for actual runs, separately from software tests.
 - [Always show research results and preserve supported presentations](docs/RESULT_PRESENTATION.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
@@ -64,6 +65,8 @@ uv run --frozen mypy src
 ```
 
 Live NewsAPI collection and substantive dossier-model transports remain unfinished. An OpenAI embedding transport is implemented behind offline defaults and explicit plan-bound paid-run permission; selecting a provider or creating a cost plan sends no model requests. Population estimation, independent scientific validation, authenticated multi-user review and externally anchored tamper detection are also unfinished. Synthetic tests verify software invariants only.
+
+Within an authorized research task, the assistant should proceed through feasible implementation and execution instead of stopping at a method specification. Every completed research step must show concrete available results in the same chat, including partial/failed/no-run states. Implementation and test completion do not establish a new cutoff or other scientific result.
 
 ## Existing repositories
 

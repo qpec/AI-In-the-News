@@ -115,10 +115,17 @@ def overview(engine: Research, session: str, context: Context, data: Json) -> Js
     threshold = run.get("threshold")
     validated = run.get("threshold_validated")
     if run.get("calibration"):
-        calibration = ledger.get(run["calibration"], "similarity_calibration")
-        threshold, validated = calibration["threshold"], calibration["passed"]
+        if run.get("calibration_kind") == "adaptive_cutoff_result":
+            calibration = ledger.get(run["calibration"], "adaptive_cutoff_result")
+            if calibration["status"] != "passed_model_reference":
+                raise AuditError("Adaptive tag overview requires the passing frozen model-reference check")
+            threshold, validated = calibration["candidate_cutoff"], False
+        else:
+            calibration = ledger.get(run["calibration"], "similarity_calibration")
+            threshold, validated = calibration["threshold"], calibration["passed"]
     cutoff = {"threshold": threshold, "validated": validated, "policy": run.get("cutoff_policy"),
-              "calibration": run.get("calibration"), "comparison": "score >= threshold" if threshold is not None else None}
+              "calibration": run.get("calibration"), "calibration_kind": run.get("calibration_kind"),
+              "comparison": "score >= threshold" if threshold is not None else None}
     snapshot = save(engine, session, rows)
     result = {"run": data["run"], "versions": context.versions, "overview_profile": profile,
         "query": question["query"], "question": question["text"], "phase": run["phase"],

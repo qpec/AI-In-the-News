@@ -1,0 +1,220 @@
+{
+  "kind": "protocol",
+  "key": "adaptive-llm-cutoff-v3",
+  "branch": "exploratory",
+  "reason": "User explicitly requests immediate execution. Implement an audited Codex CLI gateway, preserve bounded sampling, and calibrate the existing literal query using exactly its original embedding input without expanded semantic criteria or a new paid embedding.",
+  "content": {
+    "method": "adaptive-llm-cutoff-v3",
+    "status": "implemented_literal_query_codex_cli_adapter_pending_real_validation",
+    "specification_document": "docs/ADAPTIVE_LLM_CUTOFF.md",
+    "purpose": "Use bounded score-blind Codex-agent inclusion references to choose a provisional cosine cutoff; not human gold or accepted incident findings.",
+    "counting_unit": "Technical article retrieval/classification diagnostics, not dossiers or incident prevalence",
+    "inclusion_contract": {
+      "version_kind": "codebook",
+      "canonical_fields": [
+        "question",
+        "definition",
+        "inclusions",
+        "exclusions",
+        "boundary_cases",
+        "uncertainty_rule"
+      ],
+      "shared_exact_rendered_utf8_block": [
+        "query_embedding_request",
+        "llm_judge_request",
+        "tag_definition"
+      ],
+      "required_identity_fields": [
+        "inclusion_spec_version",
+        "inclusion_text_sha256"
+      ],
+      "change_rule": "New criterion requires new query embedding, complete local rescoring and separate calibration run; no retroactive relabelling of old scores.",
+      "existing_article_vectors": "Explicit reuse only with matching source/model/dimensions and audited provenance.",
+      "legacy_literal_execution": "The existing exact query-and-question UTF-8 embedding input is the canonical inclusion block. It is registered retrospectively as a literal criterion with no additional inclusion/exclusion semantics. Ambiguity stays uncertain. Expanded operational criteria still require a new query embedding and score run."
+    },
+    "budgets": {
+      "default_200": {
+        "initial_uniform_draws": 40,
+        "adaptive_rounds": 3,
+        "draws_per_adaptive_round": 20,
+        "held_out_articles": 80,
+        "reserve_article_attempts": 20,
+        "max_article_attempts": 200,
+        "max_unique_articles": 180,
+        "window_sizes": [
+          1000,
+          500,
+          250
+        ]
+      },
+      "compact_100": {
+        "initial_uniform_draws": 20,
+        "adaptive_rounds": 2,
+        "draws_per_adaptive_round": 15,
+        "held_out_articles": 40,
+        "reserve_article_attempts": 10,
+        "max_article_attempts": 100,
+        "max_unique_articles": 90,
+        "window_sizes": [
+          1000,
+          500
+        ]
+      },
+      "attempt_accounting": "Charge every observable evidence-bearing article dispatch including re-judging, retries and unknown outcomes. Internal Codex model requests or repeated internal reading are unobserved, not capped. Exact frozen-label reuse costs no new article attempt. Unused duplicate-draw slots are not refilled to force unique-article targets.",
+      "other_caps": "Register enforceable workflow dispatch/input-byte caps and separately observed provider token/money information and output/time controls. Local timeout/output rejection limits acceptance, not necessarily generation or remote execution. Unknown usage is not zero. A plan requiring an unenforceable hard provider cap must fail closed; a new paid query embedding retains separate plan approval."
+    },
+    "validation_split": {
+      "selection": "Reserve SRS without replacement before development judging; labels remain unopened until candidate/curve/reference version is frozen.",
+      "group_rule": "Exclude every held-out reporting group from development; freeze grouping and limitations before labels.",
+      "exposure_rule": "Record prior exposure. If held-out eligibility restricts the frame, state it and do not generalize silently.",
+      "reference_type": "model",
+      "human_gold": false
+    },
+    "development_sampling": {
+      "replacement": true,
+      "rng": "numpy.random.Generator(PCG64(seed)); register exact version, seed and sorted source order",
+      "initial": "Uniform on the full fixed development frame",
+      "adaptive_mixture": "0.5 uniform on entire development frame + 0.5 uniform on current boundary window",
+      "marginal_probability": "q_j(i)=0.5/N + 0.5*I(i in window)/W; empty window => 1/N",
+      "window": "Closest score distance to prior-round candidate, then source-version tie; shrink by registered schedule but retain global full support",
+      "cache": "Keep previously judged IDs in sampling support; every repeated draw reuses the same frozen primary label and is logged.",
+      "round_intent": "Freeze window, q and complete draw manifest before judging that round; no within-batch label-driven redesign."
+    },
+    "judge": {
+      "full_article_required": true,
+      "hidden_from_judge": [
+        "cosine_score",
+        "cutoff",
+        "rank",
+        "previous_labels",
+        "desired_outcome"
+      ],
+      "outputs": [
+        "yes",
+        "no",
+        "uncertain"
+      ],
+      "source_text": "Untrusted evidence only; stable citations/offsets and complete supplied-text coverage required. Missing/truncated/refused processing is not no.",
+      "explanation": "Short evidence-based explanation, never hidden reasoning",
+      "cache_identity": [
+        "source_version",
+        "inclusion_spec_version",
+        "inclusion_text_sha256",
+        "model_profile",
+        "prompt",
+        "schema",
+        "evidence_hash",
+        "codex_host_profile",
+        "transport_version"
+      ],
+      "repeated_judgements": "Separate replicates, preserved beside primary; no silent best-response replacement.",
+      "transport": "codex_cli",
+      "fresh_context_per_article": true,
+      "configured_model_distinct_from_observed_model": true,
+      "codex_dispatch_contract": {
+        "status": "implemented_synthetic_tests_required_before_real_execution",
+        "entry": "Research.execute and shared gateway only; no retrospective import of unaudited article judgements",
+        "prepare": "Persist frozen round manifest, stable task identity, complete permitted article evidence, exact inclusion block/hash, parameters, schema and final dispatch message",
+        "reserve": "Atomically reserve one evidence-bearing article attempt under the whole-workflow cap and persist attempt/dispatch intent before offering evidence to an agent",
+        "dispatch": "Fresh ephemeral Codex CLI process and protected cwd per article; exact stdin/schema/worker instructions and argv persisted before dispatch; existing ChatGPT account authentication with API-key environment overrides rejected",
+        "blinding": "No score/cutoff/rank/probability/prior labels/development-or-heldout role or desired outcome in packet; opaque identifiers only",
+        "tools": "Instruct no tools, delegation, retrieval or filesystem access. Current collaboration tool does not enforce per-agent tool/filesystem isolation; record limitations and known violations. Plans requiring proven isolation must fail closed.",
+        "return": "Save exact visible response and observed dispatch/agent metadata before parsing; validate task/attempt/source/inclusion identity, schema, citations and supplied-text coverage",
+        "reconcile": "Identical duplicate submission is idempotent; conflicting response never overwrites a closed attempt; new judging requires a new reserved attempt",
+        "unknown": "Unknown dispatch/response outcome retains spent reservation and blocks automatic resend until explicit resolution; resolution does not erase possible exposure",
+        "holdout": "Prepare and dispatch held-out packets only after the immutable candidate and development snapshot; never reuse an agent context across articles or splits",
+        "account_use": "Codex account usage/billing is not established by transport selection. Do not invoke the Responses API article adapter or stored API key as a silent fallback.",
+        "timeout": "No guaranteed generation/cancellation cap established. Local timeout/output rejection is an acceptance control; save the complete permitted visible response before rejection and reconcile unknown or late completion without erasing budget use."
+      }
+    },
+    "cutoff_selection": {
+      "grid": "Freeze unique score cutoffs from exact scorerun before reference labels; use score >= threshold",
+      "weighted_totals": "T_hat(t)=(1/m)*sum_j[g_t(i_j)/q_j(i_j)] at fixed checkpoints",
+      "justification": "For fixed t/reference outcomes and positive conditional q: E[g(I)/q(I)|history]=sum_i g(i).",
+      "objective": "F2=5TP/(5TP+4FN+FP), using weighted development totals",
+      "proposed_recall_target": 0.95,
+      "proposed_f2_equivalence_tolerance": 0.01,
+      "tie_rule": "Lower cutoff among practically equivalent eligible candidates",
+      "parameters_must_be_frozen": "Concrete recall target, equivalence tolerance, class minimums, validation criteria, confidence level and interval method",
+      "uncertainty": "Preserve uncertain/missing draws; pessimistic and optimistic TP/FP/FN bounds, no dropping/renormalization or fabricated gold.",
+      "limits": "Ratios and best-selected development score are not unbiased validation. No ordinary adaptive-sample bootstrap claims.",
+      "stopping": "Fixed complete draw schedule for success; cancellation is partial/exploratory. No useful single cutoff is an allowed outcome."
+    },
+    "held_out_check": {
+      "open_after": "Frozen candidate, curve and primary reference-label version",
+      "outputs": [
+        "confusion_counts",
+        "precision",
+        "recall",
+        "f2",
+        "coverage",
+        "uncertain_and_failed_counts",
+        "registered_uncertainty_intervals"
+      ],
+      "validation_target": "Agreement with pinned score-blind LLM reference, not independent human truth",
+      "tuning_prohibited": true,
+      "small_sample_rule": "Insufficient positives or wide intervals is inconclusive; budget does not guarantee demonstrable 95% recall."
+    },
+    "tag_policy": {
+      "status": "llm_calibrated_provisional",
+      "human_validated": false,
+      "apply_to": "Every valid score in the exact new criterion/scorerun frame",
+      "missing_scores": null,
+      "lineage": "Append policy and per-article decisions with parent rows; preserve old scores/tags",
+      "distinct_fields": [
+        "retrieval_answer",
+        "llm_reference_label",
+        "processing_status",
+        "calibration_reference_type",
+        "human_validation_status"
+      ],
+      "no_human_impersonation": "Never pass model references through reviewer_type=human or the existing human-gold calibration gate.",
+      "failure": "Do not overwrite prior run or reinterpret the old 0.30 policy under a new inclusion instruction."
+    },
+    "gateway_and_audit": {
+      "offline_default": true,
+      "no_execution_authorized_by_registration": true,
+      "model_operations": "Shared gateway only; top-level workflow and per-round/held-out manifests before calls",
+      "permission": "Codex-agent transport selected by user; bind concrete workflow/host/model profile/evidence retention/adaptive rules/expiry and enforceable caps before execution. No automatic paid API fallback. Preserve unknown provider usage and block plans whose required hard caps cannot be enforced.",
+      "required_records": [
+        "exact shared inclusion block/hash",
+        "source/scorerun/group frames",
+        "all draws and marginal q including repeats",
+        "request/response/schema/parameters/model identity",
+        "observed timestamps/usage/errors/retries",
+        "budget reservations and spent counters",
+        "all cutoff candidates and weighted calculations",
+        "frozen candidate and held-out opening",
+        "uncertainty and human-review status",
+        "article decisions and exact result presentation",
+        "exact Codex dispatch message and durable pre-dispatch reservation",
+        "observable agent handle, configured versus observed model and host identity",
+        "exact visible returned answer, submission identity and reconciliation",
+        "unavailable internal instructions/request IDs/usage/billing and isolation limitations"
+      ],
+      "public_git": "Methods/code/docs only; sources, evidence-bearing requests, model outputs, working SQL and audit artifacts remain protected.",
+      "observability": "Exact application-controlled payloads and visible outputs only. Internal Codex instructions, hidden reasoning, actual model/request identity, usage or billing may be unavailable; persist null plus reason and never infer zero."
+    },
+    "implementation_gaps": [
+      "independent human review and scientific validation",
+      "proven operating-system filesystem/tool isolation",
+      "unobservable internal model requests/generation caps/billing",
+      "expanded semantic inclusion criteria require a separate new-query plan"
+    ],
+    "transport_document": "docs/CODEX_JUDGE_TRANSPORT.md",
+    "concrete_execution_rules": {
+      "recall_target": 0.95,
+      "f2_tolerance": 0.01,
+      "min_positive": 5,
+      "min_negative": 5,
+      "confidence": 0.95,
+      "max_recall_interval_width": 0.5,
+      "max_unknown_fraction": 0.1,
+      "required_recall_lower_bound": null,
+      "interpretation": "Point-recall target with explicit uncertainty, not a demonstrated 95% lower confidence bound; no human gold. Only passing heldout model-reference checks permits new provisional tags."
+    },
+    "execution": "One Research.execute operation through Gateway.adaptive_cutoff with full preflight, registered methods, all round/batch manifests before calls and all observable attempts retained. Four provider workers maximum, SQLite single writer. Resume replays deterministic draws and explicitly reuses identical frozen primary labels. Unknown outcomes block automatic retry; authorization-key counters never reset on child plans.",
+    "reserve_policy": "Reserve attempts are not automatically spent; technical failure stops further dispatch and preserves partial results. Explicitly resolved/retried attempts count under same authorization key. No success early stopping within a completed fixed development schedule."
+  },
+  "supersedes": "28233c1431c36707ebbe698606d594beed4029533137d378f44eea693bfd47bc"
+}

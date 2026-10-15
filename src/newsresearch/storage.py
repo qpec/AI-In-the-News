@@ -433,7 +433,7 @@ class Ledger:
             "operation.completed": ["result"],
             "record.created": ["artifact"],
             "sources.imported": ["raw_ref"],
-            "model.attempt.intended": ["request"],
+            "model.attempt.intended": ["request", "dispatch"],
             "model.attempt.completed": ["response"],
             "export.write_intended": ["artifact"],
             "preparation.artifact.saved": ["artifact"],
@@ -443,6 +443,7 @@ class Ledger:
             "retrieval.artifact.saved": ["artifact"],
             "tagging.artifact.saved": ["artifact"],
             "presentation.artifact.saved": ["artifact"],
+            "codex.response.received": ["artifact"],
         }
         for row in self.db.execute("SELECT * FROM events ORDER BY seq"):
             count += 1

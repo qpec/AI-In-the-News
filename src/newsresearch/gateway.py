@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Iterator, Protocol
 import uuid
 
 from jsonschema import Draft202012Validator
@@ -370,6 +371,32 @@ class Gateway:
         from .similarity_tags import plan_query
 
         return plan_query(self.engine, session, context, data)
+
+    def adaptive_cutoff(self, session: str, context: Context, data: Json) -> Json:
+        from .adaptive_cutoff import execute
+
+        return execute(self.engine, session, context, data)
+
+    def codex_dispatch(self, session: str, provider: Any, invocations: list[tuple[Any, str]],
+                       workers: int) -> Iterator[tuple[int, ProviderResponse]]:
+        if session not in self.engine._active:
+            raise AuditError("Codex dispatch requires an active audited gateway operation")
+        for invocation, attempt in invocations:
+            intended = self.engine.ledger.unresolved.get(attempt)
+            if not intended or self.engine.ledger.artifacts.read(intended["dispatch"]) != invocation.manifest():
+                raise AuditError("Codex dispatch must match a durable exact invocation intent")
+            if self.engine.ledger.artifacts.read(intended["request"]) != invocation.request:
+                raise AuditError("Codex evidence differs from durable request")
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(provider.complete_prepared, call): n for n, (call, _) in enumerate(invocations)}
+            for future in as_completed(futures):
+                try:
+                    response = future.result()
+                except Exception as error:
+                    response = ProviderResponse(None, "codex-cli", None, raw_response={
+                        "unknown_outcome": True, "error_type": type(error).__name__,
+                        "failure": "provider_exception_with_unobserved_outcome", "observed_at": utc()})
+                yield futures[future], response
 
     def tag(self, session: str, context: Context, data: Json) -> Json:
         from .tag_gateway import execute
