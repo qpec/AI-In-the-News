@@ -21,6 +21,7 @@ RESULT_KINDS = {
     "rag_query_result",
     "conversation_turn", "conversation_retrieval",
     "embedding_checkpoint_result", "aws_clustering_evaluation",
+    "event_clustering_evaluation",
 }
 
 

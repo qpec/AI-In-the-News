@@ -6,6 +6,8 @@ An offline-first, auditable foundation for studying AI news through **versioned 
 
 Progress through the existing embedding work is [archived as a development checkpoint](docs/EMBEDDING_CHECKPOINT.md). Data, saved vectors and the audit foundation remain in place. A bounded [AWS clustering evaluation](docs/AWS_CLUSTERING_EVALUATION.md) tests the pinned numerical core locally; no cloud deployment is implied.
 
+The subsequent [corrected event-vector comparison](docs/EVENT_CLUSTERING_COMPARISON.md) reuses the exact saved pilot, checks complete memberships and batch/order behavior, and compares compact geometric groups. Independent same-event validation remains outstanding.
+
 ## Run the working demonstration
 
 Requires Python 3.12 or 3.13 and `uv`. Dependencies are locked in `uv.lock`.
