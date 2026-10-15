@@ -34,3 +34,9 @@ uv run --frozen python scripts/evaluate_event_clustering.py --previous-result IM
 ```
 
 The launcher exposes no new selection, collection, credential or model-execution option. Software verification and actual protected pilot outcomes are recorded separately in [VERIFICATION](VERIFICATION.md).
+
+## Executed checkpoint — 2026-10-15
+
+Implementation `85d67fd` completed the authorized comparison after full production-store verification. All six predetermined modes completed on the exact preserved input artifacts. Final batch/stream/reversed-order partitions agreed on this pilot, complete membership projections retained every available input ID, and complete-link groups respected their declared diameter bounds. These are engineering and geometry results; same-event accuracy remains unmeasured. Original controls, sources, embeddings and audit history remain preserved. Exact candidate counts, missingness, source-linked examples, diagnostics, timings and the prepared presentation stay in protected storage and were shown in the chat. No new embedding/model/network call or event-dossier acceptance occurred.
+
+The 48 focused software tests passed in 21.11 seconds. The full collected suite passed 513 tests in 441.48 seconds, with Ruff and mypy also passing. These include synthetic regressions and unrelated preserved workspace tests; they are not independent event judgments. Recorded fit timings overlap regression work and are not an isolated production benchmark. The next semantic evaluation requires independently reviewed event identity based on source evidence, with publication and event dates kept distinct.
