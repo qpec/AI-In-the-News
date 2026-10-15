@@ -1,0 +1,3 @@
+# Preserve the reviewed upstream license verbatim, including its final blank line.
+third_party/aws_news_clustering/LICENSE -whitespace
+third_party/aws_news_clustering/manifest.json text eol=lf

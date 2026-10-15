@@ -174,6 +174,7 @@ class Research:
             "conversation": self._conversation,
             "conversation_search": self._conversation_search,
             "conversation_chat": self._conversation_chat,
+            "evaluate_aws_clustering": self._evaluate_aws_clustering,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -854,6 +855,12 @@ class Research:
     @audited_handler
     def _conversation_chat(self, session: str, context: Context, data: Json) -> Json:
         from .conversation_chat import execute
+
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _evaluate_aws_clustering(self, session: str, context: Context, data: Json) -> Json:
+        from .aws_clustering_evaluation import execute
 
         return execute(self, session, context, data)
 

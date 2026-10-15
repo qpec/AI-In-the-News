@@ -1,0 +1,67 @@
+{
+  "repository": "https://github.com/aws-samples/news-clustering-and-summarization",
+  "commit": "6174ccd16510f2255b6de19ce71350286760266e",
+  "license": "MIT-0",
+  "extraction": "Exact selected source lines with LF line endings; timing decorator removed only from compiled AST, no upstream top-level code executed.",
+  "files": {
+    "clustering_core.py": {
+      "upstream_path": "business_logic/stream_consumer/clustering.py",
+      "upstream_file_sha256": "d7557f4fcd3f08f577cc2f6f248b74b8c6da443a20dd4be560e907b23af5e9b5",
+      "fragment_sha256": "9f6fff09e33db476a851b4b8273aef3cb31505623f84ca3222cbf73c4001f37d",
+      "functions": [
+        {
+          "name": "sort_row",
+          "start_line": 21,
+          "end_line": 23,
+          "sha256": "75bbed8a0afe523a480404331cd24a7c6e9257efdf1d5623d66848da727d7302",
+          "lf_sha256": "628b8f85d20a81946806925be10ed40d9039f6f041b4b5a3c12b4ecf70d3c04b"
+        },
+        {
+          "name": "parallel_sort_rows",
+          "start_line": 26,
+          "end_line": 50,
+          "sha256": "88eea63d28362f77917563742338ffb018ab7b1a23647468c87fbdaca4312347",
+          "lf_sha256": "6ae50f59c204156e70567456464089dda2a7be622e4c241c88b90ca1fd5079ee"
+        },
+        {
+          "name": "batch_update_numpy_distance_matrix",
+          "start_line": 53,
+          "end_line": 85,
+          "sha256": "527973adf3a4f2e2e737e31baf5d5a653280183cf0606322e5439700622cda8c",
+          "lf_sha256": "2259c366610e97bfb632822dcc606804c78f1969a1590d57f5668be020ff8f91"
+        },
+        {
+          "name": "get_sparse_distance_matrix",
+          "start_line": 88,
+          "end_line": 110,
+          "sha256": "d00ca2c8cba3be602c99d4934beb85516061789b4786163ff632851a4fc2b4c3",
+          "lf_sha256": "0b1912d61a56f843a1b63f2c9ca7951413ec225e7a3a3a7b26b1fc5d03460570"
+        },
+        {
+          "name": "make_symmetric",
+          "start_line": 113,
+          "end_line": 118,
+          "sha256": "a6df8dc6a309bce22d013f60d2ab1dffe1fd2845f6a4d0a3c279e0813807f5dc",
+          "lf_sha256": "aa7dcd519277ba00a05f732c79e52be790899db48bc341baf8247c52be29c497"
+        }
+      ],
+      "upstream_lf_sha256": "9dd3e6842bf978f55d2666e9d1866f875f781a854e871b56b21eafe0a53ebd9e"
+    },
+    "cluster_core.py": {
+      "upstream_path": "business_logic/stream_consumer/process_records.py",
+      "upstream_file_sha256": "ef828dddc6e7f7d6d00ebcb9c2344b8f55a3fd7c302a7e8bbf9171b5bbf79a97",
+      "fragment_sha256": "d52b980fcfe75c0f95c2507e1ba5757bc85779f9c33068a201bde5b418b24773",
+      "functions": [
+        {
+          "name": "cluster",
+          "start_line": 283,
+          "end_line": 445,
+          "sha256": "556dc14cb6cd78bee4713a0a1a9d557a9fe328a87040b722b3c2d5dced99fa19",
+          "lf_sha256": "d52b980fcfe75c0f95c2507e1ba5757bc85779f9c33068a201bde5b418b24773"
+        }
+      ],
+      "upstream_lf_sha256": "dfbd4706e9962a058a6accf4c2a68e6cf3f4c20ddcc90058fb6fe5633e8b0879"
+    }
+  },
+  "license_sha256": "63189df49c38c40470bea853401adf9a49bd6196ca2ba4371066e0252c100b29"
+}

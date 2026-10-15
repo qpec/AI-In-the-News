@@ -79,6 +79,7 @@ def main() -> int:
             "conversation",
             "conversation_search",
             "conversation_chat",
+            "evaluate_aws_clustering",
             "plan_tags",
             "tag",
             "tag_inspect",

@@ -18,6 +18,7 @@ RESULT_KINDS = {
     "adaptive_cutoff_result", "adaptive_cutoff_plan",
     "rag_query_result",
     "conversation_turn", "conversation_retrieval",
+    "embedding_checkpoint_result", "aws_clustering_evaluation",
 }
 
 

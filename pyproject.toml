@@ -13,6 +13,7 @@ dependencies = [
     "matplotlib>=3.9,<4",
     "numpy>=2,<3",
     "qrcode>=8.2,<9",
+    "scikit-learn==1.7.2",
     "tiktoken>=0.12,<1",
 ]
 
@@ -24,6 +25,9 @@ dev = ["pytest>=8.3,<10", "mypy>=1.14,<2", "types-jsonschema>=4.23", "ruff>=0.9,
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/newsresearch"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"third_party/aws_news_clustering" = "newsresearch/_vendor/aws_news_clustering"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
