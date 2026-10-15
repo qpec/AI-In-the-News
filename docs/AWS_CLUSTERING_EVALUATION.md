@@ -37,3 +37,11 @@ uv run --frozen python scripts/evaluate_aws_clustering.py --reference-result IMM
 ```
 
 Use `--index` instead of `--reference-result` when the original index ID is known. The launcher accepts no credentials or cloud/model execution flags. Summarization and any later human/model review require a separately registered workflow; paid/model runs still need concrete authorization. Installed wheels include the pinned source fragments and license.
+
+## Executed checkpoint — 2026-10-15
+
+The authorized saved-vector pilot completed through `Research.execute()` after full production-store preflight. All five predetermined modes completed, and their exact outputs, timings, coverage, metadata examples and presentation remain in protected storage. The exact prepared overview was presented in the chat. Source-linked examples and research artifacts are deliberately excluded from this public engineering checkpoint. There were no new embeddings, model calls, AWS resources or accepted event dossiers. No human same-event accuracy claim is made.
+
+The pinned core's returned-update omissions were observed in the real-vector pilot. Separate synthetic probes reproduced arrival/batch dependence, an incremental identical-vector crash, duplicate memberships when the production ID guard was explicitly bypassed, density chaining and failure to combine two pre-existing clusters. These are reasons to treat the sample as an experimental candidate generator requiring engineering corrections and independent event-identity evaluation, rather than adopting its output directly as event counts. No DynamoDB/cloud service behavior was tested.
+
+Implementation checkpoint: `37c66c5`. The full collected suite passed 463 software tests in 435.64 seconds; these include synthetic adapter tests and unrelated preserved workspace work. Ruff, mypy, pinned-checkout hash cross-check, wheel inclusion, launcher help and diff checks passed. See [verification](VERIFICATION.md) for the boundary between software checks and unlabelled corpus execution. Fit timings were recorded during concurrent regression work and are not isolated performance benchmarks.
