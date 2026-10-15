@@ -65,6 +65,7 @@ def main() -> int:
             "evaluate_vector_index",
             "inspect_candidates",
             "tag_retrieve",
+            "tag_setup",
             "plan_tags",
             "tag",
             "tag_inspect",

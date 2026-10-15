@@ -32,6 +32,7 @@ Use the same `--workspace` as the original run. Replay invokes no provider.
 - Versioned dossiers with uncertain and duplicate memberships, registered provider-event grouping proposals, and explicit merge/split/amendment lineage.
 - Audited FTS retrieval and inspection, question-specific work manifests, resumable batches, explicit version-dependent cache reuse, bounded retries and preserved failures.
 - Local passage-vector indexing and article candidate search over saved embeddings, full precision reranking, separate provider-ID signals, preserved missingness and exact-neighbor numerical checks. See [local candidate search](docs/LOCAL_CANDIDATE_SEARCH.md).
+- [Corpus-wide query tagging](docs/QUERY_TAGGING.md): check every article against a query/question, preserve complete segment coverage, score through the guarded OpenAI gateway, calibrate a binary cutoff on reviewed examples and verify it on a separate held-out set. Failed/missing articles remain unprocessed; generated tags remain provisional.
 - One instrumented model gateway for all research task types; strict result/evidence/coverage checks; separate interpretations, reviews and accepted findings; append-only corrections.
 - Dossier-level SQL snapshots with denominator, exclusions and missingness; linked PNG charts; deterministic stored-output replay; allowlisted aggregate exports.
 - Protected artifacts, SQLite FULL-synchronous transactions, a hash-linked append-only journal, fail-closed audit writes, single-writer locking and integrity preflight on every supported command.
@@ -48,6 +49,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [User-specified method: from news articles to incident dossiers](docs/INCIDENT_DOSSIER_METHOD.md)
 - [Selected OpenAI embeddings, offline cost planning and per-run approval](docs/OPENAI_EMBEDDINGS.md)
 - [Local candidate search, saved-vector indexing and exact-search checks](docs/LOCAL_CANDIDATE_SEARCH.md)
+- [Query-driven tags for every article, threshold calibration and execution commands](docs/QUERY_TAGGING.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)

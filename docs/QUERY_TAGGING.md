@@ -14,10 +14,27 @@ Only a threshold passing the held-out requirements can be applied to that exact 
 
 ## Runtime operations
 
+The convenience launcher registers the complete method and prepares the corpus in one audited operation, avoiding repeated full-store preflight for each version. Put a `study.json` in protected storage containing `query`, `question`, `tag`, `definition`, `model_profile`, and the independently labelled `evaluation` described below. Optional settings are `segment_characters`, `overlap_characters`, `related_sources` and `instructions`. No credential is loaded during planning.
+
+```powershell
+uv run --frozen python scripts/plan_query_tags.py --context C:/protected/dataset-context.json --study C:/protected/study.json --actor researcher:your-name
+```
+
+The result includes the plan ID and a protected `context_path`. For related-document context, provide `--candidate-run ID` and set `related_sources` above zero; all target articles are still included. An evaluation can be omitted for exploratory scoring, but later calibration then needs a new plan with the evaluation bound before execution. Existing scores are not silently reused across changed versions.
+
+After the concrete plan has been authorized and its approval policy registered, the existing Windows Credential Manager key can be injected without printing it:
+
+```powershell
+./scripts/run_query_tags_with_key.ps1 -Context C:/protected/tag-context.json -Plan PLAN_ID -ApprovalPolicy POLICY_ID -AllowPaidExecution -ReuseCache -MaxRequests 1 -Actor researcher:your-name
+```
+
+Increase `MaxRequests` only within that run's authorization. Repeat with `-ReuseCache` to resume the same plan; every reconciliation retains the full corpus, including work not yet processed. The Python equivalent is `uv run --frozen python scripts/run_query_tags.py --context ... --plan ... --approval-policy ... --allow-paid-execution --reuse-cache --max-requests 1`, with an environment-held key. Neither launcher changes global offline settings. Preflight may take several minutes on the full pilot audit.
+
 All commands use `uv run --frozen newsresearch ... run OPERATION --input protected-input.json` or `Research.execute()` with an objective and actor. Results containing text or source IDs are private. Use protected storage outside Git for inputs, outputs, contexts and research records.
 
 | Operation | Input | Result |
 | --- | --- | --- |
+| `tag_setup` | `{"study":{...},"candidate_run":"OPTIONAL_ID"}` | Registers methods, retrieves all articles and plans offline in one audited operation |
 | `tag_retrieve` | `{}` or `{"candidate_run":"ID"}` | Complete corpus/segment manifest, no inference; source filters rejected |
 | `plan_tags` | `{"retrieval":"ID"}` | Exact provider requests and cost reservations, no inference |
 | `tag` | `{"plan":"ID","approval_policy":"ID","max_requests":1,"reuse_cache":true}` | Bounded resumable gateway execution and complete reconciliation |

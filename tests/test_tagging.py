@@ -295,3 +295,21 @@ def test_handlers_require_runtime(engine: Research) -> None:
         tagging.retrieve(engine, "not-a-session", Context("test", "test"), {})
     with pytest.raises(AuditError):
         tag_gateway.execute(engine, "not-a-session", Context("test", "test"), {})
+
+
+def test_single_operation_setup_saves_bound_context_without_network(tagged: Any, monkeypatch: Any) -> None:
+    engine, versions, run, dataset, retrieved, plan = tagged
+    sent = transport(engine, monkeypatch)
+    result = engine.execute("tag_setup", {"study": {
+        "query": "second query", "question": "A distinct question?", "tag": "second_tag",
+        "definition": "A distinct registered definition",
+        "model_profile": engine.ledger.get(versions["model_profile"], "model_profile")["content"],
+        "evaluation": engine.ledger.get(versions["evaluation"], "evaluation")["content"],
+    }}, versions={"dataset": dataset["id"]}, objective="Test offline setup wrapper", actor="test")
+    assert result["expected_sources"] == 7 and not sent
+    assert engine.ledger.artifacts.read(result["context_artifact"]) == {"versions": result["versions"]}
+    assert result["versions"]["question"] != versions["question"]
+    prepared = engine.ledger.get(result["id"], "tag_plan")
+    body = engine.ledger.artifacts.read(prepared["items"][0]["request_ref"])["body"]
+    assert json.loads(body["input"])["task"]["query"] == "second query"
+    assert not engine.ledger.verify()["unresolved_model_attempts"]

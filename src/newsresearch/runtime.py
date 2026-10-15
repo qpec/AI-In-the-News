@@ -160,6 +160,7 @@ class Research:
             "evaluate_vector_index": self._evaluate_vector_index,
             "inspect_candidates": self._inspect_candidates,
             "tag_retrieve": self._tag_retrieve,
+            "tag_setup": self._tag_setup,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -758,6 +759,12 @@ class Research:
         from .tagging import retrieve
 
         return retrieve(self, session, context, data)
+
+    @audited_handler
+    def _tag_setup(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import setup
+
+        return setup(self, session, context, data)
 
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:

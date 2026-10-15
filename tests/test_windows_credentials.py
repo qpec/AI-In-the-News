@@ -50,8 +50,9 @@ Write-Output 'Credential storage checks passed.'
 
 
 @pytest.mark.skipif(os.name != "nt", reason="PowerShell launcher")
-def test_credential_launcher_blocks_missing_paid_flag() -> None:
-    script = Path(__file__).resolve().parents[1] / "scripts/run_embeddings_with_key.ps1"
+@pytest.mark.parametrize("name", ["run_embeddings_with_key.ps1", "run_query_tags_with_key.ps1"])
+def test_credential_launcher_blocks_missing_paid_flag(name: str) -> None:
+    script = Path(__file__).resolve().parents[1] / "scripts" / name
     result = subprocess.run(
         [
             "powershell.exe",

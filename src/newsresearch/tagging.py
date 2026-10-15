@@ -56,6 +56,40 @@ def definition(engine: Research, context: Context) -> Json:
             "definition": book["definition"], "scope": "Relevance of reporting, not truth of an event"}
 
 
+def setup(engine: Research, session: str, context: Context, data: Json) -> Json:
+    """Register a complete study and offline plan in one preflight-checked operation."""
+    require_active(engine, session)
+    engine._require(context, {"dataset"})
+    study = data["study"]
+    versions = {"dataset": context.versions["dataset"]}
+    specifications = {
+        "protocol": {"method": METHOD, "scope": "Exhaustive query relevance; provisional source annotations"},
+        "question": {"query": study["query"], "text": study["question"]},
+        "selection": {"rules": "Every source in the bound dataset; no top-k exclusion; retain missing text",
+                      "dataset": versions["dataset"]},
+        "codebook": {"method": METHOD, "labels": ["yes", "no"], "tag": study["tag"], "definition": study["definition"]},
+        "profile": {"mode": "exploratory", "population_estimate": False, "unit": "source annotation"},
+        "retrieval_profile": {"method": METHOD, "aggregation": "max_segment_score",
+                              "segment_characters": study.get("segment_characters", 12000),
+                              "overlap_characters": study.get("overlap_characters", 300),
+                              "related_sources": study.get("related_sources", 0)},
+        "prompt": {"instructions": study.get("instructions", "Apply the relevance definition, including negation and boundary cases.")},
+        "model_profile": study["model_profile"],
+    }
+    if "evaluation" in study:
+        specifications["evaluation"] = study["evaluation"]
+    for kind, content in specifications.items():
+        versions[kind] = engine._version(session, context, {"kind": kind,
+            "key": "query-tag-" + study["tag"] + "-" + kind, "content": content,
+            "amend_latest": True, "reason": "Register or explicitly amend the corpus-wide query tagging study"})["id"]
+    bound = Context(context.objective, context.actor, versions)
+    retrieval = retrieve(engine, session, bound, {"candidate_run": data["candidate_run"]} if data.get("candidate_run") else {})
+    planned = engine.gateway.plan_tags(session, bound, {"retrieval": retrieval["id"]})
+    reference = engine.ledger.artifacts.put({"versions": versions})
+    engine.ledger.append(session, "tagging.artifact.saved", {"artifact": reference})
+    return {**planned, "context_artifact": reference}
+
+
 def retrieve(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, BINDINGS)
