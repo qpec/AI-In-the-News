@@ -60,6 +60,30 @@ def test_prepare_blinds_scores_and_preserves_complete_evidence(tmp_path, request
     assert invocation.manifest()["stdin"] == invocation.stdin
 
 
+def test_wire_schema_reduced_but_full_validation_preserved(tmp_path, request_packet):
+    invocation = CodexCLIProvider(tmp_path).prepare(request_packet)
+    manifest = invocation.manifest()
+    wire_text = (invocation.cwd / "response-schema.json").read_text(encoding="utf-8")
+    wire = json.loads(wire_text)
+    assert wire_text == manifest["schema_file_utf8"]
+    assert wire == manifest["wire_schema"]
+    for keyword in ("uniqueItems", "minLength", "maxLength", "minItems", "maxItems"):
+        assert keyword not in wire_text
+    assert manifest["schema"] == request_packet["schema"]
+    assert json.loads(invocation.stdin)["schema"] == request_packet["schema"]
+    assert "uniqueItems" in json.dumps(request_packet["schema"])
+    assert wire["properties"]["label"]["enum"] == ["yes", "no", "uncertain"]
+    assert wire["additionalProperties"] is False
+    sample = result()
+    sample["criterion_ids"] = ["ai", "ai"]
+    with pytest.raises(ResearchError, match="schema_invalid"):
+        validate_judgement(request_packet, sample)
+    sample = result()
+    sample["rationale"] = ""
+    with pytest.raises(ResearchError, match="schema_invalid"):
+        validate_judgement(request_packet, sample)
+
+
 def test_inclusion_mismatch_and_oversize_never_dispatch(tmp_path, request_packet):
     calls = []
     provider = CodexCLIProvider(tmp_path, max_input_bytes=1, runner=lambda *a, **kw: calls.append(kw))

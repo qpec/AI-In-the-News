@@ -60,7 +60,8 @@ class PreparedCodexInvocation:
             "stdin": self.stdin,
             "stdin_sha256": hashlib.sha256(self.stdin.encode("utf-8")).hexdigest(),
             "schema": self.schema,
-            "schema_file_utf8": _schema_text(self.schema),
+            "schema_file_utf8": _schema_text(codex_wire_schema(self.schema)),
+            "wire_schema": codex_wire_schema(self.schema),
             "worker_rules": WORKER_RULES,
             "configured_model": self.configured_model,
             "authentication": "existing ChatGPT account; no API-key fallback",
@@ -98,6 +99,24 @@ def judge_schema() -> Json:
             },
         },
     }
+
+
+def codex_wire_schema(schema: Json) -> Json:
+    """Use a conservative provider subset; retain full validation locally.
+
+    The exact full application schema remains in the audited request and
+    prompt. Removing these provider-side constraints never relaxes acceptance.
+    """
+    local_only = {"uniqueItems", "minLength", "maxLength", "minItems", "maxItems"}
+
+    def reduce(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {key: reduce(item) for key, item in value.items() if key not in local_only}
+        if isinstance(value, list):
+            return [reduce(item) for item in value]
+        return value
+
+    return dict(reduce(schema))
 
 
 def validate_judgement(request: Json, result: Any) -> Json:
@@ -193,7 +212,7 @@ class CodexCLIProvider:
         cwd = Path(tempfile.mkdtemp(prefix="codex-judge-", dir=self.workspace))
         (cwd / "AGENTS.md").write_text(WORKER_RULES, encoding="utf-8", newline="\n")
         schema_path = cwd / "response-schema.json"
-        schema_path.write_text(_schema_text(request["schema"]), encoding="utf-8", newline="\n")
+        schema_path.write_text(_schema_text(codex_wire_schema(request["schema"])), encoding="utf-8", newline="\n")
         command = self._command(cwd)
         return PreparedCodexInvocation(command, cwd, stdin, request["schema"], request, self.model)
 
@@ -222,7 +241,7 @@ class CodexCLIProvider:
                 raise ResearchError("codex_worker_file_changed")
             if rules_path.read_bytes() != WORKER_RULES.encode("utf-8"):
                 raise ResearchError("codex_worker_rules_changed")
-            if schema_path.read_bytes() != _schema_text(prepared.schema).encode("utf-8"):
+            if schema_path.read_bytes() != _schema_text(codex_wire_schema(prepared.schema)).encode("utf-8"):
                 raise ResearchError("codex_worker_schema_changed")
         except OSError as error:
             raise ResearchError("codex_worker_file_unavailable") from error
