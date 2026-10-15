@@ -21,7 +21,10 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--validate-if-qualified", action="store_true")
     parser.add_argument("--conjunction", action="store_true", help="Explicit amendment after a failed single-feature result; parent is that result")
+    parser.add_argument("--monotone", action="store_true", help="Final offline five-signal existence amendment; parent is the failed two-feature result")
     args = parser.parse_args()
+    if args.monotone and (args.conjunction or args.validate_if_qualified):
+        parser.error("Monotone mode is a separate offline screen; do not combine it with conjunction or validation flags")
     project = Path(__file__).resolve().parents[1]
     config = replace(Config.load(project / "research.toml"), offline=not args.validate_if_qualified)
     engine = Research(args.workspace, config=config)
@@ -44,6 +47,8 @@ def main() -> int:
         print(json.dumps({"stage": "full_audit_preflight", "new_embedding_requests": 0}), flush=True)
         operation = "event_pair_conjunction_experiment" if args.conjunction else "event_pair_feature_experiment"
         parent_field = "parent_feature_result" if args.conjunction else "parent_result"
+        if args.monotone:
+            operation, parent_field = "event_pair_monotone_screen", "parent_conjunction_result"
         result = engine.execute(operation, {
             parent_field: args.parent_result, "experiment_key": args.experiment_key,
             "continuation_instruction": args.continuation_instruction, "reuse_cache": True,

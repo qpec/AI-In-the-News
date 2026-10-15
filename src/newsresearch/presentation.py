@@ -24,6 +24,7 @@ RESULT_KINDS = {
     "event_clustering_evaluation",
     "event_pair_plan", "event_pair_experiment", "event_pair_feature_experiment",
     "event_pair_conjunction_experiment",
+    "event_pair_monotone_result",
 }
 
 

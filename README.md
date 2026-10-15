@@ -69,6 +69,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Actual verification results](docs/VERIFICATION.md)
 - [Selective event-link comparison using retained passage embeddings](docs/EVENT_PAIR_PASSAGE_EXPERIMENT.md)
 - [Registered two-feature conjunction amendment after the failed comparison](docs/EVENT_PAIR_CONJUNCTION_AMENDMENT.md)
+- [Final finite five-feature threshold-family screen](docs/EVENT_PAIR_MONOTONE_FINAL.md)
 - [Complete-preflight performance and reproducible synthetic benchmarks](docs/PREFLIGHT_PERFORMANCE.md)
 
 ```powershell
