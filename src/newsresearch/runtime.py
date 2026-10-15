@@ -167,6 +167,7 @@ class Research:
             "similarity_apply": self._similarity_apply,
             "article_query_rows": self._article_query_rows,
             "article_query_overview": self._article_query_overview,
+            "record_presentation": self._record_presentation,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -807,6 +808,12 @@ class Research:
         from .query_overview import overview
 
         return overview(self, session, context, data)
+
+    @audited_handler
+    def _record_presentation(self, session: str, context: Context, data: Json) -> Json:
+        from .presentation import record
+
+        return record(self, session, context, data)
 
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:

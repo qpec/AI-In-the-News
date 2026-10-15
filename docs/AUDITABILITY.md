@@ -19,6 +19,8 @@ There is one workspace writer at a time, enforced with an OS file lock. This fou
 
 ## Stored evidence and model observability
 
+[Result presentations](RESULT_PRESENTATION.md) add immutable `result_presentation` SQL records with exact Markdown bytes/hash, original result IDs and version bindings, method, actor/session, destination, state and observed recording time. The mandatory assistant workflow captures and shows an overview after every search. `record_presentation` validates identity and fidelity, not the meaning of caller-supplied prose or its consistency with the results. Prepared content is distinct from caller-reported delivery; chat rendering and human reading are unobserved. Retrospective unknown message times stay null with a reason. Search APIs do not automatically publish chat messages, and a saved presentation alone does not prove delivery.
+
 [Embedding-based query tags](SIMILARITY_TAG_AUDIT.md) add an immutable `article_query_result` SQL record for every article in a completed run. Each row retains exact query/question, score, yes/no/null relevance answer, cutoff/calibration, source/vector versions, matching evidence, coverage, actor/times and links to the shared query request and session audit. Full-corpus manifests precede scoring; interrupted runs expose expected/logged/pending counts. Threshold application appends new rows linked to the original scores. The audited SQL reader retains its SELECT and parameters. Shared query token usage is explicitly distinguished from zero per-article inference usage. These records remain provisional and do not enter dossier acceptance or measurement tables.
 
 | Information | How it is preserved |

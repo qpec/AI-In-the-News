@@ -72,6 +72,7 @@ def main() -> int:
             "similarity_apply",
             "article_query_rows",
             "article_query_overview",
+            "record_presentation",
             "plan_tags",
             "tag",
             "tag_inspect",
