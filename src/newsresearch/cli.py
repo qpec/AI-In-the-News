@@ -84,6 +84,7 @@ def main() -> int:
             "plan_event_pairs",
             "event_pair_experiment",
             "event_pair_feature_experiment",
+            "event_pair_conjunction_experiment",
             "plan_tags",
             "tag",
             "tag_inspect",

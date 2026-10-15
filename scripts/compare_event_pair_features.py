@@ -20,6 +20,7 @@ def main() -> int:
     parser.add_argument("--continuation-instruction", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--validate-if-qualified", action="store_true")
+    parser.add_argument("--conjunction", action="store_true", help="Explicit amendment after a failed single-feature result; parent is that result")
     args = parser.parse_args()
     project = Path(__file__).resolve().parents[1]
     config = replace(Config.load(project / "research.toml"), offline=not args.validate_if_qualified)
@@ -41,8 +42,10 @@ def main() -> int:
 
         setattr(engine.ledger, "append", progress)
         print(json.dumps({"stage": "full_audit_preflight", "new_embedding_requests": 0}), flush=True)
-        result = engine.execute("event_pair_feature_experiment", {
-            "parent_result": args.parent_result, "experiment_key": args.experiment_key,
+        operation = "event_pair_conjunction_experiment" if args.conjunction else "event_pair_feature_experiment"
+        parent_field = "parent_feature_result" if args.conjunction else "parent_result"
+        result = engine.execute(operation, {
+            parent_field: args.parent_result, "experiment_key": args.experiment_key,
             "continuation_instruction": args.continuation_instruction, "reuse_cache": True,
             "execute_validation": args.validate_if_qualified, "workers": 4},
             objective="Compare registered passage features for same-event links; validate at most one frozen candidate within the original budget",

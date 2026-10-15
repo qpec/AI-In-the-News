@@ -23,6 +23,7 @@ RESULT_KINDS = {
     "embedding_checkpoint_result", "aws_clustering_evaluation",
     "event_clustering_evaluation",
     "event_pair_plan", "event_pair_experiment", "event_pair_feature_experiment",
+    "event_pair_conjunction_experiment",
 }
 
 

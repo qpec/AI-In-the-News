@@ -420,6 +420,11 @@ class Gateway:
 
         return execute(self.engine, session, context, data)
 
+    def event_pair_conjunction_experiment(self, session: str, context: Context, data: Json) -> Json:
+        from .event_pair_conjunction_study import execute
+
+        return execute(self.engine, session, context, data)
+
     def tag(self, session: str, context: Context, data: Json) -> Json:
         from .tag_gateway import execute
 

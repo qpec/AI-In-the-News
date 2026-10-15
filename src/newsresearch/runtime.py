@@ -181,6 +181,7 @@ class Research:
             "plan_event_pairs": self._plan_event_pairs,
             "event_pair_experiment": self._event_pair_experiment,
             "event_pair_feature_experiment": self._event_pair_feature_experiment,
+            "event_pair_conjunction_experiment": self._event_pair_conjunction_experiment,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -906,6 +907,10 @@ class Research:
     @audited_handler
     def _event_pair_feature_experiment(self, session: str, context: Context, data: Json) -> Json:
         return self.gateway.event_pair_feature_experiment(session, context, data)
+
+    @audited_handler
+    def _event_pair_conjunction_experiment(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.event_pair_conjunction_experiment(session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:
