@@ -55,6 +55,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Adaptive cutoff with Codex-agent judges, shared inclusion criteria and a 100–200 attempt ceiling](docs/ADAPTIVE_LLM_CUTOFF.md) — implemented v3 literal-query adapter and [gateway transport](docs/CODEX_JUDGE_TRANSPORT.md); earlier v1/v2 designs remain preserved. See verification for actual runs, separately from software tests.
 - [Always show research results and preserve supported presentations](docs/RESULT_PRESENTATION.md)
 - [Source-grounded top-100 RAG answers about organizational decisions and AI incidents](docs/RAG_ORGANIZATIONAL_DECISIONS.md)
+- [Local reading room for saved RAG answers, evidence and browsing progress](docs/RESULTS_READER.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)

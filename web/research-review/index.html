@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>AI in the News · Reading room</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#article-detail">Skip to selected answer</a>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="AI in the News reading room"><span class="brand-mark" aria-hidden="true">ai<span>n</span></span><span>AI IN THE NEWS<span class="brand-sub">RESEARCH READING ROOM</span></span></a>
+    <div class="private-label"><span aria-hidden="true" class="status-dot"></span>LOCAL · PRIVATE</div>
+  </header>
+  <section class="intro" aria-labelledby="page-title">
+    <div class="intro-heading"><div><p class="eyebrow">FROM THE CORPUS</p><h1 id="page-title">Decisions around AI incidents</h1></div><div class="progress-box"><span id="progress-label">Reading progress</span><strong id="progress-count">—</strong><div class="progress-track"><span id="progress-bar"></span></div></div></div>
+    <p class="question" id="research-question">Loading the saved research question…</p>
+    <p class="scope" id="scope">Opening the existing result. No new research is being run.</p>
+    <div class="summary" aria-label="Model answer summary"><div><strong id="stat-total">—</strong><span>ARTICLES ASSESSED</span></div><div><strong id="stat-supported">—</strong><span>SUPPORTED EXAMPLES</span></div><div><strong id="stat-insufficient">—</strong><span>INSUFFICIENT EVIDENCE</span></div><div><strong id="stat-uncertain">—</strong><span>UNCERTAIN</span></div></div>
+  </section>
+  <main class="workspace" id="workspace" aria-busy="true">
+    <section class="results-pane" aria-label="Browse articles">
+      <div class="list-tools">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a title, decision, organization…" aria-label="Search saved answers" autocomplete="off"><kbd aria-hidden="true">/</kbd></div>
+        <div class="tabs" role="group" aria-label="Filter by model answer"><button type="button" class="tab active" data-filter="supported" aria-pressed="true">Supported <span data-count="supported">—</span></button><button type="button" class="tab" data-filter="all" aria-pressed="false">All <span data-count="all">—</span></button><button type="button" class="tab" data-filter="insufficient" aria-pressed="false">Insufficient <span data-count="insufficient">—</span></button><button type="button" class="tab" data-filter="uncertain" aria-pressed="false">Uncertain <span data-count="uncertain">—</span></button></div>
+        <div class="secondary-filters"><label><input type="checkbox" id="saved-only"> Saved</label><label><input type="checkbox" id="unread-only"> Unread</label><span id="visible-count" role="status">Loading…</span></div>
+      </div>
+      <div class="result-list" id="result-list" aria-label="Article results"><div class="empty-state"><span class="empty-symbol" aria-hidden="true">⋯</span><h2>Opening the reading room</h2><p>Loading your saved answers.</p></div></div>
+      <div class="list-footer">Local filters only · original retrieval order</div>
+    </section>
+    <section class="detail-pane" id="article-detail" aria-label="Selected answer" tabindex="-1"><div class="empty-state"><span class="empty-symbol" aria-hidden="true">↗</span><h2>Your research, in one place.</h2><p>Choose an article to explore its answer and evidence.</p></div></section>
+  </main>
+  <footer class="page-footer"><span>Model answers are provisional and have not been human validated. Article counts are not incident counts.</span><span class="keyboard-hint"><kbd>J</kbd><kbd>K</kbd> browse <kbd>S</kbd> save <kbd>R</kbd> read</span></footer>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">Enable JavaScript to browse the saved local results.</p></noscript>
+</body>
+</html>
