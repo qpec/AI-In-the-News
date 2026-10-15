@@ -2,6 +2,8 @@
 
 This is the default query-tagging method, following the user's clarification that existing article embeddings should be reused. It replaces the earlier assumption of a new language-model judgement for every article. The separate [LLM tagging path](QUERY_TAGGING.md) remains optional and requires its own explicit plan authorization.
 
+The additional [adaptive LLM-guided cutoff design](ADAPTIVE_LLM_CUTOFF.md) proposes at most 100–200 evidence-bearing article attempts to derive a provisional operating cutoff, using the exact inclusion instruction in both query and judge. It adds a registered method specification, not an implemented execution route or a replacement for human validation.
+
 ## Registered method: exhaustive-cosine-query-tags-v1
 
 1. Register the exact query, specific question, tag, dataset, complete-corpus selection, method and evaluation versions inside `Research.execute()`. Default threshold calibration to **recall priority (F2)**, as requested by the user. Record any explicit priority override.

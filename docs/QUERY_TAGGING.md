@@ -2,6 +2,8 @@
 
 **Default method:** use [saved embeddings, exhaustive local cosine scoring and per-article SQL audit](SIMILARITY_TAG_AUDIT.md). The user clarified that per-article paid inference is unnecessary, and requested recall priority. The method below is the optional language-model assessment path, not the default. Its F1 default only applies to explicitly registered balanced evaluations; new similarity studies default to F2 when priority is omitted.
 
+The separate [adaptive cutoff design](ADAPTIVE_LLM_CUTOFF.md) limits model reading to at most 100–200 article attempts and uses model references to help choose a cosine cutoff. That bounded adapter is not yet implemented. This page's corpus-wide planner is not an implementation of that budget and must not be launched as a substitute.
+
 The user supplies a search query, a specific relevance question, and a tag name/definition. **Every article in the bound dataset is a target.** Retrieval never restricts targets to top-k hits. The current pilot dataset and the larger legacy archive are different frames; this workflow does not silently expand the pilot.
 
 ## Registered method

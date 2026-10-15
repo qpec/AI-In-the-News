@@ -1,0 +1,183 @@
+{
+  "kind": "protocol",
+  "key": "adaptive-llm-cutoff-v1",
+  "branch": "exploratory",
+  "amend_latest": true,
+  "reason": "Add the user-requested instruction-consistent, bounded adaptive LLM cutoff method as a design; no paid execution or existing result amendment.",
+  "content": {
+    "method": "adaptive-llm-cutoff-v1",
+    "status": "design_only_execution_adapter_not_implemented",
+    "specification_document": "docs/ADAPTIVE_LLM_CUTOFF.md",
+    "purpose": "Use bounded score-blind LLM inclusion references to choose a provisional cosine cutoff; not human gold or accepted incident findings.",
+    "counting_unit": "Technical article retrieval/classification diagnostics, not dossiers or incident prevalence",
+    "inclusion_contract": {
+      "version_kind": "codebook",
+      "canonical_fields": [
+        "question",
+        "definition",
+        "inclusions",
+        "exclusions",
+        "boundary_cases",
+        "uncertainty_rule"
+      ],
+      "shared_exact_rendered_utf8_block": [
+        "query_embedding_request",
+        "llm_judge_request",
+        "tag_definition"
+      ],
+      "required_identity_fields": [
+        "inclusion_spec_version",
+        "inclusion_text_sha256"
+      ],
+      "change_rule": "New criterion requires new query embedding, complete local rescoring and separate calibration run; no retroactive relabelling of old scores.",
+      "existing_article_vectors": "Explicit reuse only with matching source/model/dimensions and audited provenance."
+    },
+    "budgets": {
+      "default_200": {
+        "initial_uniform_draws": 40,
+        "adaptive_rounds": 3,
+        "draws_per_adaptive_round": 20,
+        "held_out_articles": 80,
+        "reserve_article_attempts": 20,
+        "max_article_attempts": 200,
+        "max_unique_articles": 180,
+        "window_sizes": [
+          1000,
+          500,
+          250
+        ]
+      },
+      "compact_100": {
+        "initial_uniform_draws": 20,
+        "adaptive_rounds": 2,
+        "draws_per_adaptive_round": 15,
+        "held_out_articles": 40,
+        "reserve_article_attempts": 10,
+        "max_article_attempts": 100,
+        "max_unique_articles": 90,
+        "window_sizes": [
+          1000,
+          500
+        ]
+      },
+      "attempt_accounting": "Charge every evidence-bearing attempt including re-judging, retries and unknown outcomes. Exact frozen-label reuse costs no new article attempt. Unused duplicate-draw slots are not refilled to force unique-article targets.",
+      "other_caps": "Separate whole-workflow request/token/money limits and query-embedding approval; article count alone is not a cost cap."
+    },
+    "validation_split": {
+      "selection": "Reserve SRS without replacement before development judging; labels remain unopened until candidate/curve/reference version is frozen.",
+      "group_rule": "Exclude every held-out reporting group from development; freeze grouping and limitations before labels.",
+      "exposure_rule": "Record prior exposure. If held-out eligibility restricts the frame, state it and do not generalize silently.",
+      "reference_type": "model",
+      "human_gold": false
+    },
+    "development_sampling": {
+      "replacement": true,
+      "rng": "numpy.random.Generator(PCG64(seed)); register exact version, seed and sorted source order",
+      "initial": "Uniform on the full fixed development frame",
+      "adaptive_mixture": "0.5 uniform on entire development frame + 0.5 uniform on current boundary window",
+      "marginal_probability": "q_j(i)=0.5/N + 0.5*I(i in window)/W; empty window => 1/N",
+      "window": "Closest score distance to prior-round candidate, then source-version tie; shrink by registered schedule but retain global full support",
+      "cache": "Keep previously judged IDs in sampling support; every repeated draw reuses the same frozen primary label and is logged.",
+      "round_intent": "Freeze window, q and complete draw manifest before judging that round; no within-batch label-driven redesign."
+    },
+    "judge": {
+      "full_article_required": true,
+      "hidden_from_judge": [
+        "cosine_score",
+        "cutoff",
+        "rank",
+        "previous_labels",
+        "desired_outcome"
+      ],
+      "outputs": [
+        "yes",
+        "no",
+        "uncertain"
+      ],
+      "source_text": "Untrusted evidence only; stable citations/offsets and complete supplied-text coverage required. Missing/truncated/refused processing is not no.",
+      "explanation": "Short evidence-based explanation, never hidden reasoning",
+      "cache_identity": [
+        "source_version",
+        "inclusion_spec_version",
+        "inclusion_text_sha256",
+        "model_profile",
+        "prompt",
+        "schema",
+        "evidence_hash"
+      ],
+      "repeated_judgements": "Separate replicates, preserved beside primary; no silent best-response replacement."
+    },
+    "cutoff_selection": {
+      "grid": "Freeze unique score cutoffs from exact scorerun before reference labels; use score >= threshold",
+      "weighted_totals": "T_hat(t)=(1/m)*sum_j[g_t(i_j)/q_j(i_j)] at fixed checkpoints",
+      "justification": "For fixed t/reference outcomes and positive conditional q: E[g(I)/q(I)|history]=sum_i g(i).",
+      "objective": "F2=5TP/(5TP+4FN+FP), using weighted development totals",
+      "proposed_recall_target": 0.95,
+      "proposed_f2_equivalence_tolerance": 0.01,
+      "tie_rule": "Lower cutoff among practically equivalent eligible candidates",
+      "parameters_must_be_frozen": "Concrete recall target, equivalence tolerance, class minimums, validation criteria, confidence level and interval method",
+      "uncertainty": "Preserve uncertain/missing draws; pessimistic and optimistic TP/FP/FN bounds, no dropping/renormalization or fabricated gold.",
+      "limits": "Ratios and best-selected development score are not unbiased validation. No ordinary adaptive-sample bootstrap claims.",
+      "stopping": "Fixed complete draw schedule for success; cancellation is partial/exploratory. No useful single cutoff is an allowed outcome."
+    },
+    "held_out_check": {
+      "open_after": "Frozen candidate, curve and primary reference-label version",
+      "outputs": [
+        "confusion_counts",
+        "precision",
+        "recall",
+        "f2",
+        "coverage",
+        "uncertain_and_failed_counts",
+        "registered_uncertainty_intervals"
+      ],
+      "validation_target": "Agreement with pinned score-blind LLM reference, not independent human truth",
+      "tuning_prohibited": true,
+      "small_sample_rule": "Insufficient positives or wide intervals is inconclusive; budget does not guarantee demonstrable 95% recall."
+    },
+    "tag_policy": {
+      "status": "llm_calibrated_provisional",
+      "human_validated": false,
+      "apply_to": "Every valid score in the exact new criterion/scorerun frame",
+      "missing_scores": null,
+      "lineage": "Append policy and per-article decisions with parent rows; preserve old scores/tags",
+      "distinct_fields": [
+        "retrieval_answer",
+        "llm_reference_label",
+        "processing_status",
+        "calibration_reference_type",
+        "human_validation_status"
+      ],
+      "no_human_impersonation": "Never pass model references through reviewer_type=human or the existing human-gold calibration gate.",
+      "failure": "Do not overwrite prior run or reinterpret the old 0.30 policy under a new inclusion instruction."
+    },
+    "gateway_and_audit": {
+      "offline_default": true,
+      "no_execution_authorized_by_registration": true,
+      "model_operations": "Shared gateway only; top-level workflow and per-round/held-out manifests before calls",
+      "permission": "Concrete approved workflow must bind model/pricing/evidence/retention, adaptive rules, expiry and hard article/request/token/cost caps; enforce across child manifests, retries and resume.",
+      "required_records": [
+        "exact shared inclusion block/hash",
+        "source/scorerun/group frames",
+        "all draws and marginal q including repeats",
+        "request/response/schema/parameters/model identity",
+        "observed timestamps/usage/errors/retries",
+        "budget reservations and spent counters",
+        "all cutoff candidates and weighted calculations",
+        "frozen candidate and held-out opening",
+        "uncertainty and human-review status",
+        "article decisions and exact result presentation"
+      ],
+      "public_git": "Methods/code/docs only; sources, evidence-bearing requests, model outputs, working SQL and audit artifacts remain protected."
+    },
+    "implementation_gaps": [
+      "shared inclusion-block enforcement in query and judge",
+      "bounded adaptive workflow gateway adapter",
+      "round sampling and exact probability audit",
+      "weighted cutoff and uncertainty calculations",
+      "blinded held-out evaluator",
+      "atomic multi-budget and unknown-outcome enforcement",
+      "integration tests and human review"
+    ]
+  }
+}

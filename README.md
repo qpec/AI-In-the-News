@@ -51,6 +51,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Local candidate search, saved-vector indexing and exact-search checks](docs/LOCAL_CANDIDATE_SEARCH.md)
 - [Query-driven tags for every article, threshold calibration and execution commands](docs/QUERY_TAGGING.md)
 - [Default local similarity tagging and per-article SQLite audit contract](docs/SIMILARITY_TAG_AUDIT.md)
+- [Adaptive LLM-guided cutoff design with shared inclusion criteria and a 100–200 attempt ceiling](docs/ADAPTIVE_LLM_CUTOFF.md) — method specification; execution adapter not yet implemented.
 - [Required search-result presentation and exact presentation audit](docs/RESULT_PRESENTATION.md)
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
