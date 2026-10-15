@@ -127,3 +127,9 @@ The authorized offline build completed against the reconciled embedding run. It 
 A subsequent numeric edge-case review hardened normalization: both norm calculation and division now use float64 before storing float32. This prevents finite extreme vectors from becoming zero or incorrectly scaled when the norm overflows or rounds as float32. Existing saved index bytes remain immutable and carry their original implementation identity. Six synthetic cases cover large, subnormal and ordinary magnitudes plus zero, NaN and infinity rejection. Candidate inspection also stops scanning once every explicitly requested source is found.
 
 After these changes, the complete suite passed **92 tests in 68.72 seconds**, with Ruff, mypy (14 source files) and `git diff --check` passing.
+
+## Real index numerical retrieval check — 2026-10-15
+
+The registered fixed sample of 32 passage queries was compared with exhaustive full precision cosine search across the entire saved index, excluding each query's own source. Approximate retrieval with full precision reranking recovered **627 of 640** exact top-20 neighbors: **0.9796875 recall@20**. The tie-aware score was identical. Exact and retrieved neighbor identities, per-query results, numerator/denominator and method bindings are retained in protected storage. The operation completed with zero network/model calls.
+
+This is an exploratory numerical-neighbor diagnostic on a small sample, not event retrieval recall, a human-labelled held-out evaluation, or validation of article-level aggregation. Thirteen exact neighbors were missed and remain visible in the report. No acceptance threshold or event judgement was inferred from this score.
