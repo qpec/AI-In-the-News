@@ -33,3 +33,9 @@ uv run --frozen python scripts/compare_event_pair_features.py --parent-result <i
 ```
 
 All source text, model payloads, matrices, detailed pair results, manifests, databases and logs stay outside Git. Synthetic tests establish software behavior only; actual outcomes must be presented separately in the chat.
+
+## Completed single-feature comparison
+
+The registered comparison completed on 2026-10-15 as protected result `ed7e7127bdd4ce3e78a1f05e2b07cbae4d8f292e5f654d768d005ce881b13da2`. All 54 development references and their original weights were retained: 14 same-event, 26 different-event and 14 uncertain. All five features and twenty feature/publication-filter variants completed without feature errors. No setting qualified. No candidate was frozen and no held-out labels were opened. No new model attempts or embeddings were requested; cumulative study use remains 55/100 pair attempts and 110/200 article exposures, including one known-invalid retry. This result does not establish a good cutoff.
+
+Software validation: 643 source-free tests passed in 497.57 seconds; Ruff passed across source/tests/scripts; mypy passed across source and the new launcher (46 files). These timings are test-suite duration, not an isolated research-performance benchmark. Commit `c58a282` contains the method implementation. Protected working results and the prepared exact presentation remain outside Git; chat visibility or reading is not automatically verified.
