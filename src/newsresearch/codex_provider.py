@@ -62,7 +62,7 @@ class PreparedCodexInvocation:
             "schema": self.schema,
             "schema_file_utf8": _schema_text(codex_wire_schema(self.schema)),
             "wire_schema": codex_wire_schema(self.schema),
-            "worker_rules": WORKER_RULES,
+            "worker_rules": _worker_rules(self.request),
             "configured_model": self.configured_model,
             "authentication": "existing ChatGPT account; no API-key fallback",
             "isolation": "fresh cwd and CLI read-only sandbox; not proven OS isolation",
@@ -149,7 +149,8 @@ def build_prompt(request: Json) -> str:
         raise ResearchError("codex_inclusion_fields_invalid")
     if hashlib.sha256(inclusion["instruction"].encode("utf-8")).hexdigest() != inclusion["sha256"]:
         raise ResearchError("codex_inclusion_hash_mismatch")
-    if not request["evidence"] or not inclusion["criterion_ids"]:
+    conversation = request.get("task_kind") == "rag_conversation_answer"
+    if (not request["evidence"] and not conversation) or not inclusion["criterion_ids"]:
         raise ResearchError("codex_empty_evidence_or_criteria")
     for item in request["evidence"]:
         if not isinstance(item.get("id"), str) or not isinstance(item.get("text"), str) or not item["text"]:
@@ -167,7 +168,22 @@ def build_prompt(request: Json) -> str:
         from .rag_answers import TASK_INSTRUCTION as answer_instruction
 
         packet["task"] = answer_instruction
+    elif conversation:
+        from .conversation_answers import TASK_INSTRUCTION as conversation_instruction
+
+        packet["task"] = conversation_instruction
+        packet["history"] = request.get("history", [])
+        packet["evidence"] = [{"id": item["id"], "source_version": item["source_id"],
+                               "text": item["text"]} for item in request["evidence"]]
     return json.dumps(packet, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _worker_rules(request: Json) -> str:
+    if request.get("task_kind") == "rag_conversation_answer":
+        from .conversation_answers import WORKER_RULES as conversation_rules
+
+        return conversation_rules
+    return WORKER_RULES
 
 
 class CodexCLIProvider:
@@ -214,7 +230,7 @@ class CodexCLIProvider:
         Draft202012Validator.check_schema(request["schema"])
         self.workspace.mkdir(parents=True, exist_ok=True)
         cwd = Path(tempfile.mkdtemp(prefix="codex-judge-", dir=self.workspace))
-        (cwd / "AGENTS.md").write_text(WORKER_RULES, encoding="utf-8", newline="\n")
+        (cwd / "AGENTS.md").write_text(_worker_rules(request), encoding="utf-8", newline="\n")
         schema_path = cwd / "response-schema.json"
         schema_path.write_text(_schema_text(codex_wire_schema(request["schema"])), encoding="utf-8", newline="\n")
         command = self._command(cwd)
@@ -243,7 +259,7 @@ class CodexCLIProvider:
             rules_path, schema_path = cwd / "AGENTS.md", cwd / "response-schema.json"
             if rules_path.is_symlink() or schema_path.is_symlink():
                 raise ResearchError("codex_worker_file_changed")
-            if rules_path.read_bytes() != WORKER_RULES.encode("utf-8"):
+            if rules_path.read_bytes() != _worker_rules(prepared.request).encode("utf-8"):
                 raise ResearchError("codex_worker_rules_changed")
             if schema_path.read_bytes() != _schema_text(codex_wire_schema(prepared.schema)).encode("utf-8"):
                 raise ResearchError("codex_worker_schema_changed")

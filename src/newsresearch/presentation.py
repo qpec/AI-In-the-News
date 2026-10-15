@@ -17,6 +17,7 @@ RESULT_KINDS = {
     "article_query_manifest", "tag_retrieval",
     "adaptive_cutoff_result", "adaptive_cutoff_plan",
     "rag_query_result",
+    "conversation_turn", "conversation_retrieval",
 }
 
 
@@ -31,7 +32,7 @@ def record(engine: Research, session: str, context: Context, data: Json) -> Json
     report = data.get("delivery_report")
     if not isinstance(content, str) or not content.strip():
         raise ResearchError("A presentation requires exact nonblank Markdown")
-    if destination not in {"codex_chat", "cli", "private_file"}:
+    if destination not in {"codex_chat", "cli", "private_file", "local_app"}:
         raise ResearchError("Declare the presentation destination")
     if status not in {"prepared_for_delivery", "delivery_reported"}:
         raise ResearchError("Presentation status does not establish verified UI delivery")

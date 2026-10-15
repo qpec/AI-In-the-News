@@ -1,5 +1,7 @@
 # Auditability and enforcement
 
+The optional [conversational RAG reader](CONVERSATIONAL_RAG.md) uses the same full runtime preflight and gateway boundary. Immutable evidence definitions link each question and answer to its original retrieval; explicit keyword searches create linked definitions. One submission allows at most one Codex account attempt, with durable manifests/intents/results, unknown-outcome protection and exact answer/search presentations. Read-only HTTP polling performs no research. This extension does not weaken integrity checks or accept model interpretations as findings.
+
 ## Enforced boundary
 
 Every supported research command enters `Research.execute()`, whether launched by Codex, a terminal, a script or the Python API. The old source verifier also enters this runtime. There is no trusted `--no-audit` research mode. Hooks add lifecycle observations; disabling or omitting Codex does not disable the research journal.

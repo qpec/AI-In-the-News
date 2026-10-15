@@ -103,6 +103,8 @@ Amending dossiers requires `supersedes` and `changes`, each with `action` (`merg
 
 ## Exploration and question-specific processing
 
+The optional [conversational reader](CONVERSATIONAL_RAG.md) reuses frozen, version-bound passages for follow-up questions through `conversation_chat`, `Research.execute()` and the shared Codex gateway. An explicit local keyword search can create a new linked selection; there is no hidden retrieval expansion, new query embedding or corpus-wide tagging. Each turn preserves exact evidence, history, one-attempt authorization, model provenance and presentation. Full preflight remains mandatory.
+
 `search` takes an FTS5 query and optional limit (1–1000). It filters the bound dossier frame before limiting, records SQL/parameters and returned passages, and identifies dossiers represented in the hits. `inspect` takes `passage_ids` within the bound dataset. Returning a passage is an observable inspection event; actual human reading is not observable.
 
 Search results are exploratory coverage, not corpus-wide prevalence. Register provisional notes and follow-up questions separately. To avoid reprocessing the entire corpus, call `batch` with selected `dossier_ids`; the gateway includes that dossier's evidence and input coverage. A new question/prompt/schema/version receives its own task identity. The foundation supplies lexical retrieval, local vector candidates and deterministic provider-event proposals; substantive learned event clustering remains unfinished.
