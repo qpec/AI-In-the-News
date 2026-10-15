@@ -182,3 +182,11 @@ def test_renderer_displays_no_supported_example_and_limits_quote_excerpt():
     sample["claims"][0]["quote"] = " ".join(f"word{i}" for i in range(40))
     text = render_answers({"rows": [{"rank": 1, "answer": sample}]})
     assert "word24" in text and "word25" not in text
+
+
+def test_malformed_publisher_url_does_not_prevent_report():
+    text = render_answers({"rows": [{"rank": 1, "title": "Malformed URL source",
+        "url": "https://[broken", "answer": result()}]})
+    assert "Malformed URL source" in text
+    assert "https://[broken" not in text
+    assert "Organization: Aster" in text

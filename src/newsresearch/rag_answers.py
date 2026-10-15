@@ -188,7 +188,11 @@ def _cell(value: Any) -> str:
 
 def _link(title: Any, url: Any) -> str:
     text = _cell(title).replace("[", "\\[").replace("]", "\\]")
-    if isinstance(url, str) and urlsplit(url).scheme in {"http", "https"}:
+    try:
+        supported_url = isinstance(url, str) and urlsplit(url).scheme in {"http", "https"}
+    except ValueError:
+        supported_url = False
+    if supported_url:
         safe = quote(url, safe=":/?&=%#@!$*+,;~-._")
         return f"[{text}]({safe})"
     return text
