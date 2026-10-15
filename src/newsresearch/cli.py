@@ -82,6 +82,7 @@ def main() -> int:
             "evaluate_aws_clustering",
             "evaluate_event_clustering",
             "plan_event_pairs",
+            "event_pair_experiment",
             "plan_tags",
             "tag",
             "tag_inspect",

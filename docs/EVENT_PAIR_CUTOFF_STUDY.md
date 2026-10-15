@@ -28,4 +28,16 @@ uv run --frozen python scripts/prepare_event_pairs.py --previous-result <immutab
 
 The launcher runs the complete audit preflight and captures the exact preparation overview through `record_presentation`. It prints progress and saves JSON/Markdown under the protected workspace. `uv run --frozen newsresearch ... run plan_event_pairs --input <protected-json>` is also supported. A preparation result explicitly reports zero judgments and no cutoff; software tests do not constitute a corpus result.
 
-`event_pair_experiment` is the separate audited judging operation. Its execution and resume guarantees must pass the documented tests before real use. Existing approvals for earlier tagging or RAG runs grant no permission for this study. Do not infer completion from this method document; actual runs, coverage, failures and outcomes are recorded and presented separately.
+## Bounded judging operation
+
+`event_pair_experiment` is the separate audited judging operation, routed through the shared gateway and Codex CLI transport. The immutable input `plan` is the prepared plan ID. Configure either `codex_model` plus an existing absolute `codex_executable`, or `model_reference_result` to reuse only the configuration of a prior RAG result. The latter reuses no old question, article answer, embedding or approval. The model profile records the binary hash, configured model, exact input/output limits and timeout. Observed returned model/usage metadata remains separate.
+
+`run_approval` must bind `method=event-pair-run-approval-v1`, exact `plan`, `study_key`, `criterion_hash`, a stable `authorization_key`, `approved_by`, exact human `instruction`, `approval_source=human_reply_in_current_codex_chat`, and `observed_chat_timestamp=null` when the chat timestamp is unobserved. Set the authorized external-processing/Codex-account booleans explicitly, bind maximum pair attempts 100, article exposures 200, primary pairs 90 and known-invalid retries 10, and give a future timezone-aware expiry. This is self-asserted local authorization metadata, not authenticated proof of a human identity. Never manufacture a reply, chat time or billing observation.
+
+```powershell
+uv run --frozen python scripts/run_event_pairs.py --execute --input <protected-workspace>/runs/event-pair-study/approved-input.json --output <protected-workspace>/runs/event-pair-study/judged-result.json
+```
+
+The launcher sets online mode only in its process. It changes no global configuration and does not bypass the complete preflight or per-attempt permission checks. Approval, configuration, code and version bindings are immutable across resume; a changed approval cannot reset the study budget. Explicit `reuse_cache=true` is required to reuse exact-version valid answers. Unknown outcomes block later dispatch but preserve already-opened held-out coverage and valid results. Expiry between blocks saves a partial result; initial expired approval blocks execution. Missing full input stays failed/null, never different-event. Only observed returned payloads failing local validation may retry, once per pair and within the shared reserve.
+
+Existing approvals for earlier tagging or RAG runs grant no permission for this study. Software tests must pass before real use. Do not infer research completion from this method document; actual runs, coverage, failures and outcomes are recorded and presented separately.

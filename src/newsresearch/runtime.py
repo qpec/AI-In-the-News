@@ -179,6 +179,7 @@ class Research:
             "evaluate_aws_clustering": self._evaluate_aws_clustering,
             "evaluate_event_clustering": self._evaluate_event_clustering,
             "plan_event_pairs": self._plan_event_pairs,
+            "event_pair_experiment": self._event_pair_experiment,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -896,6 +897,10 @@ class Research:
             "results": [{"kind": "event_pair_plan", "id": result["id"]}],
             "markdown": render(result), "destination": "codex_chat"})
         return {**result, "presentation": presentation}
+
+    @audited_handler
+    def _event_pair_experiment(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.event_pair_experiment(session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:

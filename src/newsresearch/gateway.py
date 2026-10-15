@@ -403,6 +403,11 @@ class Gateway:
                         "failure": "provider_exception_with_unobserved_outcome", "observed_at": utc()})
                 yield futures[future], response
 
+    def event_pair_experiment(self, session: str, context: Context, data: Json) -> Json:
+        from .event_pair_experiment import execute
+
+        return execute(self.engine, session, context, data)
+
     def tag(self, session: str, context: Context, data: Json) -> Json:
         from .tag_gateway import execute
 

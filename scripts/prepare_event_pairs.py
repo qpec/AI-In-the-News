@@ -35,7 +35,7 @@ def main() -> int:
                 print(json.dumps({"stage": kind, "purpose": payload.get("purpose")}), flush=True)
             return sequence
 
-        engine.ledger.append = progress  # type: ignore[method-assign, assignment]
+        setattr(engine.ledger, "append", progress)
         print(json.dumps({"stage": "full_audit_preflight", "model_calls": 0}), flush=True)
         result = engine.execute("plan_event_pairs", {"previous_result": args.previous_result,
             "key": args.key, "seed": args.seed},
