@@ -4,6 +4,8 @@ After every search, the assistant must show the results in the same task without
 
 Present the exact query and scope, searched/returned/scored counts as applicable, missing and pending processing, ranked matches with available scores and source links, and the meaning and limitations of scores or thresholds. Distinguish top-N results from the complete result frame. For exhaustive article-query scores, use `article_query_overview` before presentation. Preserve original query/execution times when available; do not substitute the presentation time. These are retrieval diagnostics, not confirmed incident counts. Copy stored metadata without new substantive inference.
 
+Query-relevance overviews must include the chosen cutoff and yes/no totals as well as unprocessed/pending counts. State whether the cutoff passed its registered validation or is explicitly provisional. The composed `similarity_provisional_apply` operation saves the individual decisions, frozen overview/chart and exact presentation together; see [the cutoff contract](SIMILARITY_TAG_AUDIT.md#provisional-operating-cutoff). No missing score becomes a no.
+
 ## Audited operation
 
 `record_presentation` enters `Research.execute()` and registers `search-result-presentation-v1` before recording the presentation. Use the exact original result version context and a protected JSON input:

@@ -165,6 +165,7 @@ class Research:
             "similarity_score": self._similarity_score,
             "similarity_calibrate": self._similarity_calibrate,
             "similarity_apply": self._similarity_apply,
+            "similarity_provisional_apply": self._similarity_provisional_apply,
             "article_query_rows": self._article_query_rows,
             "article_query_overview": self._article_query_overview,
             "record_presentation": self._record_presentation,
@@ -802,6 +803,12 @@ class Research:
         from .similarity_tags import read_rows
 
         return read_rows(self, session, context, data)
+
+    @audited_handler
+    def _similarity_provisional_apply(self, session: str, context: Context, data: Json) -> Json:
+        from .provisional_tags import apply
+
+        return apply(self, session, context, data)
 
     @audited_handler
     def _article_query_overview(self, session: str, context: Context, data: Json) -> Json:

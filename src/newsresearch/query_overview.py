@@ -27,6 +27,7 @@ SCORE_SQL = """SELECT id AS result_id,
 TOP_SQL = """SELECT r.id AS result_id,
  json_extract(r.payload,'$.source_version') AS source_version,
  json_extract(r.payload,'$.score') AS score,
+ json_extract(r.payload,'$.answer') AS answer,
  json_extract(s.payload,'$.title') AS title,
  json_extract(s.payload,'$.url') AS url,
  json_extract(s.payload,'$.published_at') AS published_at,
@@ -47,7 +48,7 @@ def quantile(values: list[float], q: float) -> float | None:
     return values[lower] + (values[upper] - values[lower]) * (position - lower)
 
 
-def plot(bands: list[Json], expected: int, scored: int) -> bytes:
+def plot(bands: list[Json], expected: int, scored: int, cutoff: Json | None = None) -> bytes:
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
     from matplotlib.ticker import MaxNLocator
@@ -64,7 +65,10 @@ def plot(bands: list[Json], expected: int, scored: int) -> bytes:
     axes.tick_params(axis="x", labelsize=8)
     axes.margins(y=0.16)
     axes.spines[["top", "right"]].set_visible(False)
-    figure.text(0.08, 0.025, f"Pilot: {expected:,} artikelen · {scored:,} scores · {expected-scored:,} zonder score · ja/nee-grens niet weergegeven", fontsize=9)
+    cutoff_text = "geen cutoff toegepast"
+    if cutoff and cutoff["threshold"] is not None:
+        cutoff_text = f"cutoff {cutoff['threshold']:g} ({'gevalideerd' if cutoff['validated'] else 'voorlopig'})"
+    figure.text(0.08, 0.025, f"Pilot: {expected:,} artikelen · {scored:,} scores · {expected-scored:,} zonder score · {cutoff_text}", fontsize=9)
     figure.tight_layout(rect=(0.02, 0.06, 1, 1))
     output = io.BytesIO()
     figure.savefig(output, format="png", metadata={"Software": "AI In the News audited query overview"})
@@ -85,6 +89,7 @@ def overview(engine: Research, session: str, context: Context, data: Json) -> Js
             "population_estimate": False, "quantiles": "Linear interpolation at (n-1)*q, scored articles only",
             "bands": "[-1,0), then [0.0,0.1), ... [0.9,1.0]; final upper edge inclusive",
             "ranking": "Stored maximum passage score descending; ties by source version",
+            "cutoff_reporting": "Copy applied cutoff and validation/policy provenance; do not select a threshold in this overview",
             "missingness": "Keep unprocessed and pending articles in expected denominator, outside score statistics"},
         "amend_latest": True, "reason": "Register a reproducible overview of existing query results before reading scores"})["id"]
     rows = [dict(row) for row in ledger.db.execute(SCORE_SQL, (data["run"],))]
@@ -107,6 +112,13 @@ def overview(engine: Research, session: str, context: Context, data: Json) -> Js
     stats["mean"] = math.fsum(values) / scored if scored else None
     top = [dict(row) for row in ledger.db.execute(TOP_SQL, (data["run"], top_n))]
     question = ledger.get(context.versions["question"], "question")["content"]
+    threshold = run.get("threshold")
+    validated = run.get("threshold_validated")
+    if run.get("calibration"):
+        calibration = ledger.get(run["calibration"], "similarity_calibration")
+        threshold, validated = calibration["threshold"], calibration["passed"]
+    cutoff = {"threshold": threshold, "validated": validated, "policy": run.get("cutoff_policy"),
+              "calibration": run.get("calibration"), "comparison": "score >= threshold" if threshold is not None else None}
     snapshot = save(engine, session, rows)
     result = {"run": data["run"], "versions": context.versions, "overview_profile": profile,
         "query": question["query"], "question": question["text"], "phase": run["phase"],
@@ -115,11 +127,11 @@ def overview(engine: Research, session: str, context: Context, data: Json) -> Js
         "scored_articles": scored, "unprocessed_articles": logged-scored, "pending_articles": expected-logged,
         "coverage_percent": 100 * scored / expected if expected else None,
         "status_counts": dict(Counter(row["status"] for row in rows)), "answer_counts": dict(Counter(str(row["answer"]) for row in rows)),
-        "score_statistics": stats, "score_bands": bands, "top_articles": top,
+        "score_statistics": stats, "score_bands": bands, "top_articles": top, "cutoff": cutoff,
         "scope": "Technical distribution/ranking of stored article relevance scores; no confirmed incident count or population estimate",
         "network_calls": 0, "model_calls": 0}
     identifier = ledger.record(session, "article_query_overview", digest(result), result)
-    image = ledger.artifacts.put_bytes(plot(bands, expected, scored))
+    image = ledger.artifacts.put_bytes(plot(bands, expected, scored, cutoff))
     ledger.append(session, "retrieval.artifact.saved", {"artifact": image})
     chart = {"table": identifier, "table_digest": digest(result), "image": image,
              "versions": context.versions, "calculation": "Histogram from frozen score_bands; unscored sources excluded"}

@@ -70,6 +70,7 @@ def main() -> int:
             "similarity_score",
             "similarity_calibrate",
             "similarity_apply",
+            "similarity_provisional_apply",
             "article_query_rows",
             "article_query_overview",
             "record_presentation",
