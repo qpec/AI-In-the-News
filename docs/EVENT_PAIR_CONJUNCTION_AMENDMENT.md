@@ -21,3 +21,9 @@ uv run --frozen python scripts/compare_event_pair_features.py --conjunction --pa
 ```
 
 The launcher changes online mode only for its process and defaults to offline without `--validate-if-qualified`. It runs complete preflight and captures exact prepared result presentations. All detailed records, protected sources, numeric feature rows, model payloads, databases and logs stay outside Git. Software tests alone establish no research outcome.
+
+## Completed two-feature comparison
+
+Protected result `edffb54c8b34d4581806ef30640119d8b6072d1828e1899aeaf00f7a6041aa54` completed the registered forty variants and 200,504 threshold combinations. None qualified. All 54 original references and weights were retained, including fourteen uncertain references. There were no feature errors, new model attempts, frozen candidates or held-out judgments. Cumulative study use remains 55/100 intended pair attempts and 110/200 article exposures, including one retry. No good cutoff was established and no dossiers or tags were accepted/applied.
+
+Software checks: 664 source-free tests passed in 513.15 seconds; Ruff passed across source/tests/scripts, and mypy passed source plus the launcher (48 files). Commit `5ac6495` contains the amendment implementation. Test duration is not an isolated research benchmark. Exact prepared result presentation and detailed working records remain in protected storage outside Git.
