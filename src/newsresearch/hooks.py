@@ -9,11 +9,28 @@ from pathlib import Path
 import sys
 from typing import Any
 
-from .common import ResearchError, default_workspace
+import time
+
+from .common import AuditError, ResearchError, default_workspace
 from .runtime import Research
 
 FIELDS = ("hook_event_name", "session_id", "turn_id", "tool_name", "tool_use_id", "model")
 EVENTS = {"SessionStart", "PreToolUse", "PostToolUse", "Stop"}
+
+
+def _open_runtime(workspace: Path) -> Research:
+    """Wait briefly for another supplementary hook without masking audit failures."""
+    deadline = time.monotonic() + 15.0
+    while True:
+        try:
+            return Research(workspace)
+        except AuditError as exc:
+            if str(exc) != "Workspace is already open; concurrent research processes are blocked":
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise
+            time.sleep(min(0.25, remaining))
 
 
 def observe(payload: dict[str, Any], workspace: Path) -> dict[str, Any]:
@@ -24,7 +41,7 @@ def observe(payload: dict[str, Any], workspace: Path) -> dict[str, Any]:
             raise ResearchError("Unsupported hook event")
         # Do not retain commands, tool results, prompts, transcript paths or environment variables.
         metadata = {key: value for key in FIELDS if isinstance(value := payload.get(key), str)}
-        engine = Research(workspace)
+        engine = _open_runtime(workspace)
         engine.execute(
             "hook",
             metadata,
