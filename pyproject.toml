@@ -12,6 +12,7 @@ dependencies = [
     "jsonschema>=4.23,<5",
     "matplotlib>=3.9,<4",
     "numpy>=2,<3",
+    "qrcode>=8.2,<9",
     "tiktoken>=0.12,<1",
 ]
 

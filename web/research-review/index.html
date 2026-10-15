@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <title>AI in the News · Reading room</title>
   <link rel="stylesheet" href="/app.css">
   <script src="/app.js" defer></script>
 </head>
-<body>
+<body data-mobile-view="list">
   <a class="skip-link" href="#article-detail">Skip to selected answer</a>
   <header class="masthead">
     <a class="brand" href="/" aria-label="AI in the News reading room"><span class="brand-mark" aria-hidden="true">ai<span>n</span></span><span>AI IN THE NEWS<span class="brand-sub">RESEARCH READING ROOM</span></span></a>
@@ -20,6 +20,10 @@
     <p class="scope" id="scope">Opening the existing result. No new research is being run.</p>
     <div class="summary" aria-label="Model answer summary"><div><strong id="stat-total">—</strong><span>ARTICLES ASSESSED</span></div><div><strong id="stat-supported">—</strong><span>SUPPORTED EXAMPLES</span></div><div><strong id="stat-insufficient">—</strong><span>INSUFFICIENT EVIDENCE</span></div><div><strong id="stat-uncertain">—</strong><span>UNCERTAIN</span></div></div>
   </section>
+  <nav class="mobile-view-switch" aria-label="Reader view">
+    <button type="button" id="mobile-list-view" aria-pressed="true" aria-controls="result-list">Articles <span id="mobile-list-count">—</span></button>
+    <button type="button" id="mobile-answer-view" aria-pressed="false" aria-controls="article-detail" disabled>Read answer <span id="mobile-answer-position">—</span></button>
+  </nav>
   <main class="workspace" id="workspace" aria-busy="true">
     <section class="results-pane" aria-label="Browse articles">
       <div class="list-tools">
@@ -32,6 +36,11 @@
     </section>
     <section class="detail-pane" id="article-detail" aria-label="Selected answer" tabindex="-1"><div class="empty-state"><span class="empty-symbol" aria-hidden="true">↗</span><h2>Your research, in one place.</h2><p>Choose an article to explore its answer and evidence.</p></div></section>
   </main>
+  <nav class="mobile-reading-nav" aria-label="Navigate answers">
+    <button type="button" id="mobile-prev" disabled><span aria-hidden="true">←</span> Previous</button>
+    <button type="button" id="mobile-back-list">Articles <span id="mobile-reading-position">—</span></button>
+    <button type="button" id="mobile-next" disabled>Next <span aria-hidden="true">→</span></button>
+  </nav>
   <footer class="page-footer"><span>Model answers are provisional and have not been human validated. Article counts are not incident counts.</span><span class="keyboard-hint"><kbd>J</kbd><kbd>K</kbd> browse <kbd>S</kbd> save <kbd>R</kbd> read</span></footer>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Enable JavaScript to browse the saved local results.</p></noscript>

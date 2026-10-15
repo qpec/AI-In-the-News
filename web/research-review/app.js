@@ -2,7 +2,8 @@
 
 (() => {
   const $ = (id) => document.getElementById(id);
-  const state = { data: null, rows: [], visible: [], filter: "supported", search: "", savedOnly: false, unreadOnly: false, selected: null, saved: new Set(), read: new Set(), storageKey: "", storageAvailable: true };
+  const state = { data: null, rows: [], visible: [], filter: "supported", search: "", savedOnly: false, unreadOnly: false, selected: null, saved: new Set(), read: new Set(), storageKey: "", storageAvailable: true, mobileView: "list", mobileListScroll: 0 };
+  const mobileScreen = matchMedia("(max-width: 850px)");
   const labels = { supported: "Supported example", insufficient: "Insufficient evidence", uncertain: "Uncertain", unknown: "Unprocessed" };
   const node = (tag, className, text) => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
   const textValue = (value) => {
@@ -46,14 +47,41 @@
   function badge(status) { return node("span", `pill pill-${status}`, labels[status]); }
   function action(label, fn, className = "action-button") { const button = node("button", className, label); button.type = "button"; button.addEventListener("click", fn); return button; }
   function selectionIndex() { return state.visible.findIndex(row => rowId(row) === state.selected); }
+  function updateMobileControls() {
+    const index = selectionIndex();
+    $("mobile-list-count").textContent = String(state.visible.length);
+    const position = index >= 0 ? `${index + 1} / ${state.visible.length}` : "—";
+    $("mobile-answer-position").textContent = position;
+    $("mobile-reading-position").textContent = position;
+    $("mobile-answer-view").disabled = index < 0;
+    $("mobile-prev").disabled = index <= 0;
+    $("mobile-next").disabled = index < 0 || index >= state.visible.length - 1;
+    $("mobile-list-view").setAttribute("aria-pressed", String(state.mobileView === "list"));
+    $("mobile-answer-view").setAttribute("aria-pressed", String(state.mobileView === "detail"));
+  }
+  function showMobileView(view, focusContent = false) {
+    if (!mobileScreen.matches || (view === "detail" && !state.selected)) return;
+    if (state.mobileView === view) return;
+    if (state.mobileView === "list") state.mobileListScroll = window.scrollY;
+    state.mobileView = view;
+    document.body.dataset.mobileView = view;
+    updateMobileControls();
+    if (focusContent) {
+      if (view === "detail") $("article-detail").focus({ preventScroll: true });
+      else document.querySelector(".result-card.selected")?.focus({ preventScroll: true });
+    }
+    window.scrollTo({ top: view === "list" ? state.mobileListScroll : 0, left: 0, behavior: "instant" });
+  }
   function move(offset) {
     const index = selectionIndex() + offset;
     if (index >= 0 && index < state.visible.length) select(rowId(state.visible[index]), true);
   }
   function select(id, scrollList = false) {
+    const changedArticle = id !== state.selected;
     state.selected = id;
-    renderList(); renderDetail();
-    if (scrollList) document.querySelector(".result-card.selected")?.scrollIntoView({ block: "nearest" });
+    renderList(); renderDetail(); updateMobileControls();
+    if (mobileScreen.matches && state.mobileView === "detail" && changedArticle) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    else if (scrollList && !mobileScreen.matches) document.querySelector(".result-card.selected")?.scrollIntoView({ block: "nearest" });
   }
   function toggleSaved() {
     if (!state.selected) return;
@@ -68,12 +96,14 @@
     persist(); refresh(); announce(wasRead ? "Article marked unread." : "Article marked as read. This is reading progress, not research validation.");
   }
   function refresh() {
+    const previousSelection = state.selected;
     const oldIndex = selectionIndex();
     state.visible = state.rows.filter(row => (!state.savedOnly || state.saved.has(rowId(row))) && (!state.unreadOnly || !state.read.has(rowId(row))) && (state.filter === "all" || answerStatus(row) === state.filter) && (!state.search || row._search.includes(state.search)));
     if (!state.visible.some(row => rowId(row) === state.selected)) state.selected = state.visible[Math.min(Math.max(oldIndex, 0), state.visible.length - 1)] ? rowId(state.visible[Math.min(Math.max(oldIndex, 0), state.visible.length - 1)]) : null;
     document.querySelectorAll("[data-filter]").forEach(button => { const active = button.dataset.filter === state.filter; button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active)); });
     $("visible-count").textContent = `${state.visible.length} shown`;
-    setProgress(); renderList(); renderDetail();
+    setProgress(); renderList(); renderDetail(); updateMobileControls();
+    if (mobileScreen.matches && state.mobileView === "detail" && state.selected !== previousSelection) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }
   function emptyState(title, description, symbol = "↗") {
     const box = node("div", "empty-state");
@@ -90,7 +120,7 @@
     const fragment = document.createDocumentFragment();
     state.visible.forEach(row => {
       const id = rowId(row), selected = id === state.selected;
-      const card = action("", () => { select(id); if (matchMedia("(max-width: 850px)").matches) $("article-detail").scrollIntoView({ block: "start" }); }, `result-card${selected ? " selected" : ""}`);
+      const card = action("", () => { select(id); showMobileView("detail", true); }, `result-card${selected ? " selected" : ""}`);
       card.dataset.testid = "result-card"; card.dataset.rank = String(row.rank); card.dataset.resultId = id; card.setAttribute("aria-current", selected ? "true" : "false");
       card.setAttribute("aria-label", `Rank ${row.rank}. ${row.title || "Untitled article"}. ${labels[answerStatus(row)]}${state.read.has(id) ? ". Read" : ""}${state.saved.has(id) ? ". Saved" : ""}`);
       const top = node("div", "card-top"); top.append(node("span", "rank", `#${String(row.rank).padStart(2, "0")}`), node("span", "similarity", `Similarity ${typeof row.score === "number" ? row.score.toFixed(4) : "unavailable"}`));
@@ -157,8 +187,18 @@
   }
   async function load() {
     $("workspace").setAttribute("aria-busy", "true");
+    let pairingRequired = false;
     try {
+      const pairingKey = new URLSearchParams(window.location.hash.slice(1)).get("pair");
+      if (pairingKey !== null) {
+        history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+        pairingRequired = true;
+        const paired = await fetch("/api/pair", { method: "POST", headers: { "Content-Type": "text/plain" }, body: pairingKey, credentials: "same-origin", cache: "no-store" });
+        if (paired.status !== 200) throw new Error("Pairing failed");
+        pairingRequired = false;
+      }
       const response = await fetch("/api/results", { cache: "no-store", credentials: "same-origin" });
+      if (response.status === 401) pairingRequired = true;
       if (!response.ok) throw new Error("Result unavailable");
       const data = await response.json();
       if (!data || !Array.isArray(data.rows)) throw new Error("Invalid result structure");
@@ -173,13 +213,26 @@
       document.querySelectorAll("[data-count]").forEach(el => { el.textContent = String(counts[el.dataset.count]); });
       refresh(); announce(`${state.rows.length} saved answers loaded. Showing supported examples.`);
     } catch {
-      const box = emptyState("The saved results could not be opened", "Keep the local server running and try again. No new research or model calls are needed.", "!"); box.classList.add("error-state"); box.append(action("Try again", load, "retry-button")); $("result-list").replaceChildren(box); $("visible-count").textContent = "Unavailable"; $("research-question").textContent = "The result is not currently available."; $("article-detail").replaceChildren(emptyState("Waiting for your saved results", "Once the local result is available, its answers and source links will appear here.")); announce("Could not load the saved results.");
+      const title = pairingRequired ? "Pair this device to continue" : "The saved results could not be opened";
+      const instruction = pairingRequired ? "Open the pairing page on your computer and scan its QR code." : "Keep the local server running and try again. No new research or model calls are needed.";
+      const box = emptyState(title, instruction, "!"); box.classList.add("error-state"); box.append(action("Try again", load, "retry-button")); $("result-list").replaceChildren(box); $("visible-count").textContent = "Unavailable"; $("research-question").textContent = pairingRequired ? instruction : "The result is not currently available."; $("article-detail").replaceChildren(emptyState("Waiting for your saved results", instruction)); announce(pairingRequired ? instruction : "Could not load the saved results.");
     } finally { $("workspace").setAttribute("aria-busy", "false"); }
   }
   document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => { state.filter = button.dataset.filter; refresh(); }));
   $("search").addEventListener("input", event => { state.search = event.target.value.trim().toLocaleLowerCase(); refresh(); });
   $("saved-only").addEventListener("change", event => { state.savedOnly = event.target.checked; refresh(); });
   $("unread-only").addEventListener("change", event => { state.unreadOnly = event.target.checked; refresh(); });
+  $("mobile-list-view").addEventListener("click", () => showMobileView("list", true));
+  $("mobile-answer-view").addEventListener("click", () => showMobileView("detail", true));
+  $("mobile-back-list").addEventListener("click", () => showMobileView("list", true));
+  $("mobile-prev").addEventListener("click", () => move(-1));
+  $("mobile-next").addEventListener("click", () => move(1));
+  mobileScreen.addEventListener("change", () => {
+    updateMobileControls();
+    if (!mobileScreen.matches) return;
+    if (state.mobileView === "list" && $("article-detail").contains(document.activeElement)) $("mobile-list-view").focus({ preventScroll: true });
+    else if (state.mobileView === "detail" && document.querySelector(".results-pane").contains(document.activeElement)) $("article-detail").focus({ preventScroll: true });
+  });
   document.addEventListener("keydown", event => {
     if (event.ctrlKey || event.metaKey || event.altKey || event.target.closest("input,textarea,select,button,a,summary,[contenteditable='true']")) return;
     const key = event.key.toLowerCase();

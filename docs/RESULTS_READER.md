@@ -12,6 +12,20 @@ The reading room opens on supported model examples. Select **All** to browse eve
 
 **Save** and **Mark read** remember reading progress in this browser, keyed to the result set. Saved and unread filters help continue later. J/K navigate, S saves, R marks read, and / focuses search when focus is outside a form control. These are personal browsing markers, not accepted findings or audited research reviews; they are not written to SQL. Formal selections, reviews, exports and new research must still use `newsresearch` / `Research.execute()`.
 
-The server reads one already-produced result document into memory and serves its exact original JSON bytes. It never opens the research database, runs storage-wide preflight, calls a model, retrieves sources or creates a research result. It checks the file's protected permissions and rejects Git locations, symlinks and junctions. Only three generic assets and the selected document have routes. The server binds to loopback, rejects unexpected Host/Origin and cross-site API requests, disables caching, and supplies a restrictive content security policy. It has no third-party assets, analytics or network requests; publisher links open only when clicked.
+The server reads one already-produced result document into memory and serves its exact original JSON bytes. It never opens the research database, runs storage-wide preflight, calls a model, retrieves sources or creates a research result. It checks the file's protected permissions and rejects Git locations, symlinks and junctions. The server binds to loopback by default, rejects unexpected Host/Origin and cross-site requests, disables caching, and supplies a restrictive content security policy. It has no third-party assets or analytics; publisher links open only when clicked.
 
-Keep result JSON, source quotations and screenshots in protected storage outside Git. Commit only the generic viewer, tests and documentation. This local reader is intended for the same computer; it is not a hosted or shared research application, and it does not provide an authenticated multi-user review workflow.
+## Read on a phone on the same network
+
+Use the computer's specific private IPv4 address (RFC1918), rather than `127.0.0.1`:
+
+```powershell
+uv run --frozen python scripts/serve_rag_results.py --result C:/protected/run/result.json --listen 192.168.1.233 --port 8787
+```
+
+Choose the actual address assigned to this computer. The server prints a **pairing page URL without credentials**. Open that page on the computer, connect the phone to the same trusted Wi-Fi, and scan the QR with the phone camera. The phone receives the saved reader after pairing. The pairing page also has a button to open the reader on the computer. The QR and its helper script are available only when the TCP peer is the host computer itself; forwarded-IP headers are ignored.
+
+Phone mode generates a high-entropy key in memory. The QR uses a URL fragment, which the reader removes before exchanging it in a bounded, exact-origin POST for an HttpOnly, SameSite=Strict session cookie. The server logs no requests or keys and writes no pairing key/QR to disk or Git. Pairing and further data requests expire two hours after server startup; already-loaded answers remain in the browser. Restarting creates a new key and invalidates old cookies. This is a bearer pairing session, not an identified research reviewer. It does not encrypt HTTP traffic: use a trusted home network. The server rejects public, wildcard and link-local listen addresses and never changes firewall, router, network-profile or global settings. Windows firewall or Wi-Fi client isolation may prevent another device from reaching it; phone connectivity must be verified on the actual phone. Access away from the local network requires a separate private connection setup; this mode supplies no public hosting or tunnel.
+
+On narrow screens, use **Articles** and **Read answer** to switch views, or **Previous / Articles / Next** in the fixed bottom bar. Selecting an article opens its answer; returning to the list preserves the browsing position. Controls are sized for touch. Saved/read markers stay in each browser and do not synchronize between devices.
+
+Keep result JSON, source quotations and screenshots in protected storage outside Git. Commit only the generic viewer, tests and documentation. This reader does not provide an authenticated multi-user research review workflow.
