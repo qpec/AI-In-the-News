@@ -28,11 +28,11 @@ def windows_sid() -> str:
     return match.group()
 
 
-def windows_sddl(path: Path) -> str:
+@lru_cache(maxsize=1)
+def _windows_security_api() -> tuple[Any, Any, Any]:
+    """Reuse API bindings, never an ACL or a permission decision."""
     advapi = ctypes.WinDLL("advapi32", use_last_error=True)
     kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    descriptor = ctypes.c_void_p()
-    output = wintypes.LPWSTR()
     get_security = advapi.GetNamedSecurityInfoW
     get_security.argtypes = [
         wintypes.LPWSTR,
@@ -56,6 +56,13 @@ def windows_sddl(path: Path) -> str:
     convert.restype = wintypes.BOOL
     kernel.LocalFree.argtypes = [ctypes.c_void_p]
     kernel.LocalFree.restype = ctypes.c_void_p
+    return get_security, convert, kernel.LocalFree
+
+
+def windows_sddl(path: Path) -> str:
+    get_security, convert, free = _windows_security_api()
+    descriptor = ctypes.c_void_p()
+    output = wintypes.LPWSTR()
     if get_security(str(path), 1, 5, None, None, None, None, ctypes.byref(descriptor)):
         raise AuditError("Cannot read storage ACL")
     try:
@@ -64,8 +71,8 @@ def windows_sddl(path: Path) -> str:
         return output.value or ""
     finally:
         if output:
-            kernel.LocalFree(output)
-        kernel.LocalFree(descriptor)
+            free(output)
+        free(descriptor)
 
 
 def check_permissions(path: Path, root: bool = False) -> None:
@@ -80,8 +87,10 @@ def check_permissions(path: Path, root: bool = False) -> None:
             allowed.add("OW")
         if not principals or set(principals) - allowed or (root and "D:P" not in sddl):
             raise AuditError("Protected storage has an unsafe Windows ACL")
-    elif path.stat().st_uid != getattr(os, "getuid")() or path.stat().st_mode & 0o077:
-        raise AuditError("Protected storage requires owner-only permissions")
+    else:
+        info = path.stat()
+        if info.st_uid != getattr(os, "getuid")() or info.st_mode & 0o077:
+            raise AuditError("Protected storage requires owner-only permissions")
 
 
 def prepare_root(root: Path) -> Path:
@@ -463,8 +472,10 @@ class Ledger:
                 unresolved.pop(item["payload"]["attempt"], None)
         self.unresolved = unresolved
         for row in self.db.execute("SELECT * FROM records"):
-            content = self.artifacts.read_bytes(row["artifact"])
-            if content.decode() != row["payload"] or row["id"] != digest(
+            # Byte equality follows from the payload digest and the full file hash
+            # below. No metadata-only trust or cross-invocation cache is used.
+            required_artifacts.add(row["artifact"])
+            if hashlib.sha256(row["payload"].encode("utf-8")).hexdigest() != row["artifact"] or row["id"] != digest(
                 {
                     "kind": row["kind"],
                     "key": row["logical_key"],
@@ -476,20 +487,25 @@ class Ledger:
             if event_payloads.get(row["created_event"], {}).get("record") != row["id"]:
                 raise AuditError("Record is not anchored to the journal")
         raw_cache: dict[str, Any] = {}
-        expected_passages: set[str] = set()
-        for row in self.db.execute("SELECT * FROM sources"):
-            if digest(json.loads(row["payload"])) != row["id"]:
-                raise AuditError("Source version integrity failure")
+        # Both cursors use existing indexes; source bodies are parsed once and
+        # never repeated in a joined row for each paragraph.
+        passages = iter(self.db.execute("SELECT * FROM passages ORDER BY source_id"))
+        passage = next(passages, None)
+        for row in self.db.execute("SELECT * FROM sources ORDER BY id"):
             if row["raw_ref"] not in raw_cache:
                 raw_cache[row["raw_ref"]] = self.artifacts.read(row["raw_ref"])
+            original = raw_cache[row["raw_ref"]][row["raw_index"]]
+            source_payload = canonical(original)
+            if hashlib.sha256(source_payload.encode("utf-8")).hexdigest() != row["id"]:
+                raise AuditError("Source version integrity failure")
             if (
-                canonical(raw_cache[row["raw_ref"]][row["raw_index"]]) != row["payload"]
+                source_payload != row["payload"]
                 or event_payloads.get(row["created_event"], {}).get("raw_ref") != row["raw_ref"]
             ):
                 raise AuditError("Source differs from its journal-anchored raw version")
-            original = json.loads(row["payload"])
             if original.get("original_artifact"):
                 required_artifacts.add(original["original_artifact"])
+            expected_passages: set[str] = set()
             for match in re.finditer(r"[^\n]+(?:\n(?!\n)[^\n]+)*", original["body"]):
                 expected_passages.add(
                     digest(
@@ -501,18 +517,22 @@ class Ledger:
                         }
                     )
                 )
-        for row in self.db.execute("SELECT p.*,s.payload FROM passages p JOIN sources s ON p.source_id=s.id"):
-            body = json.loads(row["payload"])["body"]
-            if (
-                body[row["start"] : row["end"]] != row["text"]
-                or hashlib.sha256(row["text"].encode()).hexdigest() != row["text_hash"]
-            ):
-                raise AuditError("Passage evidence integrity failure")
-            if row["id"] not in expected_passages:
-                raise AuditError("Passage identifier or source segmentation differs")
-            expected_passages.remove(row["id"])
-        if expected_passages:
-            raise AuditError("Source passage coverage is incomplete")
+            if passage is not None and passage["source_id"] < row["id"]:
+                raise AuditError("Passage references a missing source")
+            while passage is not None and passage["source_id"] == row["id"]:
+                if (
+                    original["body"][passage["start"] : passage["end"]] != passage["text"]
+                    or hashlib.sha256(passage["text"].encode()).hexdigest() != passage["text_hash"]
+                ):
+                    raise AuditError("Passage evidence integrity failure")
+                if passage["id"] not in expected_passages:
+                    raise AuditError("Passage identifier or source segmentation differs")
+                expected_passages.remove(passage["id"])
+                passage = next(passages, None)
+            if expected_passages:
+                raise AuditError("Source passage coverage is incomplete")
+        if passage is not None:
+            raise AuditError("Passage references a missing source")
         if (
             self.db.execute("SELECT count(*) FROM passage_fts").fetchone()[0]
             != self.db.execute("SELECT count(*) FROM passages").fetchone()[0]
@@ -544,10 +564,13 @@ class Ledger:
                 or anchor.get("assessment") != row["result_id"]
             ):
                 raise AuditError("Model attempt projection differs from the journal")
-        if required_artifacts - {path.name for path in self.artifacts.root.iterdir()}:
+        artifact_names = {path.name for path in self.artifacts.root.iterdir()}
+        if required_artifacts - artifact_names:
             raise AuditError("A journal-referenced artifact is missing")
-        for path in self.artifacts.root.iterdir():
-            self.artifacts.verified_path(path.name)
+        # Recheck shared raw imports too: they were parsed earlier, and the final
+        # full hash/ACL sweep must still detect changes made during verification.
+        for reference in artifact_names:
+            self.artifacts.verified_path(reference)
         return {
             "events": count,
             "head_hash": previous,
