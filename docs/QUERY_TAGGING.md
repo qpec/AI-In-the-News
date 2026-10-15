@@ -1,5 +1,7 @@
 # Corpus-wide query tagging
 
+**Default method:** use [saved embeddings, exhaustive local cosine scoring and per-article SQL audit](SIMILARITY_TAG_AUDIT.md). The user clarified that per-article paid inference is unnecessary, and requested recall priority. The method below is the optional language-model assessment path, not the default. Its F1 default only applies to explicitly registered balanced evaluations; new similarity studies default to F2 when priority is omitted.
+
 The user supplies a search query, a specific relevance question, and a tag name/definition. **Every article in the bound dataset is a target.** Retrieval never restricts targets to top-k hits. The current pilot dataset and the larger legacy archive are different frames; this workflow does not silently expand the pilot.
 
 ## Registered method
@@ -17,7 +19,7 @@ Only a threshold passing the held-out requirements can be applied to that exact 
 The convenience launcher registers the complete method and prepares the corpus in one audited operation, avoiding repeated full-store preflight for each version. Put a `study.json` in protected storage containing `query`, `question`, `tag`, `definition`, `model_profile`, and the independently labelled `evaluation` described below. Optional settings are `segment_characters`, `overlap_characters`, `related_sources` and `instructions`. No credential is loaded during planning.
 
 ```powershell
-uv run --frozen python scripts/plan_query_tags.py --context C:/protected/dataset-context.json --study C:/protected/study.json --actor researcher:your-name
+uv run --frozen python scripts/plan_query_tags.py --mode model --context C:/protected/dataset-context.json --study C:/protected/study.json --actor researcher:your-name
 ```
 
 The result includes the plan ID and a protected `context_path`. For related-document context, provide `--candidate-run ID` and set `related_sources` above zero; all target articles are still included. An evaluation can be omitted for exploratory scoring, but later calibration then needs a new plan with the evaluation bound before execution. Existing scores are not silently reused across changed versions.

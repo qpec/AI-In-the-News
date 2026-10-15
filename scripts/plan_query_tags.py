@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Register a query study and prepare all-article requests offline, without loading a credential."""
+"""Plan one query embedding by default; optional model mode plans per-article LLM requests."""
 import argparse
 import getpass
 import json
@@ -16,17 +16,27 @@ def main() -> int:
     parser.add_argument("--workspace", type=Path, default=default_workspace())
     parser.add_argument("--context", type=Path, required=True, help="Existing dataset context")
     parser.add_argument("--study", type=Path, required=True, help="Protected JSON study specification")
+    parser.add_argument("--mode", choices=["embeddings", "model"], default="embeddings")
+    parser.add_argument("--index", help="Saved article vector index; required in default embedding mode")
     parser.add_argument("--candidate-run", help="Optional saved vector candidates for context only")
     parser.add_argument("--actor", default=getpass.getuser())
     args = parser.parse_args()
     context = json.loads(args.context.read_text(encoding="utf-8-sig"))
     study = json.loads(args.study.read_text(encoding="utf-8-sig"))
+    if args.mode == "embeddings":
+        if not args.index or args.candidate_run:
+            parser.error("Embedding mode requires --index; it scans all vectors and does not use --candidate-run")
+        if set(study) - {"query", "question", "tag", "evaluation"}:
+            parser.error("Embedding study fields are query, question, tag and optional evaluation; use --mode model for LLM-specific fields")
+        operation, payload = "similarity_setup", {"index": args.index, **study}
+    else:
+        operation, payload = "tag_setup", {"study": study, "candidate_run": args.candidate_run}
     engine = Research(args.workspace)
     try:
-        print(json.dumps({"stage": "audit_preflight", "operation": "tag_setup"}), flush=True)
-        result = engine.execute("tag_setup", {"study": study, "candidate_run": args.candidate_run},
+        print(json.dumps({"stage": "audit_preflight", "operation": operation}), flush=True)
+        result = engine.execute(operation, payload,
             versions={"dataset": context.get("versions", context)["dataset"]}, actor=args.actor,
-            objective="Register a query, retrieve every article and plan exhaustive relevance tagging offline")
+            objective="Register the selected query-tagging method and prepare its exact offline plan")
         result["context_path"] = str(engine.ledger.artifacts.root / result["context_artifact"])
         print(json.dumps(result, indent=2), flush=True)
         return 0

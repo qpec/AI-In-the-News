@@ -19,6 +19,8 @@ There is one workspace writer at a time, enforced with an OS file lock. This fou
 
 ## Stored evidence and model observability
 
+[Embedding-based query tags](SIMILARITY_TAG_AUDIT.md) add an immutable `article_query_result` SQL record for every article in a completed run. Each row retains exact query/question, score, yes/no/null relevance answer, cutoff/calibration, source/vector versions, matching evidence, coverage, actor/times and links to the shared query request and session audit. Full-corpus manifests precede scoring; interrupted runs expose expected/logged/pending counts. Threshold application appends new rows linked to the original scores. The audited SQL reader retains its SELECT and parameters. Shared query token usage is explicitly distinguished from zero per-article inference usage. These records remain provisional and do not enter dossier acceptance or measurement tables.
+
 | Information | How it is preserved |
 | --- | --- |
 | Original sources | Permitted original bytes for stored-response imports; content hash, normalized immutable source, provider fields, actual retrieval metadata |

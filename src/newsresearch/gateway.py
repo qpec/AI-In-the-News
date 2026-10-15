@@ -366,6 +366,11 @@ class Gateway:
 
         return plan(self.engine, session, context, data)
 
+    def plan_query_embedding(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import plan_query
+
+        return plan_query(self.engine, session, context, data)
+
     def tag(self, session: str, context: Context, data: Json) -> Json:
         from .tag_gateway import execute
 

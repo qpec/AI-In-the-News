@@ -161,6 +161,11 @@ class Research:
             "inspect_candidates": self._inspect_candidates,
             "tag_retrieve": self._tag_retrieve,
             "tag_setup": self._tag_setup,
+            "similarity_setup": self._similarity_setup,
+            "similarity_score": self._similarity_score,
+            "similarity_calibrate": self._similarity_calibrate,
+            "similarity_apply": self._similarity_apply,
+            "article_query_rows": self._article_query_rows,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -765,6 +770,36 @@ class Research:
         from .tagging import setup
 
         return setup(self, session, context, data)
+
+    @audited_handler
+    def _similarity_setup(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import setup
+
+        return setup(self, session, context, data)
+
+    @audited_handler
+    def _similarity_score(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import score
+
+        return score(self, session, context, data)
+
+    @audited_handler
+    def _similarity_calibrate(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import calibrate
+
+        return calibrate(self, session, context, data)
+
+    @audited_handler
+    def _similarity_apply(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import apply
+
+        return apply(self, session, context, data)
+
+    @audited_handler
+    def _article_query_rows(self, session: str, context: Context, data: Json) -> Json:
+        from .similarity_tags import read_rows
+
+        return read_rows(self, session, context, data)
 
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:
