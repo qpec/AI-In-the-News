@@ -404,7 +404,19 @@ class Gateway:
                 yield futures[future], response
 
     def event_pair_experiment(self, session: str, context: Context, data: Json) -> Json:
-        from .event_pair_experiment import execute
+        from .event_pair_experiment import _records, execute
+        from .common import require_active
+
+        require_active(self.engine, session)
+        plan = self.engine.ledger.get(data.get("plan", ""), "event_pair_plan")
+        if any(value.get("child_manifest") for _, value in _records(
+                self.engine, "event_pair_holdout_opened", plan["study_key"])):
+            raise ResearchError("Shared holdout opened by child; resume the frozen child operation only")
+
+        return execute(self.engine, session, context, data)
+
+    def event_pair_feature_experiment(self, session: str, context: Context, data: Json) -> Json:
+        from .event_pair_feature_study import execute
 
         return execute(self.engine, session, context, data)
 

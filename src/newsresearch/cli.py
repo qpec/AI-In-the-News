@@ -83,6 +83,7 @@ def main() -> int:
             "evaluate_event_clustering",
             "plan_event_pairs",
             "event_pair_experiment",
+            "event_pair_feature_experiment",
             "plan_tags",
             "tag",
             "tag_inspect",

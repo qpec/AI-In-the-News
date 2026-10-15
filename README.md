@@ -67,6 +67,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Research protocol and command inputs](docs/RESEARCH_PROTOCOL.md)
 - [Enforcement, provenance, local tamper limits and unfinished integrations](docs/AUDITABILITY.md)
 - [Actual verification results](docs/VERIFICATION.md)
+- [Selective event-link comparison using retained passage embeddings](docs/EVENT_PAIR_PASSAGE_EXPERIMENT.md)
 - [Complete-preflight performance and reproducible synthetic benchmarks](docs/PREFLIGHT_PERFORMANCE.md)
 
 ```powershell
