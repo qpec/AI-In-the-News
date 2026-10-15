@@ -71,6 +71,7 @@ def main() -> int:
             "similarity_calibrate",
             "similarity_apply",
             "article_query_rows",
+            "article_query_overview",
             "plan_tags",
             "tag",
             "tag_inspect",

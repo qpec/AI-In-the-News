@@ -65,6 +65,7 @@ The original article-embedding permission does not authorize a new query call. T
 | `similarity_calibrate` | `{"scores":"SCORE_COMPLETION_ID"}` | Frozen threshold, calibration curve and independent test diagnostics |
 | `similarity_apply` | `{"scores":"SCORE_COMPLETION_ID","calibration":"ID","reuse_cache":true}` | New SQL rows with yes/no/null answers and parent score references |
 | `article_query_rows` | `{"run":"RUN_MANIFEST_ID","limit":100,"offset":0}` | Audited named-column SQL results and expected/logged/pending counts |
+| `article_query_overview` | `{"run":"RUN_MANIFEST_ID","top":10}` | Frozen score statistics/bands, coverage, ranked source metadata and linked private histogram, without new inference |
 
 After setup, use the exact returned version context for all operations. Scoring/application return `id` (completion record) and `run` (manifest ID). Calibration consumes the score completion `id`; SQL inspection consumes `run`. Example:
 
@@ -73,3 +74,5 @@ uv run --frozen newsresearch --versions C:/protected/query-context.json --actor 
 ```
 
 Do not read the working SQL database directly for research; the audited operation performs the SELECT and preserves its provenance. No actual article tagging or defensible production threshold is established by synthetic tests of this method.
+
+The overview registers its exploratory technical profile before reading scores. It preserves SQL/parameters, every included result/source ID and score in a protected snapshot, and reports expected, logged, scored, unprocessed and pending source counts. Quantiles use linear interpolation at `(n-1)*q` over scored articles only. Histogram bands are `[-1,0)`, then tenths from zero, with the final upper edge inclusive. Ranking uses stored score descending and source-version ties; titles, dates, URLs and winning-passage references are copied from immutable sources without new content judgements. The histogram references its frozen overview table and calculation. These are article retrieval diagnostics, not dossier measurements or incident prevalence, and the overview does not choose a classification threshold.

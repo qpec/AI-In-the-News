@@ -166,6 +166,7 @@ class Research:
             "similarity_calibrate": self._similarity_calibrate,
             "similarity_apply": self._similarity_apply,
             "article_query_rows": self._article_query_rows,
+            "article_query_overview": self._article_query_overview,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -800,6 +801,12 @@ class Research:
         from .similarity_tags import read_rows
 
         return read_rows(self, session, context, data)
+
+    @audited_handler
+    def _article_query_overview(self, session: str, context: Context, data: Json) -> Json:
+        from .query_overview import overview
+
+        return overview(self, session, context, data)
 
     @audited_handler
     def _plan_tags(self, session: str, context: Context, data: Json) -> Json:
