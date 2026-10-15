@@ -43,6 +43,8 @@ uv run --frozen python scripts/search_candidates.py search --context INDEX_CONTE
 
 Search defaults to all selected sources, including unprocessed placeholders. `--source SOURCE_VERSION_ID` may be repeated for a bounded query. `--limit N` records explicit partial coverage, with no replacement of missing-text records. The wrapper prints technical progress only after durable audit writes and returns a compact run summary. It never reads credentials or changes the offline setting.
 
+Every command performs full storage-integrity preflight before retrieval. With the pilot's vectors and candidate artifacts, this can take several minutes even for a small query. Batch related source IDs into one operation. The `status` operation additionally re-verifies storage inside its handler and therefore takes longer. The audit runtime accounts for this additional startup time.
+
 The same operations are available through `newsresearch run` and `Research.execute()`. To inspect stored candidates, use `inspect_candidates` with `{"run":"CANDIDATE_RUN_ID","limit":10}` or an explicit `source_ids` list. This returns private source/chunk references and scores; its output belongs in protected storage. Use the existing audited `inspect` operation with returned passage IDs to retrieve the original text. Candidate inspection and passage inspection are separate observable audit events.
 
 ## Storage and boundaries

@@ -31,6 +31,7 @@ Use the same `--workspace` as the original run. Replay invokes no provider.
 - Immutable permitted source versions, original-response hashes, retrieval metadata and stable passage references; saved Event Registry JSON/collection ZIP import.
 - Versioned dossiers with uncertain and duplicate memberships, registered provider-event grouping proposals, and explicit merge/split/amendment lineage.
 - Audited FTS retrieval and inspection, question-specific work manifests, resumable batches, explicit version-dependent cache reuse, bounded retries and preserved failures.
+- Local passage-vector indexing and article candidate search over saved embeddings, full precision reranking, separate provider-ID signals, preserved missingness and exact-neighbor numerical checks. See [local candidate search](docs/LOCAL_CANDIDATE_SEARCH.md).
 - One instrumented model gateway for all research task types; strict result/evidence/coverage checks; separate interpretations, reviews and accepted findings; append-only corrections.
 - Dossier-level SQL snapshots with denominator, exclusions and missingness; linked PNG charts; deterministic stored-output replay; allowlisted aggregate exports.
 - Protected artifacts, SQLite FULL-synchronous transactions, a hash-linked append-only journal, fail-closed audit writes, single-writer locking and integrity preflight on every supported command.
