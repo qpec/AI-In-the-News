@@ -1,5 +1,7 @@
 # Conversational RAG in the local reader
 
+**Project decision, 2026-10-15: FAILED / SHELVED with the website views.** This reader is no longer the active approach. The current priority is [same-event dossiers using the existing embeddings](INCIDENT_DOSSIER_METHOD.md#current-scope-event-dossiers--2026-10-15). Preserve historical code/results; do not resume this workflow by default.
+
 The optional reader conversation separates retrieval from answer instructions. A follow-up uses a frozen, audited evidence selection. It does not embed the new question, scan all vectors, rescore the corpus or launch one answer worker per article. Each explicitly submitted question can dispatch at most one fresh Codex account CLI worker through `Gateway.codex_dispatch`. The default document viewer remains read-only.
 
 ## Registered method and evidence

@@ -2,6 +2,8 @@
 
 An offline-first, auditable foundation for studying AI news through **versioned dossiers**. Ingestion, retrieval, model batches, evidence review, tables, charts and replay all enter the same enforced Python runtime, inside or outside Codex.
 
+**Current direction (2026-10-15):** use the existing passage embeddings to develop [same-event dossiers](docs/INCIDENT_DOSSIER_METHOD.md#current-scope-event-dossiers--2026-10-15), grouping reporting across sources and publication times. The website views and LLM cutoff workflow are user-declared failures and shelved. Implemented capabilities listed below remain preserved; they are not all active or validated research methods.
+
 ## Run the working demonstration
 
 Requires Python 3.12 or 3.13 and `uv`. Dependencies are locked in `uv.lock`.

@@ -1,5 +1,7 @@
 # Methode: van nieuwsartikelen naar incidentdossiers
 
+**Current direction, 2026-10-15:** the primary unit is now **an event dossier: reporting on the same real-world event**, without requiring an incident or harm. The original Dutch method below remains verbatim as history. Its broader incident container is not the current counting unit. See [the revised scope](#current-scope-event-dossiers--2026-10-15).
+
 Onderstaande methode is op 14 oktober 2026 door de gebruiker aangeleverd en woordelijk vastgelegd. Status: te ontwikkelen; de gegevensvoorbereiding voert de vier onderzoeksstappen nog niet uit.
 
 | Stap                                  | Techniek                     | Werkwijze                                                                                                                                                                                                                          |
@@ -11,6 +13,8 @@ Onderstaande methode is op 14 oktober 2026 door de gebruiker aangeleverd en woor
 
 ## Uitwerkingsafspraken — aanvullend op de exacte methode
 
+The following older incident-specific agreements remain historical where they conflict with the revised event scope below.
+
 Deze afspraken expliciteren het datacontract en veranderen de vier stappen hierboven niet. Wijzigingen worden als een nieuwe protocolversie met reden geregistreerd; oude versies blijven beschikbaar.
 
 - **Bronartikel → bronpassages → gebeurtenisvermeldingen → gebeurtenissen → incidentdossiers.** Een bronartikel mag meerdere gebeurtenisvermeldingen leveren. Een gebeurtenis kan door meerdere artikelen worden beschreven. Een incidentdossier kan meerdere afzonderlijke gebeurtenissen bevatten.
@@ -20,6 +24,30 @@ Deze afspraken expliciteren het datacontract en veranderen de vier stappen hierb
 - **Dossierkoppeling is een aparte relatie.** Bewijs voor hetzelfde onderliggende incident is iets anders dan bewijs voor dezelfde gebeurtenis. Een incident, rechtszaak en uitspraak behouden afzonderlijke gebeurtenis-ID's, relaties en tijdlijnposities. Bewaar onzekere koppelingen en merge-/splitgeschiedenis; tel pas beoordeelde dossiers als dossiers.
 - **Evaluatie vóór inhoudelijke verwerking.** Reserveer een afzonderlijke, menselijk geannoteerde evaluatieset vóór modelkeuze en tuning. Leg richtlijnen, beoordelaars, meningsverschillen en adjudicatie vast. Evalueer kandidatenbereik, extractie, coreferentie en dossierkoppeling afzonderlijk. Houd verwante artikelen/gebeurtenissen bij elkaar bij de uiteindelijke splitsing om lekkage te beperken; een artikelsplitsing alleen is onvoldoende.
 - **Gedeelde auditgrens.** Embeddings, extractie, classificatie en modelmatige dossierkoppeling moeten via een daarvoor uitgebreide gedeelde gateway lopen. Bewaar manifests vóór uitvoering, exacte toegestane inputs/outputs, modelidentiteit, parameters, retries, kosten/usage voor zover waargenomen, validatie en review. De [OpenAI-embeddingadapter](OPENAI_EMBEDDINGS.md) is geïmplementeerd met een offline kostenplan en afzonderlijke toestemming per run. [Lokale vector search](LOCAL_CANDIDATE_SEARCH.md) hergebruikt de opgeslagen embeddings via de gecontroleerde runtime; inhoudelijke modelproviders zijn nog niet geïmplementeerd. Live collectie of betaalde inference vereist toestemming voor de concrete run.
+
+## Current scope: event dossiers — 2026-10-15
+
+The latest correction is **“not incident per se, should be event, reporting on the same thing.”** This supersedes the preceding incident-with-timeline choice. One dossier represents one event across sources and publication times. A launch, policy decision, research announcement or harmful occurrence can each qualify. An organization, theme or technology is not itself an event. A dossier groups reporting about a proposed event; it does not independently verify every source claim.
+
+Represent **article → event mention → event dossier**. One article may describe several events; one event may have many reports. Retrospective reporting, corrections and additional details about the original event can join its dossier. A genuinely distinct later action is a separate event, optionally linked to the first. Publication time alone neither splits nor merges events. Preserve event date/range, uncertainty and conflicting claims separately; do not fill missing event time with publication time.
+
+### Proposed workflow — not an executed research result
+
+1. **Find candidates with saved embeddings.** Compare stored article passage vectors through audited vector search; no new question embedding is needed. The existing implementation returns up to 20 article candidates after passage search and reranking. This is a starting workload setting, not a validated semantic boundary. Provider `eventUri`, repeated reporting and entity/date matches can supply separate candidate signals; none proves identity. Keep no-match and text-unavailable articles explicit.
+2. **Describe event mentions with evidence.** For plausible candidates, identify actors, specific action/occurrence, affected object, event date/range and location when available, with source passages. Do not rely solely on a generic AI-related matching paragraph. Missing names or dates are not automatic exclusions. Model extraction would require a separately implemented and authorized gateway workflow; human review can establish an initial reference set.
+3. **Decide identity:** `same_event`, `different_event` or `uncertain`. Shared company/topic is insufficient; different publication dates do not establish different events. Missing evidence remains uncertain. No universal cosine cutoff or LLM-estimated query-relevance cutoff determines dossier membership.
+4. **Review whole proposed clusters.** Neighbor edges propose groups; arbitrary connected components do not establish events. A roundup article can bridge separate events. Check each proposed addition against the event and contradictory evidence, retain negative/uncertain links and merge/split history, and permit articles to link to multiple event dossiers through distinct mentions.
+5. **Count reviewed event dossiers.** Article totals describe reporting volume. Show unresolved mentions, uncertain memberships and unprocessed sources beside event totals. These are events represented and reviewed in the selected corpus, not all real-world events or independently verified incidents.
+
+### First proposed evaluation
+
+Use approximately 100–150 human-grouped articles, covering multi-source same-event reports, long publication gaps, retrospective accounts, multi-event roundups, same-topic/different-event cases and singletons. This is a proposed size, not existing coverage. Include known same-event reports selected independently of the embeddings being tested; evaluating only successfully retrieved neighbors hides misses. Define event granularity before annotation, preserve reviewer disagreements/adjudication and freeze event-linked development/held-out partitions before tuning. Reprints, the same event and connected multi-event reporting must not leak across splits.
+
+Measure candidate recovery of known same-event links, false merges, false splits, unresolved cases and event-count error within the annotated reference frame. A top-k cap limits recovery for large event groups; measure that limit and consider bounded expansion. Reference-set performance does not establish corpus-wide recall. Prefer broad candidate discovery and cautious confirmed merges: a wrong merge hides distinct events, while uncertain links can stay open.
+
+The existing code implements candidate retrieval, not a complete substantive event-identity pipeline. Its confirmed source-to-dossier exclusivity prevents one article joining multiple active dossiers; event-mention records and membership support need implementation. Current exact-neighbor checks measure numerical vector retrieval, not semantic/event recall. No corpus search, event extraction, clustering or model run was executed for this design.
+
+Primary research supports considering [entity/event context](https://aclanthology.org/P19-1409/) and [document structure and cluster consistency](https://aclanthology.org/2021.acl-long.374/). The workflow above is a project proposal, not a reproduction or validated application of those systems.
 
 ## Gegevensvoorbereiding v2
 

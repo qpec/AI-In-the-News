@@ -20,6 +20,11 @@ Read [RESEARCH_PROTOCOL](docs/RESEARCH_PROTOCOL.md) and [AUDITABILITY](docs/AUDI
 
 Reusable workflows: `.agents/skills/research-operations`, `research-review`, and `research-measurement`. Setup and tested commands: [README](README.md).
 
+# Current research direction — 2026-10-15
+
+- The user has declared the website views/conversational reader and LLM cutoff-detection workflow **failures for the intended research workflow**. Both are shelved; preserve their implementation, audit history and actual results, and do not resume them by default. This is a project decision, not a claim that every software component failed its tests.
+- The latest user clarification sets the primary unit to **one real-world event reported by different sources or at different publication times**. An event need not be an incident or involve harm. This supersedes the immediately preceding incident-with-timeline choice. Use [the revised event-dossier scope](docs/INCIDENT_DOSSIER_METHOD.md#current-scope-event-dossiers--2026-10-15); retain the original incident method as history. Brainstorming/design does not authorize new corpus processing or paid/model runs.
+
 # Commit checkpoints
 
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.

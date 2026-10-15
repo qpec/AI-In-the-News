@@ -1,5 +1,13 @@
 # Verification record — 2026-10-14
 
+## User-declared failures and event-dossier reset — 2026-10-15
+
+The user explicitly declared the website views and LLM cutoff-detection workflow failures and redirected work to existing embeddings for grouping reports about the same event. Their code, historical software tests, partial calibration results, earlier provisional cutoff and saved RAG answers remain unchanged. This is a user assessment/project-direction record, not a new statistical result or SQL review. Both workflows are marked FAILED / SHELVED in their method documents and standing project instructions; no automatic continuation is intended.
+
+The latest clarification, “not incident per se, should be event, reporting on the same thing,” supersedes the immediately preceding incident-with-timeline selection. The current proposal uses article/event-mention/event-dossier links, same/different/uncertain identity decisions and reviewed event counts. Harm is not required. Existing source-to-dossier exclusivity and the absence of a complete substantive event-identity provider remain implementation gaps. The small human-grouped evaluation is proposed, not performed. This documentation-only step inspects engineering sources and primary methodological literature; it opens no corpus store, judges no articles, executes no corpus search and launches no model/paid run. No new event or dossier counts are available.
+
+Validation checked 58 local documentation links, the revised-scope heading and `git diff --check`. Runtime code was unchanged, so no new software test or research execution is claimed. Unrelated workspace-clone work remains untouched; nothing was pushed.
+
 ## Conversational retrieval reuse — 2026-10-15
 
 Implemented the optional conversation reader and registered `frozen-retrieval-conversation-v1` and `conversation-local-fts-v1`. Follow-ups reuse immutable winning/cited passages; explicit keyword searches create linked evidence definitions. One form submission enters one complete `Research.execute()` preflight/session and dispatches at most one audited Codex account worker. No new embeddings, full vector scan, corpus score rows or per-article answer batches are needed. Coverage and exclusions remain explicit. Questions, history, method/model bindings, exact requests, manifests, approval/intents, observable response/usage, unknown/invalid outcomes and exact presentations remain protected and durable. Full integrity checks are unchanged; production latency was not benchmarked.

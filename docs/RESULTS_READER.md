@@ -1,5 +1,7 @@
 # Local results reader
 
+**Project decision, 2026-10-15: FAILED / SHELVED.** The user judged the website views unsuccessful for the intended workflow and redirected work to event-dossier grouping. Preserve the reader and saved results as history; do not continue UI/startup work by default. Passing software tests or an accessible older page do not reverse this user assessment. The instructions below describe the preserved implementation.
+
 Browse an existing, completed RAG result without rerunning retrieval or inference:
 
 ```powershell
