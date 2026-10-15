@@ -22,13 +22,14 @@ if TYPE_CHECKING:
 
 METHOD: Json = {
     "method": "exhaustive-cosine-query-tags-v1",
-    "query_input": "Query: {query}\\nQuestion: {question}",
+    "query_input": "Query: {query}\nQuestion: {question}",
     "scoring": "Float32 dot product of L2-normalized query and every saved full-precision passage vector; clip to [-1,1]",
     "aggregation": "Maximum cosine across every article chunk; ties use lexicographically smallest chunk ID",
     "selection": "Every source in the bound dataset; no ANN, top-k or similarity filter",
     "answer": "Is this article semantically relevant? score >= calibrated threshold; not an answer to the substantive question",
     "missingness": "No vectors or incomplete coverage means unprocessed with null score/answer",
     "threshold_selection": "Default to recall priority (F2); record any explicit override and held-out precision/recall",
+    "timestamps": "UTC local observations for planning, request start/response receipt, scoring, tag application and SQL recording; no provider execution clock is inferred",
     "scope": "Provisional article relevance, not probabilities, incident identity or accepted dossier findings",
 }
 
@@ -51,6 +52,14 @@ ROW_SQL = """SELECT r.id AS result_id,
  json_extract(r.payload,'$.embedding_model') AS embedding_model,
  json_extract(r.payload,'$.dimensions') AS dimensions,
  json_extract(r.payload,'$.query_request_id') AS query_request_id,
+ json_extract(r.payload,'$.query_attempt') AS query_attempt_id,
+ json_extract(r.payload,'$.query_planned_at') AS query_planned_at,
+ json_extract(r.payload,'$.query_request_started_at') AS query_request_started_at,
+ json_extract(r.payload,'$.query_response_received_at') AS query_response_received_at,
+ json_extract(r.payload,'$.score_run_started_at') AS score_run_started_at,
+ json_extract(r.payload,'$.score_run_completed_at') AS score_run_completed_at,
+ json_extract(r.payload,'$.tag_application_started_at') AS tag_application_started_at,
+ json_extract(r.payload,'$.tag_applied_at') AS tag_applied_at,
  json_extract(r.payload,'$.query_usage') AS query_usage_json,
  json_extract(r.payload,'$.query_usage_scope') AS query_usage_scope,
  json_extract(r.payload,'$.model_calls') AS article_model_calls,
@@ -64,7 +73,7 @@ ROW_SQL = """SELECT r.id AS result_id,
  json_extract(r.payload,'$.completed_at') AS completed_at,
  json_extract(r.payload,'$.error_type') AS error_type,
  json_extract(r.payload,'$.parent_result') AS parent_result,
- r.created_event AS audit_event, e.event_hash AS audit_hash,
+ r.created_event AS audit_event, e.event_hash AS audit_hash, e.time AS recorded_at,
  s.payload AS session_audit_json
  FROM records r JOIN events e ON e.seq=r.created_event
  JOIN events s ON s.session_id=e.session_id AND s.kind='session.started'
@@ -191,6 +200,10 @@ def score(engine: Research, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("Existing article results require explicit reuse_cache")
     started = utc()
     query_response = ledger.artifacts.read(query_result["response_ref"])
+    query_planned_at = ledger.db.execute(
+        "SELECT e.time FROM records r JOIN events e ON e.seq=r.created_event WHERE r.id=?",
+        (data["plan"],),
+    ).fetchone()[0]
     best: dict[str, tuple[float, Json]] = {}
     counts: dict[str, int] = defaultdict(int)
     # Use original index bindings for reading its immutable vectors, retaining both contexts in the audit.
@@ -211,6 +224,7 @@ def score(engine: Research, session: str, context: Context, data: Json) -> Json:
                 previous = best.get(source)
                 if previous is None or value > previous[0] or (value == previous[0] and row["id"] < previous[1]["id"]):
                     best[source] = (value, row)
+    score_run_completed_at = utc()
     ids = []
     for source in frame:
         key = digest({"run": run_id, "source": source})
@@ -244,6 +258,11 @@ def score(engine: Research, session: str, context: Context, data: Json) -> Json:
                   "query_request_id": query_response.get("request_id"), "query_usage": query_response.get("usage"),
                   "query_usage_scope": "Shared query embedding request; do not sum usage across article rows",
                   "query_http_status": query_response.get("http_status"),
+                  "query_planned_at": query_planned_at,
+                  "query_request_started_at": query_response.get("started_at"),
+                  "query_response_received_at": query_response.get("ended_at"),
+                  "score_run_started_at": started, "score_run_completed_at": score_run_completed_at,
+                  "tag_application_started_at": None, "tag_applied_at": None,
                   "actor": context.actor, "session": session, "started_at": started, "completed_at": utc(),
                   "error_type": None, "parent_result": None, "network_calls": 0, "model_calls": 0,
                   "review_status": "provisional", "scope": METHOD["scope"]}
@@ -344,6 +363,7 @@ def apply(engine: Research, session: str, context: Context, data: Json) -> Json:
                   "threshold": calibration["threshold"], "calibration": data["calibration"],
                   "comparison": "score >= threshold", "status": "classified" if value is not None else original["status"],
                   "actor": context.actor, "session": session, "started_at": started, "completed_at": utc(),
+                  "tag_application_started_at": started, "tag_applied_at": utc(),
                   "implementation_digest": code, "review_status": "provisional"}
         ids.append(ledger.record(session, "article_query_result", key, result))
     result = {**manifest, "run": run_id, "result_ids": ids, "classified_articles": scored["scored_articles"],

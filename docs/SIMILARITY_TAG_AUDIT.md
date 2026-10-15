@@ -28,11 +28,15 @@ The protected working database is `research.sqlite3`, outside both Git repositor
 | `embedding_model`, `dimensions`, `index_id`, stored original index versions | Bind results to the article/query embedding representation and immutable vector snapshot |
 | `method`, `versions_json`, `implementation_digest` | Bind dataset, query, protocol, selection, codebook, evaluation, profiles and code/lockfile version |
 | `actor`, `session_id`, `started_at`, `completed_at` | Record self-asserted operator identity and observed local execution times |
+| `query_planned_at`, `query_request_started_at`, `query_response_received_at` | Separate durable query planning, local request start and observed response receipt |
+| `score_run_started_at`, `score_run_completed_at`, `tag_application_started_at`, `tag_applied_at`, `recorded_at` | Preserve original comparison times through tag application and expose each row's journal recording time |
 | `error_type`, `parent_result`, stored `review_status` | Preserve failures/lineage and provisional status without overwriting history |
 | `audit_event`, `audit_hash`, `session_audit_json` | Link the row to its durable journal event and full session identity/configuration/preflight |
 | `article_model_calls`, `query_usage_scope` | Make clear that local article scoring has zero model calls; shared query usage must not be summed across rows |
 
 The request/response artifact references and query attempt ID are also retained in each record. Credentials are never stored. Provider identity, usage or request metadata that was not observed remains unavailable rather than being fabricated. SQL inspection logs its exact SELECT, parameters, returned rows and pagination. Full results may contain restricted text and identifiers and must remain in protected storage.
+
+All timestamps are local UTC ISO-8601 observations. Query request/response times come from the durable gateway response metadata; they are not an OpenAI execution clock. Reusing a saved query preserves its original request times and records a separate reuse event. Tag application preserves the original query and comparison times while adding its own start/finish times. `recorded_at` comes from the immutable row's creating journal event. Older records without these fields remain null rather than being backfilled with invented times.
 
 A complete result run has one row for every selected source. A durable manifest of **all expected source IDs** precedes scoring and row writes. If storage fails or execution is interrupted, the operation stops, no successful reconciliation is created, and the manifest plus any completed rows remain. `article_query_rows` reports expected, logged and pending counts. Pending rows are not negative findings. Resume requires `reuse_cache: true`; existing rows retain their original actor/timestamps and reuse receives a separate audit event. A changed query, threshold/calibration or implementation creates separate records rather than updating old ones.
 

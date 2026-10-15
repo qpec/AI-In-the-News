@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import datetime
 import json
 import sqlite3
 from typing import Any
@@ -78,6 +79,11 @@ def test_single_query_call_and_exhaustive_exact_sql_scores(prepared_query: Any) 
         assert row["answer"] is None and row["threshold"] is None
         assert row["actor"] == "test:local" and row["audit_event"] and row["audit_hash"]
         assert row["query_embedding_result"] and row["query_request_id"]
+        assert row["query_attempt_id"]
+        assert (row["query_planned_at"] <= row["query_request_started_at"] <= row["query_response_received_at"]
+                <= row["score_run_started_at"] <= row["score_run_completed_at"] <= row["recorded_at"])
+        assert datetime.fromisoformat(row["query_request_started_at"]).utcoffset().total_seconds() == 0
+        assert row["tag_applied_at"] is None
         assert json.loads(row["query_usage_json"])["total_tokens"] > 0
         assert row["article_model_calls"] == 0 and "do not sum" in row["query_usage_scope"]
         assert json.loads(row["session_audit_json"])["context"]["actor"] == "test:local"
@@ -106,6 +112,13 @@ def test_threshold_creates_append_only_answer_for_each_article(prepared_query: A
             assert row["answer"] == ("yes" if row["score"] >= row["threshold"] else "no")
     old = run("article_query_rows", {"run": scored["run"]})["rows"]
     assert all(row["answer"] is None for row in old)
+    previous = {row["source_version"]: row for row in old}
+    for row in rows:
+        original = previous[row["source_version"]]
+        for key in ("query_planned_at", "query_request_started_at", "query_response_received_at",
+                    "score_run_started_at", "score_run_completed_at"):
+            assert row[key] == original[key]
+        assert row["score_run_completed_at"] <= row["tag_application_started_at"] <= row["tag_applied_at"] <= row["recorded_at"]
     assert engine.ledger.db.execute("SELECT count(*) FROM records WHERE kind='article_query_result'").fetchone()[0] == 22
     with pytest.raises(sqlite3.IntegrityError, match="append-only"):
         engine.ledger.db.execute("UPDATE records SET payload='{}' WHERE id=?", (rows[0]["result_id"],))
