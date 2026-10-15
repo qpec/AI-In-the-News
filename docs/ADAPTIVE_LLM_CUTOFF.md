@@ -1,8 +1,16 @@
-# Adaptieve cutoff met LLM-beoordelingen
+# Adaptieve cutoff met Codex-agentbeoordelingen
 
-Method ID: `adaptive-llm-cutoff-v1`. Status: **geregistreerd methodeontwerp; de uitvoeringsadapter is nog niet gebouwd**. Dit document en [de registreerbare specificatie](../methods/adaptive-llm-cutoff-v1.json) voegen een methode toe, geen betaalde uitvoering of nieuw resultaat. De bestaande voorlopige cutoff en eerdere onderzoeksresultaten worden niet gewijzigd.
+Method ID: `adaptive-llm-cutoff-v2`. Status: **methodeontwerp; de uitvoeringsadapter is nog niet gebouwd**. De gebruiker heeft **Codex-agents als artikelbeoordelaar** gekozen. Deze versie wijzigt de uitvoeringsroute van het [geregistreerde v1-ontwerp](../methods/adaptive-llm-cutoff-v1.json); het trekkingsschema, de rekenregels en leesbudgetten blijven gelijk. De [registreerbare v2-specificatie](../methods/adaptive-llm-cutoff-v2.json) bewaart de oorspronkelijke protocolversie als voorganger. Registratie is geen uitvoering of nieuw resultaat.
 
-Het LLM beoordeelt de **inclusie van artikelen** volgens één vast criterium. De onderzoeksruntime berekent vervolgens welke cosinusgrens die beoordelingen het beste benadert, met voorkeur voor recall. Het LLM krijgt geen opdracht een getal voor de cutoff te verzinnen. De uitkomst heet een **LLM-gekalibreerde voorlopige cutoff**; overeenstemming met een model is geen menselijke gouden standaard of bevestiging van incidenten.
+Een Codex-agent beoordeelt de **inclusie van artikelen** volgens één vast criterium. De onderzoeksruntime berekent vervolgens welke cosinusgrens die beoordelingen het beste benadert, met voorkeur voor recall. De agent krijgt geen opdracht een getal voor de cutoff te verzinnen. De uitkomst heet een **LLM-gekalibreerde voorlopige cutoff**, met `judge_transport: codex_agent`; overeenstemming met een model is geen menselijke gouden standaard of bevestiging van incidenten. De huidige Responses-API-artikelbeoordelaar is niet de gekozen uitvoeringsroute. Een eventuele nieuwe queryembedding blijft een afzonderlijke stap.
+
+## Gekozen uitvoering: Codex-agent via de gateway
+
+De [Codex-beoordelingsroute](CODEX_JUDGE_TRANSPORT.md) beschrijft de nog te bouwen koppeling: eerst een bevroren bewijsopdracht en poging duurzaam opslaan, dan precies die opdracht aan een verse agent aanbieden, en het zichtbare antwoord via de gateway opslaan en valideren. Per artikel komt er een nieuwe context zonder de gespreksgeschiedenis, score, cutoff of andere labels. Eén agent mag geen artikelen uit meerdere ontwikkelrondes of uit de toetsset verzamelen.
+
+Een direct `spawn_agent` met echte artikeltekst vanuit deze chat is nog geen geïmplementeerde gatewayroute. De huidige samenwerkingstools bieden ook geen technisch afgedwongen verbod op tools of bestandstoegang; een instructie om geen tools te gebruiken is geen sandbox. De adapter moet de gekozen omgeving en die beperking vastleggen en een mislukte of oncontroleerbare overdracht onbeslist laten. Tot de koppeling en budgethandhaving werken, worden geen echte artikelen voor deze methode beoordeeld.
+
+Bewaar de exacte applicatie-instructies en aangeboden tekst, agenthandle, zichtbare respons, waarneembare tijden en validatie. Interne Codex-instructies, verborgen redenering, feitelijke modelidentiteit, provider-request-ID, tokens en facturatie zijn mogelijk niet beschikbaar en blijven dan null met een reden. Een ingesteld modelprofiel is niet automatisch een waargenomen model-ID. Codex-gebruik wordt niet als gratis of als volledig intern gelogd gepresenteerd. De gateway mag geen harde provider-token- of geldlimiet claimen die deze route niet kan waarnemen of afdwingen.
 
 ## Eén inclusie-instructie voor zoeken en beoordelen
 
@@ -19,9 +27,9 @@ De huidige queryplanner gebruikt alleen query en vraag; de bestaande artikelbeoo
 | Standaard | 40 + 3 × 20 = 100 | 80 | 20 | 200 |
 | Compact | 20 + 2 × 15 = 50 | 40 | 10 | 100 |
 
-Een ontwikkeltrekking kan een al beoordeeld artikel aanwijzen. Dan wordt het bevroren label expliciet hergebruikt, zonder opnieuw te lezen. Standaard worden dus maximaal 180 **unieke** artikelen gelezen en maximaal 200 bewijsdragende modelpogingen uitgevoerd. Compact zijn dat maximaal 90 unieke artikelen en 100 pogingen. Ongebruikte plaatsen door hergebruik worden niet stilzwijgend aangevuld totdat toch 100 unieke ontwikkelartikelen zijn bereikt: dat zou het vastgelegde trekkingsschema veranderen.
+Een ontwikkeltrekking kan een al beoordeeld artikel aanwijzen. Dan wordt het bevroren label expliciet hergebruikt, zonder opnieuw te lezen. Standaard worden dus maximaal 180 **unieke** artikelen aangeboden en maximaal 200 bewijsdragende artikelopdrachten verstuurd. Compact zijn dat maximaal 90 unieke artikelen en 100 pogingen. Bij Codex telt iedere waarneembare bewijsdragende overdracht, retry of herbeoordeling als artikelpoging; interne modelrequests of intern herlezen zijn niet afzonderlijk waarneembaar. Het budget bewijst dus geen maximum aan interne Codex-aanroepen of werkelijke leesbeurten. Ongebruikte plaatsen door hergebruik worden niet stilzwijgend aangevuld totdat toch 100 unieke ontwikkelartikelen zijn bereikt: dat zou het vastgelegde trekkingsschema veranderen.
 
-Een tweede oordeel, retry of onbekende uitkomst waarbij artikeltekst aangeboden kan zijn telt opnieuw mee. De reserve is geen toestemming voor overschrijding. Een modeltaak moet het volledige toegestane artikel kunnen ontvangen. Te lange, ontbrekende, geweigerde of onvolledig verwerkte teksten blijven expliciet onverwerkt; geen stilzwijgende afkapping tot alleen titel of best scorende passage. Modelaandacht is niet waarneembaar, ook als het systeem de volledige aangeleverde tekstdekking controleert. Queryembedding, tokenlimieten en geldbudget worden daarnaast afzonderlijk begrensd; het artikelaantal alleen begrenst de kosten niet.
+Een tweede oordeel, retry of onbekende uitkomst waarbij artikeltekst aangeboden kan zijn telt opnieuw mee. De reserve is geen toestemming voor overschrijding. Een modeltaak moet het volledige toegestane artikel kunnen ontvangen. Te lange, ontbrekende, geweigerde of onvolledig verwerkte teksten blijven expliciet onverwerkt; geen stilzwijgende afkapping tot alleen titel of best scorende passage. Modelaandacht is niet waarneembaar, ook als het systeem de volledige aangeleverde tekstdekking controleert. Queryembedding heeft een eigen budget. Registreer daarnaast welke token- en geldgrenzen de gekozen transport werkelijk kan afdwingen; het artikelaantal alleen begrenst de kosten niet.
 
 ## 1. Frame en toetsset vastzetten
 
@@ -49,7 +57,7 @@ De blijvende brede helft zoekt inclusies die een uitsluitend lokale zoekactie zo
 
 ## 3. Beoordelen zonder de gewenste uitkomst te verklappen
 
-Het LLM ziet het inclusieblok en de volledige toegestane artikeltekst, maar **geen cosinescore, huidige cutoff, zoekrang, eerdere labels of gewenste uitkomst**. Ieder artikel krijgt een aparte stateloze taak onder hetzelfde vastgezette model/prompt/schema.
+De Codex-agent ziet het inclusieblok en de volledige toegestane artikeltekst, maar **geen cosinescore, huidige cutoff, zoekrang, eerdere labels of gewenste uitkomst**. Ieder artikel krijgt een aparte taak met verse context onder hetzelfde vastgezette modelprofiel/prompt/schema. Modeldrift die de host niet kan uitsluiten blijft een expliciete beperking; rapporteer de ingestelde en waargenomen identiteit afzonderlijk.
 
 De gestructureerde uitkomst bevat `yes`, `no` of `uncertain`, criterium-ID's, een korte bewijsgerichte toelichting en controleerbare bronpassages met offsets/hashes. Bij afwezigheid van ondersteunende tekst na volledige aangeleverde dekking mag een nee geen verzonnen citaat krijgen; bewaar expliciet de grond voor die afwezigheidsbeoordeling. Onvolledige bron of verwerking is een aparte processingstatus, geen nee. Vraag geen verborgen redeneerstappen op.
 
@@ -101,14 +109,14 @@ Bewaar in beschermde SQL/artifactopslag:
 
 ## Implementatie en toestemming
 
-De uitvoeringsadapter moet nog de gedeelde-instructiecontrole, adaptieve rondeplanning, exacte trekkingskansen, gewogen rekenroute, geblindeerde toets, budgetteller en hun integratietests implementeren. De bestaande `tag_retrieve`/`plan_tags`-route is corpusbreed en mag **niet** als een al werkende 200-artikelenroute worden gepresenteerd. Ook de oude menselijke kalibratiepoort wordt niet versoepeld om modeloordelen als menselijke labels te accepteren.
+De uitvoeringsadapter moet nog de gedeelde-instructiecontrole, Codex-gatewayoverdracht en antwoordvalidatie, adaptieve rondeplanning, exacte trekkingskansen, gewogen rekenroute, geblindeerde toets, budgetteller en hun integratietests implementeren. De bestaande `tag_retrieve`/`plan_tags`-route is corpusbreed en mag **niet** als een al werkende 200-artikelenroute worden gepresenteerd. Ook de oude menselijke kalibratiepoort wordt niet versoepeld om modeloordelen als menselijke labels te accepteren.
 
-Registreer vóór een echte run een concreet workflowplan met frame, criteria, modelprofielen, prijsbasis, bronretentie/externe verwerking, ronderegels, maximale 200 bewijsdragende pogingen, afzonderlijke token-/kostengrenzen en expiry. Adaptieve kindmanifests moeten binnen die vooraf goedgekeurde workflow blijven en vóór iedere batch duurzaam bestaan. De gateway moet de gezamenlijke tellers afdwingen, ook bij retries, herstart en onbekende uitkomsten. De bestaande plan-specifieke betaaltoestemming mag niet ongemerkt worden verbreed naar onbekende vervolgplannen. Eerst die handhaving bouwen en testen; daarna pas de concrete run laten autoriseren.
+Registreer vóór een echte run een concreet workflowplan met frame, criteria, Codex-modelprofiel en host/transport, bronretentie/externe verwerking, ronderegels, maximale 200 bewijsdragende artikeloverdrachten, afdwingbare invoergrenzen en expiry. Vermeld apart welke token-/kosteninformatie en uitvoer-/tijdcontroles beschikbaar zijn. Een lokale timeout of te groot antwoord afwijzen begrenst acceptatie, niet noodzakelijk de modelgeneratie. Als een vereiste provider-token-, geld-, uitvoer- of tijdgrens niet afdwingbaar is, blokkeert dat een plan dat die harde garantie vereist; vul onbekend gebruik niet met nul. Adaptieve kindmanifests moeten binnen die workflow blijven en vóór iedere batch duurzaam bestaan. De gateway moet de gezamenlijke pogingtellers afdwingen, ook bij retries, herstart en onbekende uitkomsten. De keuze voor Codex is vastgelegd; daarvoor hoeft niet opnieuw een keuzevraag te worden gesteld. Een afzonderlijke betaalde API-run blijft concreet plan-gebonden en mag niet stilzwijgend de Codex-route vervangen.
 
 Alleen de methode registreren kan nu al offline:
 
 ```powershell
-uv run --frozen newsresearch --objective "Register the adaptive LLM cutoff method design without inference" --actor codex:method-design run version --input methods/adaptive-llm-cutoff-v1.json
+uv run --frozen newsresearch --objective "Register the user-selected Codex-agent cutoff method amendment without inference" --actor codex:method-design run version --input methods/adaptive-llm-cutoff-v2.json
 ```
 
 Dit voert geen queryembedding, artikelbeoordeling, steekproeftrekking of wijziging van bestaande tags uit.
