@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import sqlite3
 import subprocess
+import tempfile
 import uuid
 from typing import Any, Callable
 
@@ -196,6 +197,57 @@ class Artifacts:
 
     def read(self, reference: str) -> Any:
         return json.loads(self.read_bytes(reference))
+
+    def verified_path(self, reference: str) -> Path:
+        """Verify large binary artifacts with bounded memory before a native reader opens them."""
+        if not re.fullmatch(r"[a-f0-9]{64}", reference):
+            raise AuditError("Invalid artifact reference")
+        path = self.root / reference
+        try:
+            check_permissions(path)
+            with path.open("rb") as stream:
+                actual = hashlib.file_digest(stream, "sha256").hexdigest()
+        except OSError as error:
+            raise AuditError("Required artifact is missing") from error
+        if actual != reference:
+            raise AuditError("Artifact integrity failure")
+        return path
+
+    def put_file(self, source: Path) -> str:
+        """Copy a protected binary file into content-addressed storage without loading it."""
+        check_permissions(source)
+        staging: Path | None = None
+        try:
+            with source.open("rb") as incoming, tempfile.NamedTemporaryFile(
+                dir=self.root.parent, prefix="artifact-", delete=False
+            ) as outgoing:
+                staging = Path(outgoing.name)
+                if os.name != "nt":
+                    staging.chmod(0o600)
+                checksum = hashlib.sha256()
+                while block := incoming.read(1024 * 1024):
+                    checksum.update(block)
+                    outgoing.write(block)
+                outgoing.flush()
+                os.fsync(outgoing.fileno())
+            reference = checksum.hexdigest()
+            target = self.root / reference
+            if target.exists():
+                self.verified_path(reference)
+            else:
+                os.replace(staging, target)
+                if os.name != "nt":
+                    fd = os.open(self.root, os.O_RDONLY)
+                    try:
+                        os.fsync(fd)
+                    finally:
+                        os.close(fd)
+            return reference
+        except OSError as error:
+            raise AuditError("Required artifact write failed") from error
+        finally:
+            if staging is not None and staging.exists():
+                staging.unlink()
 
 
 SCHEMA = """
@@ -388,6 +440,7 @@ class Ledger:
             "embedding.request.prepared": ["request", "wire_body"],
             "embedding.context.saved": ["artifact"],
             "embedding.response.received": ["artifact"],
+            "retrieval.artifact.saved": ["artifact"],
         }
         for row in self.db.execute("SELECT * FROM events ORDER BY seq"):
             count += 1
@@ -491,7 +544,7 @@ class Ledger:
         if required_artifacts - {path.name for path in self.artifacts.root.iterdir()}:
             raise AuditError("A journal-referenced artifact is missing")
         for path in self.artifacts.root.iterdir():
-            self.artifacts.read_bytes(path.name)
+            self.artifacts.verified_path(path.name)
         return {
             "events": count,
             "head_hash": previous,

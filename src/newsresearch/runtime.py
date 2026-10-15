@@ -41,6 +41,7 @@ VERSION_KINDS = {
     "export_policy",
     "evaluation",
     "embedding_profile",
+    "retrieval_profile",
 }
 FULL_BINDINGS = {
     "dataset",
@@ -107,7 +108,8 @@ class Research:
             "python": sys.version,
             "platform": platform.platform(),
             "sqlite": sqlite3.sqlite_version,
-            "packages": {name: importlib.metadata.version(name) for name in ["jsonschema", "matplotlib"]},
+            "packages": {name: importlib.metadata.version(name) for name in
+                         ["jsonschema", "matplotlib", "numpy", "faiss-cpu"]},
         }
 
     def execute(
@@ -152,6 +154,10 @@ class Research:
             "prepare_legacy_pilot": self._prepare_legacy_pilot,
             "plan_embeddings": self._plan_embeddings,
             "embed": self._embed,
+            "build_vector_index": self._build_vector_index,
+            "vector_search": self._vector_search,
+            "evaluate_vector_index": self._evaluate_vector_index,
+            "inspect_candidates": self._inspect_candidates,
         }
         if operation not in handlers:
             raise ResearchError("Unsupported research operation")
@@ -217,6 +223,7 @@ class Research:
             "prompt": "instructions",
             "profile": "mode",
             "embedding_profile": "model",
+            "retrieval_profile": "method",
         }
         if kind in required_fields and not data["content"].get(required_fields[kind]):
             raise ResearchError("Versioned research methods cannot be empty")
@@ -708,3 +715,31 @@ class Research:
             context, {"dataset", "protocol", "question", "selection", "profile", "embedding_profile"}
         )
         return self.gateway.embed(session, context, data)
+
+    @audited_handler
+    def _build_vector_index(self, session: str, context: Context, data: Json) -> Json:
+        from .retrieval import build
+
+        self._require(context, {"dataset", "protocol", "question", "selection", "profile", "embedding_profile"})
+        return build(self, session, context, data)
+
+    @audited_handler
+    def _vector_search(self, session: str, context: Context, data: Json) -> Json:
+        from .retrieval import search
+
+        self._require(context, {"dataset", "protocol", "question", "selection", "profile", "retrieval_profile"})
+        return search(self, session, context, data)
+
+    @audited_handler
+    def _evaluate_vector_index(self, session: str, context: Context, data: Json) -> Json:
+        from .retrieval import evaluate
+
+        self._require(context, {"dataset", "protocol", "question", "selection", "profile", "retrieval_profile"})
+        return evaluate(self, session, context, data)
+
+    @audited_handler
+    def _inspect_candidates(self, session: str, context: Context, data: Json) -> Json:
+        from .retrieval import inspect_candidates
+
+        self._require(context, {"dataset", "retrieval_profile"})
+        return inspect_candidates(self, session, context, data)

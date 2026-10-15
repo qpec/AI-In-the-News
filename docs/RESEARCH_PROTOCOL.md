@@ -21,6 +21,7 @@ Register these objects using `version` before the relevant operation:
 | `profile` | `mode: exploratory` or `systematic`; scope and `population_estimate: false` |
 | `policy` | Automatic acceptance (`synthetic-only-v1`) or concrete embedding-run permission (`embedding-run-approval-v1`); run permission never accepts findings |
 | `embedding_profile` | `model`: provider, dimensions, tokenizer, batching limits, price basis and retrieval-only purpose |
+| `retrieval_profile` | `method`: local vector index, candidate aggregation, provider-ID signals, missingness and numerical evaluation rules |
 | `exclusion` | `dossier_ids`, `reason`, plus any study-specific decision metadata |
 | `evaluation` | `split: held_out`, prior method and `items` containing dossier IDs/gold labels |
 | `export_policy` | `allowed_labels`, `minimum_cell_size`, `allow_restricted_aggregates` |
@@ -104,7 +105,7 @@ Amending dossiers requires `supersedes` and `changes`, each with `action` (`merg
 
 `search` takes an FTS5 query and optional limit (1–1000). It filters the bound dossier frame before limiting, records SQL/parameters and returned passages, and identifies dossiers represented in the hits. `inspect` takes `passage_ids` within the bound dataset. Returning a passage is an observable inspection event; actual human reading is not observable.
 
-Search results are exploratory coverage, not corpus-wide prevalence. Register provisional notes and follow-up questions separately. To avoid reprocessing the entire corpus, call `batch` with selected `dossier_ids`; the gateway includes that dossier's evidence and input coverage. A new question/prompt/schema/version receives its own task identity. The foundation supplies lexical retrieval and deterministic provider-event proposals; semantic/vector retrieval and substantive learned clustering are unfinished.
+Search results are exploratory coverage, not corpus-wide prevalence. Register provisional notes and follow-up questions separately. To avoid reprocessing the entire corpus, call `batch` with selected `dossier_ids`; the gateway includes that dossier's evidence and input coverage. A new question/prompt/schema/version receives its own task identity. The foundation supplies lexical retrieval, local vector candidates and deterministic provider-event proposals; substantive learned event clustering remains unfinished.
 
 ## Shared model gateway and review
 
@@ -112,7 +113,9 @@ Search results are exploratory coverage, not corpus-wide prevalence. Register pr
 
 The dossier-interpretation provider is a local deterministic **software mock**. It searches for a fixture phrase and otherwise returns uncertainty. Task-type support validates the shared contract; it does not imply scientifically useful extraction, summaries or grouping. Substantive provider extensions must implement `Provider.complete`, preserve permitted exact payloads and observable metadata, and retain gateway enforcement.
 
-The shared gateway also implements OpenAI embeddings under the separate [embedding contract](OPENAI_EMBEDDINGS.md). `plan_embeddings` registers an embedding profile, verifies exact chunk references and writes a complete request manifest with local token/cost estimates, without model calls. `embed` requires that exact plan and version context, unchanged implementation, a registered concrete paid-run approval with a budget and expiry, process-local online mode and an environment-held API key. All requests and attempts retain the shared intent, artifact and recovery boundary. Vectors are retrieval representations, never accepted findings. Vector search and held-out retrieval evaluation remain unfinished.
+The shared gateway also implements OpenAI embeddings under the separate [embedding contract](OPENAI_EMBEDDINGS.md). `plan_embeddings` registers an embedding profile, verifies exact chunk references and writes a complete request manifest with local token/cost estimates, without model calls. `embed` requires that exact plan and version context, unchanged implementation, a registered concrete paid-run approval with a budget and expiry, process-local online mode and an environment-held API key. All requests and attempts retain the shared intent, artifact and recovery boundary. Vectors are retrieval representations, never accepted findings.
+
+The offline [local candidate-search contract](LOCAL_CANDIDATE_SEARCH.md) implements `build_vector_index`, `vector_search`, `evaluate_vector_index` and `inspect_candidates`. It retains exact embedding provenance, a versioned compact index, full precision reranking, paragraph matches, per-source missingness, distinct provider-ID candidates and resumable per-article results. Numerical checks against exact neighbors are technical diagnostics; independent held-out event retrieval evaluation remains unfinished.
 
 Before execution the full intended work manifest is committed. Stable task keys bind versions, evidence, instructions, schema, parameters, provider/model and implementation/lock digest. Resubmit the same work to resume; successful matching outputs are explicitly logged as cache reuse. Failed attempts remain, with bounded retries. An interrupted intent with no durable completion is an unknown outcome: inspect it and use `resolve_attempt` with an explicit reason before retrying. It is never a negative finding.
 

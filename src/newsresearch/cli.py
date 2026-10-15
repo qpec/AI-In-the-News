@@ -60,6 +60,10 @@ def main() -> int:
             "prepare_legacy_pilot",
             "plan_embeddings",
             "embed",
+            "build_vector_index",
+            "vector_search",
+            "evaluate_vector_index",
+            "inspect_candidates",
         ],
     )
     run.add_argument("--input", type=Path, required=True)
