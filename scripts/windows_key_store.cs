@@ -7,6 +7,7 @@ using System.Text;
 public static class NewsKeyStore
 {
     public const string Target = "AI-In-the-News/OpenAI";
+    public const string NewsApiTarget = "AI-In-the-News/NewsAPI.ai";
     private const int NotFound = 1168;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -39,7 +40,9 @@ public static class NewsKeyStore
 
     private static void CheckTarget(string target)
     {
-        if (target != Target && !target.StartsWith(Target + "/test/", StringComparison.Ordinal))
+        if (target != Target && target != NewsApiTarget
+            && !target.StartsWith(Target + "/test/", StringComparison.Ordinal)
+            && !target.StartsWith(NewsApiTarget + "/test/", StringComparison.Ordinal))
             throw new ArgumentException("Unsupported application credential target");
     }
 
@@ -52,8 +55,9 @@ public static class NewsKeyStore
         try
         {
             var credential = new Credential {
-                Type = 1, TargetName = target, UserName = "OpenAI",
-                Comment = "AI In the News local embedding credential",
+                Type = 1, TargetName = target,
+                UserName = target.StartsWith(NewsApiTarget, StringComparison.Ordinal) ? "NewsAPI.ai" : "OpenAI",
+                Comment = "AI In the News local API credential",
                 CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(value),
                 CredentialBlob = blob, Persist = 2 // CRED_PERSIST_LOCAL_MACHINE, current user's credential set.
             };

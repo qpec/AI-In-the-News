@@ -10,7 +10,8 @@ import pytest
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows Credential Manager integration")
-def test_windows_credential_roundtrip_and_isolation(tmp_path: Path) -> None:
+@pytest.mark.parametrize("target_name", ["Target", "NewsApiTarget"])
+def test_windows_credential_roundtrip_and_isolation(tmp_path: Path, target_name: str) -> None:
     root = Path(__file__).resolve().parents[1]
     helper = str(root / "scripts/windows_key_store.cs").replace("'", "''")
     script = tmp_path / "credential_test.ps1"
@@ -35,7 +36,7 @@ try {
 } finally { [NewsKeyStore]::Delete($target) }
 if ([NewsKeyStore]::Exists($target)) { throw 'Synthetic credential was not removed' }
 Write-Output 'Credential storage checks passed.'
-""".replace("__HELPER__", helper),
+""".replace("__HELPER__", helper).replace("::Target", "::" + target_name),
         encoding="utf-8",
     )
     result = subprocess.run(
