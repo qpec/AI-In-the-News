@@ -142,6 +142,8 @@ class Research:
             "export": self._export,
             "status": self._status,
             "collect": self._collect,
+            "newsapi_probe": self._newsapi_probe,
+            "newsapi_overview": self._newsapi_overview,
             "hook": self._hook,
             "evaluate": self._evaluate,
             "review_queue": self._review_queue,
@@ -612,6 +614,18 @@ class Research:
             "status": "pending human review; labels are provisional",
             "versions": context.versions,
         }
+
+    @audited_handler
+    def _newsapi_overview(self, session: str, context: Context, data: Json) -> Json:
+        from .newsapi_probe import overview
+
+        return overview(self, session, context, data)
+
+    @audited_handler
+    def _newsapi_probe(self, session: str, context: Context, data: Json) -> Json:
+        from .newsapi_probe import probe
+
+        return probe(self, session, context, data)
 
     @audited_handler
     def _collect(self, session: str, context: Context, data: Json) -> Json:

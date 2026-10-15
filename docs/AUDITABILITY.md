@@ -84,6 +84,16 @@ Official references: [Codex hooks](https://learn.chatgpt.com/docs/hooks), [advan
 
 ## Unfinished integrations
 
+The separate [Dutch cyber-news pilot](NL_CYBER_SEARCH_PILOT.md) adds a narrowly
+authorized `newsapi_probe` operation through `Research.execute()`, with immutable
+pre-dispatch reservations, ten-dispatch/200-token conservative budgeting, protected
+responses, no automatic retries and exact supported presentations. This does not
+enable general `collect` or pagination. Its actual historical checks reported no
+archive use; three-year coverage remains unestablished. One early non-JSON failure
+has an unresolved reserved outcome without captured response bytes. Later adapter
+versions retain non-JSON failures. See the study method for observed counts and
+billing limitations.
+
 The bounded adapter currently requires unchanged approval content on resume. A code-only review identified that changing approval metadata (including expiry) can change the plan identity used by the holdout-open lookup. Do not amend an existing workflow approval or treat its held-out articles as newly sealed; immutable approval-lineage enforcement is still required before that path is supported. The actual 2026-10-15 resume preserved identical approval content and never opened its held-out set. See [VERIFICATION](VERIFICATION.md) for the partial execution outcome.
 
 The [adaptive cutoff v3 adapter](ADAPTIVE_LLM_CUTOFF.md) and its [Codex CLI gateway transport](CODEX_JUDGE_TRANSPORT.md) are implemented for the exact existing literal-query criterion. Expanded semantic criteria still require a separate new-query embedding/rescoring plan. Proven operating-system tool/filesystem isolation, guarantees over unobserved internal requests/generation/billing, and independent human validation remain unfinished. Fresh processes, read-only CLI and no-tools instructions do not prove isolation. A hard provider token/cost cap cannot be claimed without enforcement. The corpus-wide Responses adapter must not silently replace the selected Codex route. Registration and software tests neither execute judging nor turn model labels into human gold; actual run status belongs in verification and the visible result presentation.
