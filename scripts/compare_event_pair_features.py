@@ -5,6 +5,7 @@ import argparse
 from dataclasses import replace
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 from newsresearch.common import Config, default_workspace
@@ -12,7 +13,16 @@ from newsresearch.runtime import Research
 from newsresearch.storage import check_permissions
 
 
+def configure_output() -> None:
+    """Keep saved and printed research presentations faithful on Windows pipes."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    configure_output()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, default=default_workspace())
     parser.add_argument("--parent-result", required=True)
