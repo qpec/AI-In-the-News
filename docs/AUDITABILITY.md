@@ -94,6 +94,15 @@ has an unresolved reserved outcome without captured response bytes. Later adapte
 versions retain non-JSON failures. See the study method for observed counts and
 billing limitations.
 
+The user-authorized [continuation strategy](NL_CYBER_SEARCH_STRATEGY.md) preserves
+the same authorization/workspace and 200-token ceiling. V2 releases a reservation
+only against an immutable `req-tokens` receipt; every unknown charge keeps its
+original 20-token bound. No fresh budget is created. It adds official SDK-route,
+identifier-frame, proximity, usage and service-status diagnostics. These remain
+retrieval/technical results without incident acceptance or relevance judgements.
+One additional response was rejected before retention by credential detection;
+it remains an uncompleted, fully reserved outcome, without automatic retry.
+
 The bounded adapter currently requires unchanged approval content on resume. A code-only review identified that changing approval metadata (including expiry) can change the plan identity used by the holdout-open lookup. Do not amend an existing workflow approval or treat its held-out articles as newly sealed; immutable approval-lineage enforcement is still required before that path is supported. The actual 2026-10-15 resume preserved identical approval content and never opened its held-out set. See [VERIFICATION](VERIFICATION.md) for the partial execution outcome.
 
 The [adaptive cutoff v3 adapter](ADAPTIVE_LLM_CUTOFF.md) and its [Codex CLI gateway transport](CODEX_JUDGE_TRANSPORT.md) are implemented for the exact existing literal-query criterion. Expanded semantic criteria still require a separate new-query embedding/rescoring plan. Proven operating-system tool/filesystem isolation, guarantees over unobserved internal requests/generation/billing, and independent human validation remain unfinished. Fresh processes, read-only CLI and no-tools instructions do not prove isolation. A hard provider token/cost cap cannot be claimed without enforcement. The corpus-wide Responses adapter must not silently replace the selected Codex route. Registration and software tests neither execute judging nor turn model labels into human gold; actual run status belongs in verification and the visible result presentation.

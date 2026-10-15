@@ -1,5 +1,12 @@
 # Dutch cyber-news retrieval pilot, 2026-10-15
 
+This document preserves the initial v1 pilot and its ten-dispatch checkpoint.
+The user subsequently requested continued documentation research and tests.
+See [the revised strategy](NL_CYBER_SEARCH_STRATEGY.md) for the continuation:
+versioned v2 accounting retains the same 200-token authorization, releases only
+receipt-proven over-reservations, and keeps every unavailable charge fully reserved.
+The earlier fixed ten-dispatch rule is historical, not a fresh allowance.
+
 This separate exploratory study searches for Dutch news about hacks, ransomware
 and data breaches affecting the Netherlands. The requested publication window is
 2023-10-15 through 2026-10-15, inclusive. An article is a source; the eventual
