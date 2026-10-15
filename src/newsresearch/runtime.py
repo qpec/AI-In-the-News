@@ -42,6 +42,7 @@ VERSION_KINDS = {
     "evaluation",
     "embedding_profile",
     "retrieval_profile",
+    "model_profile",
 }
 FULL_BINDINGS = {
     "dataset",
@@ -158,6 +159,14 @@ class Research:
             "vector_search": self._vector_search,
             "evaluate_vector_index": self._evaluate_vector_index,
             "inspect_candidates": self._inspect_candidates,
+            "tag_retrieve": self._tag_retrieve,
+            "plan_tags": self._plan_tags,
+            "tag": self._tag,
+            "tag_inspect": self._tag_inspect,
+            "tag_review_queue": self._tag_review_queue,
+            "tag_review": self._tag_review,
+            "tag_calibrate": self._tag_calibrate,
+            "tag_apply": self._tag_apply,
         }
         if operation not in handlers:
             raise ResearchError("Unsupported research operation")
@@ -743,3 +752,47 @@ class Research:
 
         self._require(context, {"dataset", "retrieval_profile"})
         return inspect_candidates(self, session, context, data)
+
+    @audited_handler
+    def _tag_retrieve(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import retrieve
+
+        return retrieve(self, session, context, data)
+
+    @audited_handler
+    def _plan_tags(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.plan_tags(session, context, data)
+
+    @audited_handler
+    def _tag(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.tag(session, context, data)
+
+    @audited_handler
+    def _tag_inspect(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import inspect
+
+        return inspect(self, session, context, data)
+
+    @audited_handler
+    def _tag_review_queue(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import queue
+
+        return queue(self, session, context, data)
+
+    @audited_handler
+    def _tag_review(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import review
+
+        return review(self, session, context, data)
+
+    @audited_handler
+    def _tag_calibrate(self, session: str, context: Context, data: Json) -> Json:
+        from .tag_calibration import calibrate
+
+        return calibrate(self, session, context, data)
+
+    @audited_handler
+    def _tag_apply(self, session: str, context: Context, data: Json) -> Json:
+        from .tag_calibration import apply
+
+        return apply(self, session, context, data)

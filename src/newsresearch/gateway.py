@@ -361,6 +361,16 @@ class Gateway:
 
         return plan(self.engine, session, context, data)
 
+    def plan_tags(self, session: str, context: Context, data: Json) -> Json:
+        from .tagging import plan
+
+        return plan(self.engine, session, context, data)
+
+    def tag(self, session: str, context: Context, data: Json) -> Json:
+        from .tag_gateway import execute
+
+        return execute(self.engine, session, context, data)
+
     def embed(self, session: str, context: Context, data: Json) -> Json:
         from .embeddings import execute
 

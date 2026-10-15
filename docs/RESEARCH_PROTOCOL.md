@@ -109,6 +109,8 @@ Search results are exploratory coverage, not corpus-wide prevalence. Register pr
 
 ## Shared model gateway and review
 
+The [corpus-wide query tagging contract](QUERY_TAGGING.md) adds exhaustive article relevance processing through the same gateway. It checks all articles in the bound dataset, uses related retrieval only as context, calibrates a binary cutoff on reviewed examples, and tests that cutoff on a separate held-out split. Scores and generated tags remain provisional source annotations; missing/failed articles are never negative. These technical classification diagnostics do not change the dossier counting unit. Register `model_profile` and a `query-tag-calibration-v1` evaluation before the relevant plan, and use a separate `tag-run-approval-v1` policy for any paid execution.
+
 `batch` requires dataset, dossiers, protocol, question, selection, dossier_definition, codebook, prompt and profile bindings. It accepts distinct `dossier_ids`, `task_kind` (`classification`, `extraction`, `grouping`, `summarization`, `retrieval_judgement`), exact application `parameters`, and optional `max_items`. All task kinds share the same manifest, request, attempt, validation and review path. Optional prompt `details_schema` validates question-specific structured fields.
 
 The dossier-interpretation provider is a local deterministic **software mock**. It searches for a fixture phrase and otherwise returns uncertainty. Task-type support validates the shared contract; it does not imply scientifically useful extraction, summaries or grouping. Substantive provider extensions must implement `Provider.complete`, preserve permitted exact payloads and observable metadata, and retain gateway enforcement.

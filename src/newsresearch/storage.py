@@ -441,6 +441,7 @@ class Ledger:
             "embedding.context.saved": ["artifact"],
             "embedding.response.received": ["artifact"],
             "retrieval.artifact.saved": ["artifact"],
+            "tagging.artifact.saved": ["artifact"],
         }
         for row in self.db.execute("SELECT * FROM events ORDER BY seq"):
             count += 1

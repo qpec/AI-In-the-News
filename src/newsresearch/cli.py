@@ -12,7 +12,7 @@ from .runtime import Research
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Audited, offline-first dossier research. No live integrations are enabled."
+        description="Audited, offline-first research. Paid inference requires a plan-bound approval."
     )
     parser.add_argument(
         "--workspace", type=Path, default=default_workspace(), help="Protected storage outside Git"
@@ -64,6 +64,14 @@ def main() -> int:
             "vector_search",
             "evaluate_vector_index",
             "inspect_candidates",
+            "tag_retrieve",
+            "plan_tags",
+            "tag",
+            "tag_inspect",
+            "tag_review_queue",
+            "tag_review",
+            "tag_calibrate",
+            "tag_apply",
         ],
     )
     run.add_argument("--input", type=Path, required=True)
