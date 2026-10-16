@@ -1,5 +1,10 @@
 # Dutch cyber-incident news: collection strategy
 
+Current direction, 2026-10-16: the user prioritizes a minimal set of commonly used
+keywords. [The five-term proposal](NL_CYBER_MINIMAL_KEYWORDS.md) supersedes the
+expanded lexicon and three-branch approach below as the default future design.
+The following v1 design and its actual results remain preserved as history.
+
 Status: exploratory strategy revised after live retrieval diagnostics on 2026-10-15.
 The identifier-list approach and several query branches were exercised. Three-year
 archive coverage and incident-level relevance remain unvalidated. No model judging
