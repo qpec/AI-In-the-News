@@ -183,6 +183,7 @@ class Research:
             "event_pair_feature_experiment": self._event_pair_feature_experiment,
             "event_pair_conjunction_experiment": self._event_pair_conjunction_experiment,
             "event_pair_monotone_screen": self._event_pair_monotone_screen,
+            "apply_event_rule": self._apply_event_rule,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -916,6 +917,11 @@ class Research:
     @audited_handler
     def _event_pair_monotone_screen(self, session: str, context: Context, data: Json) -> Json:
         return self.gateway.event_pair_monotone_screen(session, context, data)
+
+    @audited_handler
+    def _apply_event_rule(self, session: str, context: Context, data: Json) -> Json:
+        from .event_rule_application_study import execute
+        return execute(self, session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:

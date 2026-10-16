@@ -86,6 +86,7 @@ def main() -> int:
             "event_pair_feature_experiment",
             "event_pair_conjunction_experiment",
             "event_pair_monotone_screen",
+            "apply_event_rule",
             "plan_tags",
             "tag",
             "tag_inspect",
