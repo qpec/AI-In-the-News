@@ -142,6 +142,14 @@ byte-cap rejection, so zero byte-cap recoveries occurred. These failed calls
 remain spent and missing. Subsequent model coverage and quality results must be
 reported from the continuation result, not inferred from the speed improvement.
 
+The first continuation subsequently stopped at one 180-second local timeout.
+Its cumulative 40 calls and 145 exposures remain preserved, with 360 tasks still
+pending; this is a transport obstacle, not an audit-preflight failure. See
+[the partial validation checkpoint](LUNA_GROUP_VALIDATION.md#first-bounded-workspace-continuation--2026-10-16).
+The updated tracked and installed Luna skill both passed the skill package
+validator using an isolated, offline cached PyYAML dependency. Project and global
+settings were unchanged.
+
 ## Operation
 
 `scripts/run_luna_bounded.py` runs audited offline export, audited offline import,

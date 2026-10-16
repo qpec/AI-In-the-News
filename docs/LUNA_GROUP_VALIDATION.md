@@ -212,3 +212,25 @@ parallel untouched-task continuation. Model failures remain missing, unknown
 outcomes still block execution, and no retries or new policy budget are created.
 Engineering tests and benchmarks are distinct from actual transfer or new Luna
 judgments; executed outcomes must be appended from protected results.
+
+## First bounded-workspace continuation — 2026-10-16
+
+Result `c305312a08b635fbf010f8a1591251cb485e815e5d1a4384ee99c5c7964330f2`
+is partial after 36 new primary calls: cumulative 40/400 attempts and 145/6,000
+article exposures, zero retries. Outcomes were 25 valid, 14 invalid, one unknown
+and 360 pending. There were no preparation exclusions. Among 300 groups: 12
+same-event, two mixed, 11 uncertain, 12 failed/unobserved and 263 pending. The
+85.7% complete-case value is only 12/14 decisive groups; bounds retaining all
+unknowns are 4.0%–99.3%. It does not establish useful grouping accuracy. All 100
+held-out groups remain pending; candidate-pool and corpus recall are unavailable.
+The exact saved result presentation was shown in this chat. Memberships remain
+unchanged.
+
+Technical diagnostic
+`69fab5fcbbb682c45ff0af27286770071be7f0fd80d289fb65c98317cee78660`
+identified the unknown attempt as a retained `codex_timeout_unknown_outcome` at
+180 seconds, with only thread/turn-start events and no completed answer. It made
+no model calls or article judgments and did not resolve remote generation or
+billing. The full exact diagnostic was presented. `scripts/diagnose_luna_transport.py`
+registers that metadata inspection before execution through the audited runtime.
+The timeout stays spent and null; it has not been retried.
