@@ -50,6 +50,17 @@ def main():
             versions = {kind: execute("version", {"kind": kind, "key": METHOD, "content": body})["id"]
                         for kind, body in content.items()}
             context_path.write_text(json.dumps(versions), encoding="utf-8")
+        sensitivity_path = workspace / "sensitivity-profile.json"
+        if not sensitivity_path.exists():
+            from newsresearch.keyword_sensitivity import METHOD as SENSITIVITY
+
+            profile = execute("version", {"kind": "retrieval_profile", "key": SENSITIVITY,
+                "content": {"method": SENSITIVITY, "mode": "exploratory", "population_estimate": False,
+                    "registered_during": "Collection, before final sensitivity calculations; extension motivated by observed RSS caps",
+                    "calculations": "Compare original5, common4families8forms, all10; per-publisher and cap-free whole-stratum sensitivity. Exact title-word counts in discovered union. Singular/plural pair overlap. Exhaustive size1..10 best first4period subset, lexicographic ties; freeze and test period5. Smallest train95percent subset is an exploratory operating candidate; heldout95percent is retrieval-only check, never gold recall or relevance validation",
+                    "missingness": "Use complete 11-query cells; exclude entire capped cells for cap-free sensitivity; empty denominators remain null",
+                    "limitations": "No new searches, semantic inference or incident counts. Broad Google matching and caps; selection bias remains. No population confidence interval or NewsAPI transfer claim"}})
+            sensitivity_path.write_text(json.dumps({"retrieval_profile": profile["id"]}), encoding="utf-8")
         result = execute("keyword_study", {"action": "report" if args.report or not args.execute else "run",
                          "execute": args.execute, "limit": args.limit}, versions)
         output = workspace / "latest-result.json"

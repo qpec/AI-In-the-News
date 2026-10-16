@@ -73,3 +73,20 @@ within this frame only. Keyword choice cannot resolve missing archive entitlemen
 
 Results are recorded in protected storage and shown in the research chat. This
 document specifies the method; it contains no claimed live results.
+
+## Exploratory sensitivity extension, registered during collection
+
+`nl-cyber-keyword-sensitivity-v1` is registered separately as a retrieval profile,
+before final calculation, because early RSS responses reached 100 entries. It
+preserves the original collection versions and result IDs, adds no searches and
+does not change collection selection. Compare the original five terms, eight
+forms in four common families, and all ten; add per-publisher and whole-stratum
+cap-free sensitivity, exact title token counts, and singular/plural overlap.
+Exhaustively compare subset sizes 1 through 10 on the first four periods, with
+lexicographic tie breaking, and freeze choices before testing period five. The
+smallest training subset reaching 95% discovered-pool coverage is an exploratory
+operating candidate; 95% in the held-out period is only a retrieval check. It is
+not a relevance threshold, calibrated article label, or verified real-world recall.
+Empty denominators remain null. Run `scripts/analyze_keyword_study.py` only after
+collection has no pending or unknown outcomes. This is a documented exploratory
+extension motivated during collection, not a claim of independent preregistration.

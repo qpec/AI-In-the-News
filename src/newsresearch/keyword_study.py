@@ -120,6 +120,10 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
             or selection.get("rules") != queries):
         raise ResearchError("Exact registered 550-query public RSS manifest required")
     action = data.get("action", "run")
+    if action == "sensitivity":
+        from .keyword_sensitivity import execute
+
+        return execute(engine, session, context, data)
     previous = [r for r in rows(engine, "keyword_query") if r["versions"] == context.versions]
     reservations = [r for r in rows(engine, "keyword_reservation") if r["versions"] == context.versions]
     if action == "run":

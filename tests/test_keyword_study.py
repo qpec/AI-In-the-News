@@ -75,3 +75,53 @@ def test_cap_and_title_dedup_sensitivity():
     assert a["possibly_capped"] == 1 and a["unique_records"] == 1
     assert a["heldout_strata"] == 0 and a["subsets"][0]["heldout"]["fraction"] is None
     assert json.dumps(a)
+
+
+def test_frozen_training_choice_and_cap_free_sensitivity():
+    from newsresearch.keyword_sensitivity import calculate
+
+    results = []
+    for period in [1, 5]:
+        for term in [*ks.TERMS, "control"]:
+            identifiers = []
+            if term in {"hack", "datalek", "control"}:
+                identifiers = ["a", "b"] if (term == "control" or (period == 1 and term == "hack") or (period == 5 and term == "datalek")) else ["a"]
+            results.append({"status": "completed", "query": {"term": term, "domain": "nos.nl", "period": period},
+                            "possibly_capped": period == 1 and term == "control",
+                            "items": [{"identity": i, "title_words": ["hack"], "title_publisher_identity": i} for i in identifiers]})
+    result = calculate(results)
+    assert result["subsets"][0]["terms"] == ["hack"]
+    assert result["subsets"][0]["train"]["fraction"] == 1
+    assert result["subsets"][0]["heldout"]["fraction"] == .5
+    assert result["subsets"][0]["uncapped_train"]["fraction"] is None
+    assert result["uncapped_strata"] == 1
+
+
+def test_unknown_outcome_is_reserved_not_retried(engine, monkeypatch):
+    run = setup(engine)
+    calls = []
+    def crash(q):
+        calls.append(q)
+        raise RuntimeError("Synthetic process interruption")
+    monkeypatch.setattr(ks, "fetch", crash)
+    with pytest.raises(RuntimeError):
+        run()
+    monkeypatch.setattr(ks, "fetch", lambda q: (calls.append(q) or (200, b"<rss><channel/></rss>")))
+    monkeypatch.setattr(ks.time, "sleep", lambda _: None)
+    result = run()
+    assert result["unknown"] == 1 and result["completed"] == 1
+    assert calls[0] != calls[1]
+
+
+def test_response_storage_failure_stops_without_acceptance(engine, monkeypatch):
+    run = setup(engine)
+    original = engine.ledger.artifacts.put_bytes
+    monkeypatch.setattr(ks, "fetch", lambda _: (200, b"<rss><channel/></rss>"))
+    def fail(raw):
+        if raw == b"<rss><channel/></rss>":
+            raise AuditError("Synthetic response storage failure")
+        return original(raw)
+    monkeypatch.setattr(engine.ledger.artifacts, "put_bytes", fail)
+    with pytest.raises(AuditError):
+        run()
+    assert not list(engine.ledger.db.execute("SELECT * FROM records WHERE kind='keyword_query'"))
