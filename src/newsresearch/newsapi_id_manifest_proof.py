@@ -347,12 +347,17 @@ def verify_proof_bytes(raw: bytes) -> Json:
                         or (row["ascending_reverse_equal"] is not None and (row["complete"] or row["ascending_reverse_equal"])
                             and (ascending_ids == reverse_ids) != row["ascending_reverse_equal"])):
                     raise AuditError("Packaged year IDs do not reproduce the reported set comparison")
+            final_scope = None
+            if "final-scope-verification.json" in checksums:
+                from .newsapi_id_manifest_final_audit import verify_scope_package
+                final_scope = verify_scope_package(archive, comparison)
     except (KeyError, ValueError, zipfile.BadZipFile, ResearchError) as error:
         raise AuditError("Proof package could not be independently replayed") from error
     return {"status": "verified", "files_checked": len(checksums), "raw_responses_checked": raw_count,
         "years_checked": len(comparison["years"]), "complete_year_comparisons": sum(bool(r["complete"]) for r in comparison["years"]),
         "quarter_pairs_checked": quarter_count,
         "archive_block_pairs_checked": block_count,
+        "final_scope_verification": final_scope,
         "outer_sha256": hashlib.sha256(raw).hexdigest(),
         "scope": "Byte integrity, raw-to-normalized IDs and available set-comparison replay; null absence remains unsettled, no independent provider attestation"}
 
@@ -360,7 +365,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
 def export_proof(engine: Research, session: str, reference: str, filename: str = "id-manifest-proof.zip") -> str:
     """Write the same anchored bytes to one fixed, protected, user-readable path."""
     raw = engine.ledger.artifacts.read_bytes(reference)
-    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip", "id-manifest-block-proof.zip"}:
+    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip", "id-manifest-block-proof.zip", "id-manifest-final-proof.zip"}:
         raise ResearchError("Use a fixed registered proof filename in protected storage")
     target = engine.ledger.root / filename
     if target.is_symlink() or target.is_junction():

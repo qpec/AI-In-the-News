@@ -142,6 +142,43 @@ or inconsistent replay does not establish completeness. The exact result overvie
 is recorded through `record_presentation` before being shown. No source evidence,
 working database, credential or protected proof package belongs in Git.
 
+The archive-only block test also left 2026 unsettled, with a reverse union of
+9,307 IDs and six observed IDs absent from the 9,301-ID saved collection.
+Those observations do not establish a complete missing count. At that checkpoint,
+known test charges totalled 277 tokens and account usage was 4,694/5,000. Preserve
+that partial proof and all earlier results.
+
+The final metadata-only step, `nl-cyber-id-manifest-final-audit-v1`, performs no
+further keyword search. `scripts/finalize_nl_cyber_manifest_audit.py` obtains an
+audited source diagnostic and registers the exact source proof and candidate-ID
+cohort before dispatch. One metadata-only batch may identify at most ten exact
+previously discrepant IDs, with a 50-token reservation; the original cumulative
+583-token authorization and unknown-charge reservations still apply. The exact
+cohort is bound in the versioned policy, rather than selected after seeing dates.
+
+The registered correction tests returned publication date and language against
+the unchanged original scope: 1 January 2020 through 15 October 2026 inclusive,
+language `nld`. Preserve every raw provider set. Exclude a candidate from an
+eligible comparison only when known metadata establishes an outside date or
+language. Missing, failed or ambiguous metadata cannot justify exclusion and
+remains explicit. This does not test the keyword match from a title or infer
+why the provider returned an ID. Any cause remains unestablished until supported
+by the recorded result.
+
+Replay each retained block pair and yearly union after the explicit scope
+decisions. Complete eligible coverage requires every complete pair to agree,
+zero cross-block overlap and resolved required scope checks. Otherwise report
+2026 as unsettled with observed candidates and unknown final coverage. Reuse
+the six settled years with their original observation times. No further keyword
+queries or metadata repetition are authorized by this final step.
+
+Save `id-manifest-final-proof.zip`, the protected final JSON audit and candidate
+CSV, including raw-versus-eligible counts, exact IDs and all individual scope
+decisions, metadata source links, prior disagreements, method versions, actual
+costs and checksums. Capture the exact final overview with `record_presentation`.
+Even agreeing eligible sets establish only the observed provider universe at
+the retained request times, not a permanent snapshot or all published-news recall.
+
 Primary technical references:
 
 - https://newsapi.ai/plans
