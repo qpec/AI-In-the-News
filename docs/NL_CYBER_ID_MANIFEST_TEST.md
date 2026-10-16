@@ -199,6 +199,36 @@ software behavior, not provider completeness.
 
 Primary technical references:
 
+The user subsequently authorized diagnosis and resolution of the six unknown
+2026 IDs under the same cumulative 583-token cap. The initial
+`nl-cyber-id-manifest-resolution-v1` diagnostic registers new protocol/policy
+versions before inspecting only the exact retained final-audit metadata
+receipts. It preserves HTTP/provider errors, raw JSON identity, timestamps and
+prior versions, with zero new API or model calls. New paid templates must be
+registered after that diagnosis and primary API-documentation review; this
+amendment does not repeat requests or release unknown-charge reservations.
+
+The saved metadata response returned HTTP200 with a separate explicit
+`Invalid article uri ... was provided` error for each of the six IDs. The
+registered resolution continuation tests the documented SDK detail endpoint and
+the independent exact-ID article-list route, including one deterministically
+selected saved 2026 positive control. It then enumerates actual article metadata
+for the disputed September1–October15 window with the unchanged original eight
+keywords and selection. The exact bounded matrix contains two controls and at
+most thirty100-record ascending pages, with fifty-token reservations and the
+same shared583-token cap. Unknown fees/outcomes are never released; no hidden
+retries occur. Required storage failure stops immediately.
+
+Complete metadata enumeration requires stable totals, every expected page,
+unique identities, confirmed archive routing and returned date/language scope.
+Its retrievable population is reported separately from the raw URI-list frame.
+Only explicit invalid-ID responses from both detail routes, working controls,
+a complete alternative list omitting the IDs and complete keyword enumeration
+omitting them justify the technical label `provider_unresolvable`. This does
+not establish deletion or article eligibility and never silently removes IDs
+from the raw manifest. Save both prior and updated proof packages, with an
+additional independent replay of all resolution receipts and calculations.
+
 - https://newsapi.ai/plans
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/QueryArticles.py
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py

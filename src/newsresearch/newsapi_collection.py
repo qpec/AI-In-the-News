@@ -152,6 +152,12 @@ def save_cost(engine: Research, session: str, identifier: str, receipt: Json) ->
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
+    if data.get("action") == "id_manifest_resolution_diagnostic":
+        from .newsapi_id_manifest_final_audit import diagnose
+        return diagnose(engine, session, context, data)
+    if data.get("action") in {"id_manifest_resolution_prepare", "id_manifest_resolution"}:
+        from .newsapi_id_manifest_resolution_run import prepare, run as resolve
+        return (prepare if data["action"] == "id_manifest_resolution_prepare" else resolve)(engine, session, context, data)
     if data.get("action") == "id_manifest_final_source":
         from .newsapi_id_manifest_final_audit import source as id_manifest_final_source
         return id_manifest_final_source(engine, session, context, data)

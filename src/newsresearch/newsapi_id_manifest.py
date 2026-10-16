@@ -79,7 +79,15 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
              reserve_override: int | None = None) -> Json:
     require_active(engine, session)
     usage = parameters == {"endpointVariant": "usage"}
-    metadata = parameters.get("endpointVariant") == "article_info"
+    resolution = purpose.startswith("resolution_") and not usage
+    if resolution:
+        policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
+        if (policy.get("resolution_method") != "nl-cyber-id-manifest-resolution-v1"
+                or policy.get("authorization_id") != AUTH_ID or policy.get("max_tokens") != CAP
+                or parameters not in policy.get("resolution_templates", [])
+                or parameters.get("includeArticleBody") is not False or parameters.get("articleBodyLen") != 0):
+            raise ResearchError("Resolution dispatch requires an exact registered metadata-only template")
+    metadata = parameters.get("endpointVariant") == "article_info" or resolution
     reserve = USAGE_RESERVATION if usage else SEARCH_RESERVATION if metadata else RESERVATIONS[parameters["uriWgtListCount"]]
     if reserve_override is not None:
         policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
@@ -131,6 +139,12 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
                 raise ResearchError("Credential echo rejected")
             require_no_credentials(parsed)
             require_no_credentials(headers)
+            def has_body(value: object) -> bool:
+                if isinstance(value, dict):
+                    return any((k == "body" and bool(v)) or has_body(v) for k, v in value.items())
+                return isinstance(value, list) and any(has_body(item) for item in value)
+            if resolution and has_body(parsed):
+                raise ResearchError("Unexpected article body rejected from resolution metadata retention")
             if metadata and any(isinstance(item, dict) and isinstance(item.get("info"), dict)
                     and item["info"].get("body") for item in parsed.values()):
                 raise ResearchError("Unexpected article body rejected from metadata-only retention")

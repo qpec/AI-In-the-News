@@ -19,7 +19,39 @@ if TYPE_CHECKING:
     from .runtime import Research
 
 FINAL_METHOD = "nl-cyber-id-manifest-final-audit-v1"
+RESOLUTION_METHOD = "nl-cyber-id-manifest-resolution-v1"
 SCOPE = {"date_start": "2020-01-01", "date_end": "2026-10-15", "lang": "nld"}
+
+
+def diagnose(engine: Research, session: str, context: Context, data: Json) -> Json:
+    """Inspect retained exact-ID responses without dispatching any request."""
+    require_active(engine, session)
+    engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
+    policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
+    if (policy.get("resolution_method") != RESOLUTION_METHOD or policy.get("authorization_id") != AUTH_ID
+            or policy.get("max_tokens") != CAP):
+        raise ResearchError("Register the offline resolution diagnostic under the original authorization")
+    finals = records(engine, "newsapi_id_manifest_final_audit")
+    if not finals:
+        raise ResearchError("The existing final audit is required")
+    previous = finals[-1]
+    if any(context.versions[k] != previous["versions"][k] for k in ("selection", "question", "profile")):
+        raise ResearchError("The diagnostic must preserve the original selection")
+    receipts = []
+    for identifier in previous["metadata_receipts"]:
+        receipt = engine.ledger.get(identifier, "newsapi_id_receipt")
+        raw = engine.ledger.artifacts.read_bytes(receipt["raw_response"]) if receipt.get("raw_response") else None
+        if raw is not None and canonical(json.loads(raw)) != canonical(receipt["response"]):
+            raise AuditError("Metadata receipt does not reproduce its raw response")
+        receipts.append({"id": identifier, "parameters": receipt["parameters"], "http_status": receipt["http_status"],
+            "outcome": receipt["outcome"], "headers": receipt.get("headers"), "response": receipt.get("response"),
+            "completed_at": receipt["completed_at"], "raw_response": receipt.get("raw_response")})
+    result = {"versions": context.versions, "authorization_id": AUTH_ID, "method": RESOLUTION_METHOD,
+        "source_audit": previous["id"], "source_versions": previous["versions"], "metadata_ids": previous["metadata_ids"],
+        "metadata_receipts": receipts, "budget": accounting(records(engine, "newsapi_id_intent"), records(engine, "newsapi_id_receipt")),
+        "new_api_calls": 0, "model_calls": 0, "generated_at": utc()}
+    identifier = engine.ledger.record(session, "newsapi_id_manifest_resolution_diagnostic", str(uuid.uuid4()), result)
+    return {"id": identifier, **result}
 
 
 def bound_source(engine: Research, context: Context) -> Json:
