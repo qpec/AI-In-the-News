@@ -71,4 +71,54 @@ uv run --offline --frozen pytest -q tests/test_event_group_refinement.py tests/t
 uv run --offline --frozen python scripts/refine_event_groups.py --parent-result <application-id> --comparison-key <stable-key> --user-instruction <exact-instruction> --output-directory C:/protected/research/runs/group-refinement
 ```
 
-Actual results will be appended after the audited comparison.
+## Completed comparison — 2026-10-16
+
+Immutable result:
+`1e803a0c84fe80ef441005687209364dd3302a3b0ab1f3e8169ea76f0e55600d`.
+Manifest:
+`9ceaf97222e2a4f498c5a56a464c74f3f2ee6d5c19e947db11d9c632da7e065b`.
+The candidate was frozen as
+`ef2ab015da3879477d88b0480c309e9814dd1d673072b639642335d4e511113a`
+before the reference check. Its exact result overview was captured as a prepared
+chat presentation; UI delivery and reading remain unobserved.
+
+| Technical diagnostic | Original | Full candidate | Applied after guard |
+| --- | ---: | ---: | ---: |
+| Multi-article groups | 1,596 | 1,562 | 1,579 |
+| Grouped articles | 4,017 | 4,016 | 4,012 |
+| Review singletons | 15,532 | 15,533 | 15,537 |
+| Passing within-group links | 4,099 | 4,455 | 4,225 |
+| Review bridges | 7,569 | 7,213 | 7,443 |
+| Duplicate-discounted support | 741.7026 | 795.5523 | 760.6723 |
+
+The full candidate changed memberships for 932 articles. It converged in four
+passes; the graph-refinement computation took 0.3282133 seconds. That timing
+excludes the full audit preflight, input loading, reference checks and durable
+exports; it is not an end-to-end speed benchmark.
+
+The candidate newly joined one of the 26 different-event model references.
+The prospective guard retained the baseline in its entire connected component.
+The applied version changed memberships for 428 articles and retained exactly
+the prior reference co-memberships: ten of fourteen same-event, zero of twenty-six
+different-event and two of fourteen uncertain references. All fifty-four
+references were evaluable; none was excluded or replaced. All probabilities,
+weights, candidate/selected decisions and the blocked component's exact members
+and reasons remain in protected artifacts. The development-selected guard is not
+an independent accuracy test.
+
+The new provisional partition was applied to all 20,000 pilot articles. All
+88,088 original feature rows were reused; feature failures and pending processing
+were zero. The 424 missing-vector articles and 27 vector-bearing articles without
+usable publication dates remain unprocessed. No new embeddings, model calls or
+held-out labels were used. Accepted dossiers remain zero, and the cutoff's failed
+development status is unchanged. Graph support improved; improved real-world
+event accuracy has not been established.
+
+Private exports retain the selected and candidate groups, per-article states,
+review bridges, group lineage and complete development comparison. Sources,
+metadata, payloads, working databases and logs remain outside Git.
+
+Verification: all five focused synthetic tests passed; the integration scenario
+was rerun after the component guard/binding hardenings and passed. Ruff, mypy for
+the new modules/launcher, CLI help and `git diff --check` passed. The full suite was
+not repeated. Existing unrelated workspace-clone work was preserved.
