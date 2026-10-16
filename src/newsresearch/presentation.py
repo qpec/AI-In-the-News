@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 RESULT_KINDS = {
+    "keyword_study",
     "newsapi_probe",
     "newsapi_overview",
     "search", "candidate_run", "article_candidates", "article_query_run",

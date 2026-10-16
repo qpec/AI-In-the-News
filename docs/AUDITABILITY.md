@@ -84,6 +84,14 @@ Official references: [Codex hooks](https://learn.chatgpt.com/docs/hooks), [advan
 
 ## Unfinished integrations
 
+The separate [550-search Dutch keyword diagnostic](NL_CYBER_KEYWORD_VALIDATION.md)
+uses the registered `keyword_study` operation for public Google News RSS metadata.
+Per-query durable reservations precede network requests; unknown dispatches are
+not silently retried. Results and exact presentations are protected and version
+bound. This exploratory retrieval diagnostic performs no model judgement, paid
+inference, incident counting or publisher-body collection. Google index caps and
+language/country uncertainty remain explicit; generic live collection stays disabled.
+
 The separate [Dutch cyber-news pilot](NL_CYBER_SEARCH_PILOT.md) adds a narrowly
 authorized `newsapi_probe` operation through `Research.execute()`, with immutable
 pre-dispatch reservations, ten-dispatch/200-token conservative budgeting, protected
