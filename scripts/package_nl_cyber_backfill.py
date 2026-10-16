@@ -41,6 +41,8 @@ def main() -> None:
             "method": COPY_METHOD, "repository": REPOSITORY, "topic": TOPIC + "/extensions/2020-2023",
             "user_authorized_private_dataset_copy": True,
             "materialization_result": original["id"], "missingness_result": missing["id"],
+            "original_snapshot_missingness": json.loads((root / "fetch-missingness.json").read_text(encoding="utf-8"))["id"],
+            "combined_calculation": "Verify nonoverlapping publication periods and bind original plus extension missingness/materialization IDs; add record/body/page/provider-gap counts and sum calendar-year rows. Do not claim combined provider-ID uniqueness or event counts",
             "user_instruction": "User requests pushing this dataset to a separate Cybercrime NL topic with method and missing retrieval data, then extends the same collection to2020 using remaining quota. Copy the added periods as an extension child topic, preserving the original snapshot",
             "validation": "Named private GitHub repository, exact source lineage and method bindings, bundle and row hashes, credentials, scope and counts; record intent before writes, refuse overwrite",
             "include": "Four safe extension year bundles, exact retrieval method, aggregate missingness, year CSV, missing-field locator inventory and checksums",

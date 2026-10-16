@@ -191,3 +191,10 @@ allowance. A further inconsistent response lacks retry permission and stops.
 Missingness uses the same valid-page rule and counts anomalies as failed/invalid
 attempts; successful matching retries are separately identified. Provider/index
 recall remains unknown even after consistency is restored.
+
+The extension copy policy also binds the original immutable missingness result.
+`combined-coverage.json` verifies that the original and extension publication
+intervals do not overlap, then adds record, body, page and provider-gap counters
+and aggregates calendar-year rows (including the two disjoint 2023 partitions).
+This is a deterministic retrieval diagnostic, not a dossier measurement or a
+claim of combined provider-ID uniqueness, event counts or real-world recall.

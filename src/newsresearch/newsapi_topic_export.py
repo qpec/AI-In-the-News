@@ -140,6 +140,31 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         "private_repository_exception": policy["user_instruction"],
         "not_in_repository": "Credentials, working database, audit logs, raw response artifacts and per-request billing log"}
     contents["retrieval-method.json"] = (json.dumps(method, ensure_ascii=False, indent=2) + "\n").encode()
+    combined = None
+    if backfill:
+        base = engine.ledger.get(policy["original_snapshot_missingness"], "newsapi_collection_missingness")
+        intervals = sorted((y["date_start"], y["date_end"]) for y in base["years"] + missing["years"])
+        if ([(y["date_start"], y["date_end"]) for y in base["years"]] != PERIODS
+                or any(intervals[i][0] <= intervals[i-1][1] for i in range(1, len(intervals)))):
+            raise ResearchError("Combined snapshot publication intervals overlap or differ from registered scope")
+        combined_years: dict[str, Json] = {}
+        for y in base["years"] + missing["years"]:
+            entry = combined_years.setdefault(y["year"], {"year": y["year"], "records": 0, "provider_matches": 0, "missing_body": 0, "pages": 0})
+            entry["records"] += y["returned"]
+            entry["provider_matches"] += y["provider_total"]
+            entry["missing_body"] += y.get("missing_body_quarantined", 0) + y.get("missing_body_other", 0)
+            entry["pages"] += y["successful_pages"]
+        combined = {"date_start": intervals[0][0], "date_end": intervals[-1][1],
+            "records": base["total_records"] + missing["total_records"],
+            "body_present": base["body_present"] + missing["body_present"],
+            "missing_body": base["missing_body"] + missing["missing_body"],
+            "successful_pages": base["successful_pages"] + missing["successful_pages"],
+            "missing_pages": sum(len(y["missing_page_indices"]) for y in base["years"] + missing["years"]),
+            "unretrieved_provider_matches": sum(y["count_gap"] for y in base["years"] + missing["years"]),
+            "years": sorted(combined_years.values(), key=lambda y: y["year"]),
+            "source_missingness_results": [policy["original_snapshot_missingness"], policy["missingness_result"]],
+            "limitations": "Record-count sums across nonoverlapping publication intervals; combined provider-ID uniqueness not calculated. No event counts, semantic relevance, index recall or full publisher-text fidelity validation"}
+        contents["combined-coverage.json"] = (json.dumps(combined, indent=2) + "\n").encode()
     contents["README.md"] = (backfill_readme(original, missing, len(inventory)) if backfill else README).encode()
     checksums = {name: hashlib.sha256(raw).hexdigest() for name, raw in contents.items()}
     contents["SHA256SUMS.txt"] = "".join(f"{value}  {name}\n" for name, value in sorted(checksums.items())).encode()
@@ -166,6 +191,8 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         "source_result": policy["materialization_result"], "missingness_result": policy["missingness_result"],
         "new_newsapi_requests": 0, "new_model_calls": 0, "repository_metadata_requests": 1,
         "git_push_status": "not_performed_by_export_operation", "generated_at": utc()}
+    if combined is not None:
+        result["combined_coverage"] = combined
     identifier = engine.ledger.record(session, "newsapi_topic_export", str(uuid.uuid4()), result)
     return {"id": identifier, **result}
 
@@ -203,6 +230,9 @@ def backfill_readme(original: Json, missing: Json, affected: int) -> str:
         "`retrieval-method.json` contains credential-free request templates: increment "
         "`articlesPage` beyond the illustrative page 1. `SHA256SUMS.txt` inventories this "
         "extension's other files.\n\n"
+        "`combined-coverage.json` adds record/body/page counts across the nonoverlapping "
+        "original and extension windows, including calendar-year sums. It does not "
+        "claim combined provider-ID uniqueness or event counts.\n\n"
         "`coverage-by-year.csv` and `missingness.json` distinguish missing pages, provider "
         "count gaps, missing bodies, quarantines, unavailable raw snapshots and failures/retries. "
         f"`records-with-missing-fields.csv` identifies {affected} records with at least one "
