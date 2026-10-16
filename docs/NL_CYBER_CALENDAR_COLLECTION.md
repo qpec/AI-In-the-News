@@ -119,3 +119,26 @@ publisher-text completeness. Query-page completeness cannot establish recall of
 all Netherlands incidents or all Dutch news. Missing fields not returned by the
 provider are distinguished from local retention exclusions; the original matched
 credential-like strings and non-locator trigger fields remain unobserved.
+
+## User-authorized private repository topic copy — 2026-10-16
+
+The user explicitly requested pushing this collection to the data repository as
+a separate Cybercrime NL topic, including retrieval methods and missingness.
+This is a narrow exception to the earlier local-only restriction: four unchanged
+safe working bundles and method/missingness summaries may be copied to the named
+private `qpec/AI-In-the-News-Data` repository. Other datasets, public redistribution,
+credentials, working databases, audit logs, original raw responses and per-request
+billing logs remain outside Git. Do not apply this exception to future exports.
+
+`scripts/export_nl_cyber_topic.py` registers the explicit `export_policy` before
+`Research.execute("newsapi_collection", {"action": "topic_export", ...})`.
+The handler verifies original version/result lineage, the exact push remote and
+live private repository status. It validates immutable bundle hashes, individual
+row hashes, date/language scope, credential screening, record totals and missing
+bodies before writing a durable export intent and creating the new topic.
+It refuses to overwrite an existing topic. Source text is not judged or changed.
+The topic includes exact request templates, year coverage CSV, aggregate JSON,
+missing-field record inventory and SHA-256 checksums. Export audit records stay
+protected. The operation prepares files only; Git commit/push are separate,
+explicitly user-authorized repository operations, with their outcomes reported
+in this task. No new NewsAPI.ai requests or model calls are made.

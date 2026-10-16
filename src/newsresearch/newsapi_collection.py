@@ -167,6 +167,10 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         from .newsapi_missingness import run as missingness
 
         return missingness(engine, session, context, data)
+    if data.get("action") == "topic_export":
+        from .newsapi_topic_export import run as topic_export
+
+        return topic_export(engine, session, context, data)
     if engine.config.offline or data.get("execute") is not True:
         raise ResearchError("Explicit online execution required")
     if data.get("action") == "collect":
