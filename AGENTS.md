@@ -27,4 +27,20 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Working grouping decision — 2026-10-16
+
+- The user withdrew the thirty-day compromise before any operating choice was
+  applied and explicitly keeps the **current guarded seven-day** pilot groups.
+  Preserve the policy and actual results in [CROSS_WINDOW_GROUP_LINKS](docs/CROSS_WINDOW_GROUP_LINKS.md).
+  This is a human method decision, not validation of the cutoff or individual
+  memberships. The raw seven-day comparison candidate is a different frame.
+- Keep longer-span event linking separate. The implemented full-provider-anchor,
+  complete-cross-feature tier produced **zero eligible cross-window group pairs**
+  in this pilot. Do not claim it recovered long-span events or proved accuracy.
+  Broader linking requires source-backed event-coreference review, with uncertain
+  outcomes and whole-group consistency retained. That semantic component remains
+  unfinished; no new paid/model run is implied. Similarity is not probability.
+
+## Commit practice
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.

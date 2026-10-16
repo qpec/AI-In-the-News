@@ -68,3 +68,59 @@ the new files, mypy on the new modules and launcher, and `git diff --check`.
 Preserve audit-failure, frozen resume, source/version identity, missingness,
 nontransitivity, raw-reference conflicts and no-acceptance behavior. The additive
 dispatch/presentation kind does not change shared audit machinery.
+
+## Executed decision and diagnostic — 2026-10-16
+
+The seven-day working policy was recorded as
+`15a67b60fe40ec3ba0f1aadd6c63103348b5c667a9d6ddc6f8816898b30230e7`.
+Result: `3b583ea51cfed6a3d4964a05decd6436c101e149a7a36552d5a9a2516c01ef52`.
+Manifest: `46c22488592d586deb2d9f2632200c21f2a0824df2c825dd09e759cea3b3d1a8`.
+Exact prepared presentation artifact:
+`4ce315690983691924759fb8df3b86e88c268e2883180e3edf7b909f663a12f6`.
+Prepared does not establish verified UI delivery or reading.
+
+The current guarded frame remains 1,579 provisional multi-article groups,
+4,012 grouped articles and 15,537 review singletons. Saved model-reference
+co-memberships are 10/14 same-event, 0/26 different-event and 2/14 uncertain.
+The guard already used these development labels; this is not an independent
+accuracy test, and zero known conflicts is not a zero corpus-error estimate.
+
+Provider anchoring across the 1,579 multi-article groups:
+
+| Metadata status | Groups |
+| --- | ---: |
+| Fully populated by one consistent provider event ID | 531 |
+| Partial provider-ID coverage | 347 |
+| Multiple distinct populated provider IDs | 446 |
+| No populated provider IDs | 255 |
+
+**Zero fully anchored group pairs qualified for the cross-window candidate
+frame.** Therefore zero pairs reached the cross-feature/diversity checks, zero
+group-merge proposals were formed, zero were quarantined and zero await event-fact
+review. This is not evidence that longer-span same-event groups do not exist.
+The full-provider-ID gate has no cross-window proposal coverage in this pilot;
+this first tier does not solve the broader linking objective.
+
+All 54 saved model-reference pairs were reused; none changed co-membership and
+none was unprocessed. This zero-change check cannot validate the mechanism's
+precision. The new mechanism remains unjudged and uncalibrated.
+
+Scope: 20,000 original pilot articles, 424 missing vectors and 27 vector-bearing
+unusable dates; original feature failures/pending pairs zero. New model calls,
+embeddings, actual merges and accepted event dossiers zero. Seven-day memberships
+and historical thirty-day experiment results remain unchanged. Exact group-level
+anchoring statuses, empty candidate/proposal frames and reference effects are
+retained privately.
+
+The next substantive component is an evidence-based event-coreference check for
+groups without a complete shared provider anchor. It must compare source-backed
+actors, action, place and event date and explicitly return same/different/uncertain,
+with cluster-wide consistency checks. Candidate similarity cannot itself become
+an extreme-probability claim. This component was **not** implemented or executed
+by the metadata-anchored diagnostic; no new paid/model judging is authorized by
+this result. Do not relax the frozen first-tier criteria silently.
+
+Software checks: four focused synthetic tests passed in 1.74 seconds; after the
+presentation addition the affected integration scenario passed in 1.73 seconds.
+Ruff and mypy passed, as did `git diff --check`. Tests establish software behavior
+only; no full-suite rerun or new scientific validation was claimed.
