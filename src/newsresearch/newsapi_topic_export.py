@@ -121,6 +121,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         "provenance": {"materialization_result": policy["materialization_result"], "missingness_result": policy["missingness_result"],
             "method_versions": context.versions}, "exported_at": utc(), "new_newsapi_requests": 0, "new_model_calls": 0})
     summary["costs"]["account_ceiling"] = original.get("account_ceiling", 4000)
+    summary["inconsistent_provider_responses"] = original.get("inconsistent_responses", [])
     contents["missingness.json"] = (json.dumps(summary, ensure_ascii=False, indent=2) + "\n").encode()
     year_fields = ["year", "date_start", "date_end", "returned", "body_present", "quarantined", "missing_body_quarantined",
         "missing_body_other", "successful_pages", "provider_pages", "provider_total", "count_gap", "missing_page_indices",
@@ -216,6 +217,11 @@ def backfill_readme(original: Json, missing: Json, affected: int) -> str:
         f"There are {missing['nonblank_body_at_most_200_chars']} nonblank bodies of at most "
         "200 characters; short text alone is not evidence of truncation.\n\n"
         "## Actual costs and limits\n\n"
+        f"Historical failed/inconsistent attempts: {sum(y['failed_attempts'] for y in missing['years'])}; "
+        f"attempts with a matching successful retry: {sum(y['failed_attempts_with_successful_retry'] for y in missing['years'])}. "
+        "Inconsistent empty-zero responses within previously positive result pages are excluded "
+        "from successful pagination, preserved with their charges, and require explicit "
+        "receipt-bound retry decisions. The aggregate JSON retains safe anomaly references.\n\n"
         f"Backfill search requests explicitly reported **{original['reported_collection_cost']:g} tokens**. "
         f"Latest observed account usage: **{original['final_observed_used']:g}/5,000** "
         f"({100*original['final_observed_used']/5000:.2f}%). "

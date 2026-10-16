@@ -85,11 +85,11 @@ def main() -> None:
         progress_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         text = ("Query: `hack OR gehackt OR hackers OR ransomware OR datalek OR datalekken OR cyberaanval OR cyberaanvallen`, title/body, Dutch-language news. "
                 "**Backfill: 1 January 2020 through 14 October 2023**, separate calendar-year requests,100articles/page, ascending publication date.\n\n"
-                "| Year | Pages retrieved | Articles | Provider matches | Reported search tokens | Exhausted |\n|---|---:|---:|---:|---:|---|\n")
+                "| Year | Pages retrieved | Articles | Provider matches | Reported search tokens | Exhausted |\n|---|---:|---:|---:|---:|---:|---|\n")
         for y in result["years"]:
             text += f"| {y['year']} | {y['pages']} | {y['returned']:,} | {y['provider_total']} | {y['reported_cost']:g} | {y['exhausted']} |\n"
-        text += (f"\n**{result['unique_articles']:,} unique candidate articles**, {result['missing_body']} missing texts, {result['failed_pages']} failed/interrupted attempts and {result['scope_invalid']} invalid-scope rows. "
-                 f"Account usage: **{result['baseline_used']:g} to {result['final_observed_used']:g}/5,000**, soft target4,000; hard ceiling{result.get('account_ceiling', 4000)}. "
+        text += (f"\n**{result['unique_articles']:,} unique candidate articles**, {result['missing_body']} missing texts, {result['failed_pages']} historical failed/inconsistent attempts and {result['scope_invalid']} invalid-scope rows. "
+                 f"Account usage: **{result['baseline_used']:g} to {result['final_observed_used']:g}/5,000**, soft target 4,000; hard ceiling {result.get('account_ceiling', 4000)}. "
                  f"Backfill requests explicitly report {result['reported_collection_cost']:g} tokens. Stop: `{result['stop_reason']}`. "
                  "Unexhausted years remain incomplete; article counts are not event/incident counts. No relevance scoring, cutoff or model judgement.\n\n")
         for a in result["examples"]:
