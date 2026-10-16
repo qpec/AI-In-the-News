@@ -91,6 +91,18 @@ lookups fit one bounded batch; excess or failed metadata stays unavailable and
 does not negate an observed ID. Preserve the earlier disagreements and the new
 requests together in a separate, replay-checked protected quarter proof package.
 
+The initial quarter validator accepted 2020 but rejected the recent October
+2026 pair because it required `req-archive=1`. The provider's pricing page says
+recent is the last 30 days; its SDK describes 31 days. A registered correction
+therefore allows explicit `req-archive=0` only if the complete exact requested
+interval is within the 30 days preceding **that receipt's own retrieval date**.
+The header, HTTP, response shape, unique-ID count, total and paired-set checks
+remain required. Retained October responses are revalidated without new quarter
+requests. Preserve their original failed status and the initial partial proof;
+append corrected decisions under new protocol/policy versions. The proof replay
+reads the same version-bound rule and original timestamps. A later observation
+date must never be substituted to make an older response qualify.
+
 Primary technical references:
 
 - https://newsapi.ai/plans

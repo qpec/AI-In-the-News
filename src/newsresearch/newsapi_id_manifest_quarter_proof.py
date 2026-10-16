@@ -11,7 +11,7 @@ from .common import Context, Json, ResearchError, canonical, digest, require_act
 from .newsapi_collection import number
 from .newsapi_id_manifest import AUTH_ID, CAP, METHOD, accounting, dispatch, load_baseline, parse_manifest, records, request
 from .newsapi_id_manifest_details import extract_info, info_request, metadata
-from .newsapi_id_manifest_proof import compare_frames, evidence_zip, export_proof, verify_proof_bytes
+from .newsapi_id_manifest_proof import RECENT_WINDOW_METHOD, archive_or_recent, compare_frames, evidence_zip, export_proof, verify_proof_bytes
 
 if TYPE_CHECKING:
     from .runtime import Research
@@ -26,7 +26,7 @@ def templates() -> list[Json]:
         for start, end in WINDOWS for ascending in (True, False)]
 
 
-def inspect_windows(receipts: list[Json]) -> list[Json]:
+def inspect_windows(receipts: list[Json], allow_recent: bool = False) -> list[Json]:
     rows = []
     for start, end in WINDOWS:
         row: Json = {"date_start": start, "date_end": end, "year": start[:4]}
@@ -40,7 +40,7 @@ def inspect_windows(receipts: list[Json]) -> list[Json]:
                 except ResearchError:
                     continue
                 if (r.get("outcome") == "received" and r.get("http_status") == 200
-                        and r.get("headers", {}).get("req-archive") == "1"
+                        and archive_or_recent(r, allow_recent)
                         and 0 <= total <= 5000 and len(ids) == total and len(ids) == len(set(ids))):
                     valid.append((r, ids, total))
             # Do not choose one successful repeated response and silently discard drift.
@@ -48,6 +48,7 @@ def inspect_windows(receipts: list[Json]) -> list[Json]:
             row[direction] = {"complete": complete, "ids": sorted(valid[0][1]) if complete else [],
                 "provider_total": valid[0][2] if complete else None,
                 "receipt": valid[0][0]["id"] if complete else None, "attempts": [r["id"] for r in candidates],
+                "validation_method": RECENT_WINDOW_METHOD if complete and valid[0][0].get("headers", {}).get("req-archive") == "0" else "archive_required",
                 "status": "complete" if complete else "pending" if not candidates else "invalid_or_repeated_response"}
         row["enumerated"] = row["ascending"]["complete"] and row["reverse"]["complete"]
         row["ascending_reverse_equal"] = row["ascending"]["ids"] == row["reverse"]["ids"] if row["enumerated"] else None
@@ -57,8 +58,8 @@ def inspect_windows(receipts: list[Json]) -> list[Json]:
 
 
 def compare_quarters(baseline: Json, identities: Json, old: Json, old_frames: dict[str, Json],
-                     receipts: list[Json]) -> tuple[Json, dict[str, Json]]:
-    windows = inspect_windows(receipts)
+                     receipts: list[Json], allow_recent: bool = False) -> tuple[Json, dict[str, Json]]:
+    windows = inspect_windows(receipts, allow_recent)
     frames = {start: {**frame} for start, frame in old_frames.items()}
     years = []
     for previous in old["years"]:
@@ -212,7 +213,8 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
                 "reason": "Exact-version completed quarter proof reused without provider calls"})
             return {**prior, "new_api_calls": 0, "reused": True, "proof_path": path, "proof_self_check": verified}
     def state() -> tuple[Json, dict[str, Json]]:
-        return compare_quarters(baseline, identities, old, old_frames, records(engine, "newsapi_id_receipt"))
+        return compare_quarters(baseline, identities, old, old_frames, records(engine, "newsapi_id_receipt"),
+            allow_recent=policy.get("recent_window_validation") == RECENT_WINDOW_METHOD)
     result, frames = state()
     limit = data.get("requests", 16)
     if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 16:
@@ -290,9 +292,13 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         metadata_billed_tokens=sum(r["billed_tokens"] for r in metadata_receipts if r.get("billed_tokens") is not None),
         stop_reason="quarter_confirmation_complete" if result["complete"] else "quarter_order_disagreement" if result["ascending_reverse_equal"] is False
             else "quarter_cross_window_overlap" if any(any(y.get("cross_quarter_duplicate_occurrences", {}).values()) for y in result["years"]) else stop)
-    reference = evidence_zip(engine, session, context, baseline, first, result, frames,
-        extra_json={"quarter-verification.json": {"method": QUARTER_METHOD, "source_proof_id": previous["id"], "windows": result["windows"]},
-            "source-reverse-proof.json": previous}, method=QUARTER_METHOD)
+    extra = {"quarter-verification.json": {"method": QUARTER_METHOD, "source_proof_id": previous["id"], "windows": result["windows"]},
+        "source-reverse-proof.json": previous}
+    older_quarter = records(engine, "newsapi_id_manifest_quarter_proof")
+    if policy.get("recent_window_validation") == RECENT_WINDOW_METHOD and older_quarter:
+        extra["prior-quarter-proof.json"] = older_quarter[-1]
+        export_proof(engine, session, older_quarter[-1]["proof_artifact"], filename="id-manifest-quarter-proof-initial.zip")
+    reference = evidence_zip(engine, session, context, baseline, first, result, frames, extra_json=extra, method=QUARTER_METHOD)
     result.update(proof_artifact=reference, proof_self_check=verify_proof_bytes(engine.ledger.artifacts.read_bytes(reference)),
         evidence_zip=reference, proof_path=export_proof(engine, session, reference, filename="id-manifest-quarter-proof.zip"))
     identifier = engine.ledger.record(session, "newsapi_id_manifest_quarter_proof", str(uuid.uuid4()), result)

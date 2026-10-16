@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import date, timedelta
 import io
 import json
 import os
@@ -23,12 +24,28 @@ if TYPE_CHECKING:
 
 CONFIRM_METHOD = "nl-cyber-id-manifest-reverse-proof-v1"
 PAGE_SIZE = 5000
+RECENT_WINDOW_METHOD = "nl-cyber-quarter-recent-window-v1"
 LIMITATION = (
     "Agreement of independent ascending and descending pagination establishes the observed provider ID set "
     "for these exact keywords and dates. It is not an external census of Dutch news, a fixed provider snapshot, "
     "proof of historical omission, semantic relevance, or publisher-body completeness. Local hashes are not "
     "independent attestation. No article text is requested by this confirmation."
 )
+
+
+def archive_or_recent(receipt: Json, allow_recent: bool = False) -> bool:
+    archive = receipt.get("headers", {}).get("req-archive")
+    if archive == "1":
+        return True
+    if not allow_recent or archive != "0":
+        return False
+    try:
+        observed = date.fromisoformat(receipt["completed_at"][:10])
+        start = date.fromisoformat(receipt["parameters"]["dateStart"])
+        end = date.fromisoformat(receipt["parameters"]["dateEnd"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return observed - timedelta(days=30) <= start <= end <= observed
 
 
 def reverse_request(start: str, end: str, page: int) -> Json:
@@ -287,6 +304,8 @@ def verify_proof_bytes(raw: bytes) -> Json:
             if "quarter-verification.json" in checksums:
                 from .newsapi_id_manifest_quarter_proof import WINDOWS
                 windows = json.loads(archive.read("quarter-verification.json"))["windows"]
+                validation_policy = json.loads(archive.read("versions/policy.json"))["content"]
+                allow_recent = validation_policy.get("recent_window_validation") == RECENT_WINDOW_METHOD
                 if [(w["date_start"], w["date_end"]) for w in windows] != WINDOWS:
                     raise AuditError("Quarter proof does not contain the registered disjoint date ranges")
                 for window in windows:
@@ -299,7 +318,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
                             "uriWgtListSortByAsc": direction == "ascending"}
                         actual_ids, total = parse_manifest(json.loads(archive.read(f"responses/{item['receipt']}.json")))
                         if (canonical(source["parameters"]) != canonical(expected) or source.get("http_status") != 200
-                                or source.get("headers", {}).get("req-archive") != "1" or not 0 <= total <= 5000
+                                or not archive_or_recent(source, allow_recent) or not 0 <= total <= 5000
                                 or len(actual_ids) != total or len(set(actual_ids)) != total
                                 or sorted(actual_ids) != item["ids"] or total != item["provider_total"]):
                             raise AuditError("Quarter ID list does not reproduce its raw response and registered request")
@@ -331,7 +350,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
 def export_proof(engine: Research, session: str, reference: str, filename: str = "id-manifest-proof.zip") -> str:
     """Write the same anchored bytes to one fixed, protected, user-readable path."""
     raw = engine.ledger.artifacts.read_bytes(reference)
-    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip"}:
+    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip"}:
         raise ResearchError("Use a fixed registered proof filename in protected storage")
     target = engine.ledger.root / filename
     if target.is_symlink() or target.is_junction():

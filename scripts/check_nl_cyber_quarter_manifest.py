@@ -9,6 +9,7 @@ from pathlib import Path
 
 from newsresearch.common import Config
 from newsresearch.newsapi_id_manifest_quarter_proof import QUARTER_METHOD, templates
+from newsresearch.newsapi_id_manifest_proof import RECENT_WINDOW_METHOD
 from newsresearch.runtime import Research
 from verify_nl_cyber_id_manifest import source_link
 
@@ -50,6 +51,9 @@ def overview(result, root):
         "The five already agreeing years reuse their recorded annual checks. The original retrieval is unchanged.\n\n"
         f"All verification windows settled: **{result['complete']}**. No relevance scores or incident judgements were applied. "
         "Coverage refers to the provider's observed keyword-match sets at the recorded request times, not all published news or a permanent index snapshot.\n\n")
+    first_year = next(row for row in result["years"] if row["year"] == "2020")
+    if first_year["complete"] and not first_year["manifest_only_ids"]:
+        text += "The two apparent 2020 gaps from the first annual pass were not reproduced; both quarter enumerations match the saved 2020 IDs.\n\n"
     text += "Matches absent from the saved collection:\n\n"
     for row in result.get("differences", []):
         if row["direction"] == "manifest_only_ids":
@@ -76,6 +80,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--allow-recent-window", action="store_true")
     args = parser.parse_args()
     root = args.workspace.resolve()
     engine = Research(root, config=Config(offline=not args.execute))
@@ -89,9 +94,13 @@ def main():
         path.write_text(text, encoding="utf-8")
         print(json.dumps({"presentation_id": captured["id"], "presentation": text}, ensure_ascii=True), flush=True)
     try:
-        prior = run("newsapi_collection", {"action": "id_manifest_proof", "execute": False})
-        present("newsapi_id_manifest_proof", prior, first_overview(prior, root), root / "id-manifest-proof-overview.md")
         path = root / "id-manifest-quarter-context.json"
+        prior = None
+        if not args.allow_recent_window:
+            prior = run("newsapi_collection", {"action": "id_manifest_proof", "execute": False})
+            present("newsapi_id_manifest_proof", prior, first_overview(prior, root), root / "id-manifest-proof-overview.md")
+        elif not path.exists():
+            raise RuntimeError("Initial quarter context required before recent-window revalidation")
         if path.exists():
             versions = json.loads(path.read_text(encoding="utf-8"))
         else:
@@ -105,6 +114,22 @@ def main():
             versions["policy"] = run("version", {"kind": "policy", "key": QUARTER_METHOD, "content": policy,
                 "supersedes": versions["policy"], "reason": "Bind exact16quarter requests and sourceproof under unchanged583-token authorization"})["id"]
             path.write_text(json.dumps(versions), encoding="utf-8")
+        if args.allow_recent_window:
+            recent_path = root / "id-manifest-quarter-recent-context.json"
+            if recent_path.exists():
+                versions = json.loads(recent_path.read_text(encoding="utf-8"))
+            else:
+                protocol = engine.ledger.get(versions["protocol"], "protocol")["content"]
+                protocol = {**protocol, "recent_window_validation": RECENT_WINDOW_METHOD,
+                    "validation_correction": "The original strict archive-use rule rejected retained October2026 quarter responses. Append a correction, without changing original receipts: archive flag1 remains valid; flag0 is valid only when the exact requested date range lies entirely within30days before that receipt's own completed_at date, including observeddate. Revalidate retained rawresponses, exactparameters, HTTPstatus, uniqueIDs andtotalcardinality; no repeatquarterqueries. The current Oct1-Oct15range fits both the documented30-day recent plan and SDK31-day recent window. Retain initialpartialproof anditsversions innewpackage; newmetadataonlyifallpairsagree, underexisting583cap",
+                    "recent_sources": ["https://newsapi.ai/plans", "https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py"]}
+                versions["protocol"] = run("version", {"kind": "protocol", "key": RECENT_WINDOW_METHOD, "content": protocol,
+                    "supersedes": versions["protocol"], "reason": "Correct archive-only validation for genuinely recent ranges using retained receipts"})["id"]
+                policy = engine.ledger.get(versions["policy"], "policy")["content"]
+                versions["policy"] = run("version", {"kind": "policy", "key": RECENT_WINDOW_METHOD,
+                    "content": {**policy, "recent_window_validation": RECENT_WINDOW_METHOD}, "supersedes": versions["policy"],
+                    "reason": "Permit explicit date-bounded recent-index revalidation, preserving all original charges and validations"})["id"]
+                recent_path.write_text(json.dumps(versions), encoding="utf-8")
         if not args.execute:
             print(json.dumps({"status": "registered_only", "versions": versions, "new_paid_calls": 0}))
             return

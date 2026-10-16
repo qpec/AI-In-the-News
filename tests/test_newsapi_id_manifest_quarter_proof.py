@@ -175,7 +175,8 @@ def test_metadata_cap_fetches_first_ten_and_preserves_remaining_pending_ids(monk
     assert result["differences"][-1]["metadata"] is None
 
 
-def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_costs(engine, monkeypatch):
+@pytest.mark.parametrize("recent_q4", [False, True])
+def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_costs(engine, monkeypatch, recent_q4):
     """Real audited runtime/dispatch/artifacts, with only provider transport synthetic."""
     def bootstrap(engine, session, context, data):
         definitions = {"protocol": {"method": module.QUARTER_METHOD},
@@ -239,6 +240,8 @@ def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_cost
         policy = {"method": source.METHOD, "quarter_method": module.QUARTER_METHOD,
             "quarter_source": proof_id, "quarter_templates": module.templates(), "baseline_audit": audit,
             "authorization_id": source.AUTH_ID, "max_tokens": source.CAP, "allow_metadata": True, "metadata_max_ids": 10}
+        if recent_q4:
+            policy["recent_window_validation"] = annual.RECENT_WINDOW_METHOD
         versions["policy"] = engine.ledger.record(session, "policy", "quarter-integration", {"content": policy})
         return versions
 
@@ -247,6 +250,7 @@ def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_cost
     monkeypatch.setattr(collection, "run", module.run)
     engine.config = replace(engine.config, offline=False)
     monkeypatch.setenv("EVENTREGISTRY_API_KEY", "synthetic-transient-value")
+    monkeypatch.setattr(source, "utc", lambda: "2026-10-16T12:00:00+00:00")
     expected = {canonical(r["parameters"]): r["response"] for r in quarter_receipts()}
     calls = []
     account_used = 4500
@@ -255,7 +259,9 @@ def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_cost
         calls.append(parameters)
         if parameters == {"endpointVariant": "usage"}:
             return 200, {"req-tokens": "0"}, canonical({"usedTokens": account_used, "availableTokens": 5000}).encode()
-        account_used += 5
+        recent = recent_q4 and parameters.get("dateStart") == "2026-10-01"
+        cost = 1 if recent else 5
+        account_used += cost
         if parameters.get("endpointVariant") == "article_info":
             assert parameters["articleUri"] == ["2026-new"]
             assert parameters["includeArticleBody"] is False
@@ -263,7 +269,7 @@ def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_cost
                 "url": "https://example.test/new", "date": "2026-10-15", "lang": "nld"}}}
         else:
             response = expected[canonical(parameters)]
-        return 200, {"req-tokens": "5", "req-archive": "1"}, canonical(response).encode()
+        return 200, {"req-tokens": str(cost), "req-archive": "0" if recent else "1"}, canonical(response).encode()
     monkeypatch.setattr(source, "transport", transport)
     result = engine.execute("newsapi_collection", {"execute": True, "requests": 16},
         objective="Validate full synthetic quarter retrieval proof", actor="test", versions=versions)
@@ -273,10 +279,14 @@ def test_full_audited_quarter_run_replays_raw_evidence_and_counts_all_phase_cost
     assert year2020["manifest_only_ids"] == [] and year2020["saved_only_ids"] == []
     assert year2026["manifest_only_ids"] == ["2026-new"]
     assert len([p for p in calls if p.get("resultType") == "uriWgtList"]) == 16
-    assert result["quarter_reported_tokens"] == 80 and result["additional_metadata_tokens"] == 5
-    assert result["budget"]["reported_tokens"] == result["observed_account_delta"] == 165
+    assert result["quarter_reported_tokens"] == (72 if recent_q4 else 80) and result["additional_metadata_tokens"] == 5
+    assert result["budget"]["reported_tokens"] == result["observed_account_delta"] == (157 if recent_q4 else 165)
     assert result["proof_self_check"]["status"] == "verified"
     assert result["proof_self_check"]["quarter_pairs_checked"] == 8
+    recent_window = next(w for w in result["windows"] if w["date_start"] == "2026-10-01")
+    if recent_q4:
+        assert recent_window["ascending"]["validation_method"] == annual.RECENT_WINDOW_METHOD
+        assert recent_window["reverse"]["validation_method"] == annual.RECENT_WINDOW_METHOD
     raw = engine.ledger.artifacts.read_bytes(result["proof_artifact"])
     assert annual.verify_proof_bytes(raw)["complete_year_comparisons"] == 7
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:

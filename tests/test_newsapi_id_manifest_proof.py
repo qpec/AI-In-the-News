@@ -72,6 +72,24 @@ def test_first_frame_must_itself_be_complete_and_have_exact_keywords():
         module.compare_frames(baseline, identities, [asc], [])
 
 
+def test_recent_validation_is_explicit_and_bound_to_receipt_date():
+    r = receipt("recent", ["a"], 1, ascending=False)
+    r.update(headers={"req-archive": "0"}, completed_at="2026-10-16T12:00:00+00:00")
+    r["parameters"].update(dateStart="2026-10-01", dateEnd="2026-10-15")
+    assert not module.archive_or_recent(r)
+    assert module.archive_or_recent(r, allow_recent=True)
+    r["parameters"]["dateStart"] = "2026-09-15"
+    assert not module.archive_or_recent(r, allow_recent=True)
+    r["parameters"]["dateStart"] = "2026-10-01"
+    r["parameters"]["dateEnd"] = "2026-10-17"
+    assert not module.archive_or_recent(r, allow_recent=True)
+    r["parameters"]["dateEnd"] = "2026-10-15"
+    r["completed_at"] = "2026-12-01T12:00:00+00:00"
+    assert not module.archive_or_recent(r, allow_recent=True)
+    r["headers"] = {"req-archive": "1"}
+    assert module.archive_or_recent(r)
+
+
 def prepared(engine, monkeypatch):
     def bootstrap(engine, session, context, data):
         definitions = {"protocol": {"method": source.METHOD}, "question": {"text": "Synthetic ID proof"},
