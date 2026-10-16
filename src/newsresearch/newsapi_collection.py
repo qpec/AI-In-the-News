@@ -19,6 +19,8 @@ METHOD = "nl-cyber-calendar-collection-4000-total-v1"
 WORDS = ["hack", "gehackt", "hackers", "ransomware", "datalek", "datalekken", "cyberaanval", "cyberaanvallen"]
 PERIODS = [("2023-10-15", "2023-12-31"), ("2024-01-01", "2024-12-31"),
            ("2025-01-01", "2025-12-31"), ("2026-01-01", "2026-10-15")]
+BACKFILL_PERIODS = [("2020-01-01", "2020-12-31"), ("2021-01-01", "2021-12-31"),
+                    ("2022-01-01", "2022-12-31"), ("2023-01-01", "2023-10-14")]
 CONTROL = {"endpointVariant": "sdk", "action": "getArticles", "resultType": "articles",
            "lang": "nld", "dateStart": "2024-01-01", "dateEnd": "2024-01-02",
            "articlesCount": 100, "articlesPage": 1, "includeArticleBody": False,
@@ -150,9 +152,11 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
     policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
+    backfill = data.get("action") == "backfill"
+    periods = BACKFILL_PERIODS if backfill else PERIODS
     if (policy.get("method") != METHOD
             or policy.get("total_account_target") != 4000 or policy.get("monthly_allowance") != 5000
-            or policy.get("words") != WORDS or policy.get("periods") != [list(p) for p in PERIODS]):
+            or policy.get("words") != WORDS or policy.get("periods") != [list(p) for p in periods]):
         raise ResearchError("Exact authorized 4000/5000 account-bound collection policy required")
     existing = saved(engine, "newsapi_collection_check", context.versions)
     if data.get("action") == "report":
@@ -173,6 +177,10 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         return topic_export(engine, session, context, data)
     if engine.config.offline or data.get("execute") is not True:
         raise ResearchError("Explicit online execution required")
+    if backfill:
+        if policy.get("user_authorized_backfill_2020") is not True:
+            raise ResearchError("Explicit 2020 backfill authorization required")
+        return collect(engine, session, context, data, policy, periods)
     if data.get("action") == "collect":
         return collect(engine, session, context, data, policy)
     if data.get("action") == "recover":
@@ -221,11 +229,13 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     return {"id": identifier, **result}
 
 
-def collect(engine: Research, session: str, context: Context, data: Json, policy: Json) -> Json:
+def collect(engine: Research, session: str, context: Context, data: Json, policy: Json,
+            periods: list[tuple[str, str]] | None = None) -> Json:
+    periods = PERIODS if periods is None else periods
     proof = engine.ledger.get(policy.get("archive_check", ""), "newsapi_collection_check")
     if (policy.get("collection_enabled") is not True
             or proof["archive_access"] != "verified_by_historical_articles"
-            or policy.get("templates") != [collection_request(p, 1) for p in PERIODS]):
+            or policy.get("templates") != [collection_request(p, 1) for p in periods]):
         raise ResearchError("Verified archive check and exact full-text collection templates required")
     limit = data.get("pages", 20)
     if not isinstance(limit, int) or not 1 <= limit <= 40:
@@ -234,7 +244,7 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
     if baseline["http_status"] != 200 or number(baseline["response"].get("usedTokens")) is None:
         raise ResearchError("Live account usage unavailable")
     stop = "checkpoint"
-    state = collection_state(engine)
+    state = collection_state(engine, periods)
     for _ in range(limit):
         candidates = [row for row in state["years"] if not row["exhausted"]]
         if not candidates:
@@ -242,7 +252,7 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
             break
         # Balance first-page coverage and continuing page counts across years.
         year = min(candidates, key=lambda row: (row["pages"], row["year"]))
-        period = next(p for p in PERIODS if p[0][:4] == year["year"])
+        period = next(p for p in periods if p[0][:4] == year["year"])
         page = year["pages"] + 1
         try:
             receipt = dispatch(engine, session, context, collection_request(period, page),
@@ -273,7 +283,8 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
                           "cost": receipt["billed_tokens"], "provider_total": section.get("totalResults")}), flush=True)
         time.sleep(.6)
     after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_collection_batch")
-    result = {**collection_state(engine), "versions": context.versions, "stop_reason": stop,
+    result = {**collection_state(engine, periods), "versions": context.versions, "stop_reason": stop,
+              "periods": periods,
               "baseline_used": number(baseline["response"].get("usedTokens")),
               "final_observed_used": number(after["response"].get("usedTokens")),
               "target_used": 4000, "allowance": 5000, "model_calls": 0, "scored": 0,
@@ -285,10 +296,12 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
     return {"id": identifier, **result}
 
 
-def collection_state(engine: Research) -> Json:
-    receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["purpose"].startswith("collect_")]
+def collection_state(engine: Research, periods: list[tuple[str, str]] | None = None) -> Json:
+    periods = PERIODS if periods is None else periods
+    receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["purpose"].startswith("collect_")
+                and (r["parameters"].get("dateStart"), r["parameters"].get("dateEnd")) in periods]
     years, unique, examples = [], set(), []
-    for period in PERIODS:
+    for period in periods:
         selected = [r for r in receipts if r["parameters"]["dateStart"] == period[0]]
         good = [r for r in selected if r["http_status"] == 200 and isinstance(r["response"].get("articles", {}).get("results"), list)]
         articles = [a for r in good for a in r["response"]["articles"]["results"]]

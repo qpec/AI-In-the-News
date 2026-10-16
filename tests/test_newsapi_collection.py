@@ -130,6 +130,31 @@ def test_collection_uses_account_total_not_additional_budget(engine, monkeypatch
     assert all(p == {"endpointVariant": "usage"} for p in calls)
 
 
+def test_2020_backfill_requires_authorization_and_keeps_original_scope_separate(engine, monkeypatch):
+    run, calls, _ = collection_setup(engine, monkeypatch)
+    original = run()
+    versions = dict(original["versions"])
+    content = engine.ledger.get(versions["policy"], "policy")["content"]
+    content.update(periods=nc.BACKFILL_PERIODS, templates=[nc.collection_request(p, 1) for p in nc.BACKFILL_PERIODS])
+    def policy(value):
+        return engine.execute("version", {"kind": "policy", "key": "backfill-test", "content": value},
+            objective="Synthetic extension scope and authorization check", actor="test")["id"]
+    versions["policy"] = policy(content)
+    before = len(calls)
+    with pytest.raises(ResearchError, match="Explicit 2020"):
+        engine.execute("newsapi_collection", {"action": "backfill", "execute": True},
+            objective="Synthetic extension scope and authorization check", actor="test", versions=versions)
+    assert len(calls) == before
+    versions["policy"] = policy({**content, "user_authorized_backfill_2020": True})
+    extended = engine.execute("newsapi_collection", {"action": "backfill", "execute": True},
+        objective="Synthetic extension scope and authorization check", actor="test", versions=versions)
+    assert extended["unique_articles"] == 4 and extended["stop_reason"] == "query_exhausted"
+    assert [p["dateStart"] for p in calls[before:] if "dateStart" in p] == [p[0] for p in nc.BACKFILL_PERIODS]
+    assert nc.collection_state(engine)["returned_articles"] == 4
+    assert nc.collection_state(engine, nc.BACKFILL_PERIODS)["returned_articles"] == 4
+    assert len(set(original["receipt_ids"]) & set(extended["receipt_ids"])) == 0
+
+
 def test_credential_pattern_quarantine_preserves_membership_without_secret(engine, monkeypatch):
     run, _, original = collection_setup(engine, monkeypatch)
     matched = "sk-" + "x"*30

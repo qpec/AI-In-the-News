@@ -142,3 +142,19 @@ missing-field record inventory and SHA-256 checksums. Export audit records stay
 protected. The operation prepares files only; Git commit/push are separate,
 explicitly user-authorized repository operations, with their outcomes reported
 in this task. No new NewsAPI.ai requests or model calls are made.
+
+## User-authorized extension to 2020 — 2026-10-16
+
+The user subsequently requested using remaining quota to look back to 2020.
+`scripts/backfill_nl_cyber.py` registers new protocol/question/selection/profile/
+policy versions before the separate `backfill` action. It covers calendar 2020,
+2021, 2022 and 2023-01-01 through 2023-10-14, without overlapping the original
+window. Keywords, language/type, full-text settings and 100-item ascending-date
+pagination are unchanged. First-page coverage then round-robin continuation
+shares the original workspace's account-wide 4,000-total target and unknown-outcome
+guard; quota is never reset. The existing positive archive control is referenced,
+and actual returned dates establish observed coverage of each additional year.
+Original receipts/materializations remain immutable. New progress and receipt-ID
+selections are period-bound, distinguishing the two 2023 windows. Every checkpoint
+captures exact coverage, cost, missingness and examples through the audited runtime.
+If the budget stops collection, unexhausted years remain explicitly incomplete.
