@@ -192,3 +192,65 @@ succeeded before research resumed. The failure did not reproduce; its original
 cause is unconfirmed. No audit history or global settings were changed or
 bypassed. The production preparation subsequently completed its mandatory full
 preflight and durable result/presentation writes.
+
+## Executed authorized Codex review — 2026-10-16
+
+Result `0f49ead5bce2a6bb04cbab86a355b00a71e4274ed8eac2f10b5abff30f82d43b`;
+execution key `cross-window-event-coref-codex-20261016-v1`;
+exact prepared presentation artifact
+`21efcc6bf2cc82b0b99d404f6291ddc9f4fc01b14511ad121f445427c6e4278c`.
+The fresh human authorization was recorded and bound to the frozen preparation,
+exact requests/configuration, implementation and original cumulative study
+counter before dispatch. All model work used the shared audited Codex gateway.
+
+| Article-pair model reference | Pairs |
+| --- | ---: |
+| Same focal event | 14 |
+| Different focal events | 8 |
+| Uncertain | 8 |
+| Failed / pending / unknown | 0 / 0 / 0 |
+| Total completed | 30 / 30 |
+
+| Proposed union outcome | Proposals |
+| --- | ---: |
+| Every union pair judged same event; still requires cluster review | 3 |
+| At least one different-event model reference | 5 |
+| Uncertain, without a different-event reference | 2 |
+| Incomplete processing | 0 |
+| Total | 10 |
+
+Every proposal covers three articles, with all three pair comparisons completed,
+including the old-group internal pair. These are model references, not human
+gold. Three passing unions out of this deterministic ten-proposal development
+queue are **not** a corpus precision estimate, and do not validate a 99% or other
+extreme-probability cutoff. Pairwise support still requires cluster review.
+The remaining seven proposals are not approved: uncertainty stays separate from
+different-event references. No labels were inferred from missing processing.
+
+One recorded model example distinguishes delivered Washington layoff notices
+from preparations for an anticipated layoff wave. Another marks broad investment
+analysis uncertain when no single focal event can be established. Exact
+source-bound quotes, passage hashes/offsets, actor/action/event-date/location
+fields, observable model metadata, payloads, attempts and source links remain in
+protected storage. The saved overview includes actual examples; no article titles,
+quotes or evidence payloads are copied into this public document.
+
+The run used 30 new primary attempts and zero retries. Original cumulative
+spend is now **85/100 attempts, 170/200 article exposures: 84 primary plus one
+historical retry**. Unresolved attempts zero. Six primary/nine retry slots remain
+under the original global allocation; they are not filled or spent by this
+completed authorization. Provider billing and internal provider request counts
+remain unavailable, not zero.
+
+All seven-day memberships remain unchanged: 1,579 provisional multi-article
+groups, 4,012 grouped articles and 15,537 singletons. Accepted dossiers and actual
+merges zero. No new embeddings, held-out opening or live collection occurred.
+The model run covered the frozen 30 articles/pairs only, not the other 699
+cosine-qualified group pairs. The pilot retains 424 missing vectors and 27
+vector-bearing articles without usable publication dates.
+
+The completed result and its presentation are durable. No further inference,
+automatic retry, queue expansion or membership adoption follows from completion.
+The source-free software checks reported above remain separate from these
+actual model-reference results; documentation-only reporting needs no additional
+model run or repeated full test suite.

@@ -127,6 +127,12 @@ not require provider anchors, change working memberships or establish event
 identity. The separately implemented Codex executor still requires fresh concrete
 authorization for this exact queue; implementing it did not run model judgments.
 
+The user subsequently authorized that exact bounded review. Its completed
+30-pair result produced three all-pair-supported provisional unions, five with
+conflicting model references and two uncertain. Zero merges were applied. See
+the linked review method for actual counts, budget and validation limits; no
+extremely-high-probability claim has been established.
+
 Software checks: four focused synthetic tests passed in 1.74 seconds; after the
 presentation addition the affected integration scenario passed in 1.73 seconds.
 Ruff and mypy passed, as did `git diff --check`. Tests establish software behavior

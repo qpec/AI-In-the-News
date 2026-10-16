@@ -59,6 +59,16 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
   original cumulative study counter; preserve exact resume rather than launching
   duplicate runs. This authorization covers no other queues, expanded budgets
   or membership adoption. Record it in the protected audit before model dispatch.
+- That bounded run is now **completed** as
+  `0f49ead5bce2a6bb04cbab86a355b00a71e4274ed8eac2f10b5abff30f82d43b`,
+  execution key `cross-window-event-coref-codex-20261016-v1`: 30/30 pair
+  references, 14 same/8 different/8 uncertain; zero failures/pending/unknowns
+  and no new retries. Of ten proposed unions, three have all-pair model support
+  and still require cluster review; five have conflicting references and two
+  are uncertain. This is not a validated probability or accuracy estimate.
+  Current memberships remain unchanged. Cumulative spend is now 84 primary plus
+  one historical retry (85/100 attempts, 170/200 article exposures). Do not fill
+  the unused six primary/nine retry slots or rerun the completed queue by default.
 
 ## Commit practice
 
