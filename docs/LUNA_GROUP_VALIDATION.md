@@ -275,8 +275,8 @@ billing, improved accuracy or a new performance result.
 
 ## V2 interim group checkpoint — 2026-10-16
 
-**This is an interim result; the remaining eligible anchor queue is still
-running.** Result
+**This is an interim result; at this checkpoint the remaining eligible anchor
+queue was still running.** Result
 `9cdba9481925b20b9ce993215633bc0e7c1246b889b4e14f8aeaa5ac79426391`
 retains cumulative **303/400 attempts and 797/6,000 article exposures**, with
 zero retries. Overall task counts are 171 valid, 131 invalid, one unknown and
@@ -313,3 +313,38 @@ test-only missing variable. The corrected execution file passed five tests in
 0.25 s; its other 29 selected checks passed on the preceding runs. Ruff and
 mypy passed for the changed production modules. No original bound module,
 research packet or answer validator was changed to make these checks pass.
+
+## V2 final eligible-queue checkpoint — 2026-10-17
+
+Final protected result
+`da480ad8c3fa87ca41ddfe11530695f22246581419412193a2580d60dc4bc19a`
+is **partial with no eligible tasks pending**. It retains 399/400 cumulative
+calls, 2,735/6,000 article exposures and zero retries; 359 calls were new in this
+continuation. Task statuses are 171 valid, 227 invalid, one unknown and one
+pending execution exclusion. The unknown timeout, its two quarantined source
+versions and the excluded untouched task remain unchanged. There were no new
+timeouts. No unused budget is refilled or replacement sample introduced.
+
+All 300 sampled groups were attempted: **67 same-event, 16 mixed, 88 uncertain,
+129 unusable/unknown**. Complete-case precision remains **67/83 = 80.7%**;
+217 nondecisive groups leave bounds of **22.3%–94.7%**. The held-out subset is
+unchanged: 21 same-event, three mixed, 32 uncertain, 44 unusable/unknown; its
+87.5% value uses only 24 decisive groups. These provisional lead-only references
+do not establish human-validated accuracy.
+
+Of the 100 selected anchors, **99 were attempted and all 99 failed validation**;
+one was excluded prospectively. There are zero valid anchor assessments.
+All 1,918 candidate relations remain unknown (53 inside groups, 1,865 outside).
+Candidate-pool recall is unavailable, with bounds 0%–100%; full-corpus recall
+cannot be estimated. Missing processing is never a negative finding. This
+bundled anchor execution did not deliver a usable recall evaluation.
+
+Exact final presentation
+`aefd21b734471fe2f7c3ad46476829fd8727e8970ef2ce555118a8bc03e6a980`
+was reproduced in chat, including source-linked examples. End-to-end continuation
+time was 2,625.651 s; preflight took 17.229 s. The partial-status exit code was 1.
+No model requests remain running. No group memberships, accepted dossiers,
+cutoffs, approval budget or original implementation bindings changed. Do not
+retry or fill the one unused call by default; further evaluation needs its own
+explicitly bounded method and authorization. The audit speed improvement is
+separate from this inconclusive scientific result.

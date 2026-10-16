@@ -205,5 +205,28 @@ alongside one prospectively excluded task. One observed local timeout remains
 unknown, with two source versions quarantined. The exact saved interim overview
 was shown in chat. See the [grouping checkpoint](LUNA_GROUP_VALIDATION.md#v2-interim-group-checkpoint--2026-10-16)
 for the substantial uncertain/failed coverage and provisional precision limits.
-The queue is continuing; these counts and this timing are **not a final research
-result or a completed end-to-end performance measurement**.
+At this interim checkpoint the queue was continuing; these counts and this timing
+were not a final research result or an end-to-end performance measurement.
+
+## Final eligible-queue timing — 2026-10-17
+
+Final result `da480ad8c3fa87ca41ddfe11530695f22246581419412193a2580d60dc4bc19a`
+exhausted the eligible queue: cumulative 399 calls/2,735 article exposures, zero
+retries, one unresolved timeout and one prospectively excluded request. Eligible
+pending is zero. The exact final presentation was shown in chat and retained as
+`aefd21b734471fe2f7c3ad46476829fd8727e8970ef2ce555118a8bc03e6a980`.
+
+This continuation took **2,625.651 s (43 min 45.651 s)** end to end. Its complete
+17.229 s preflight was about **0.66%** of that duration. The remainder includes
+provider/model processing, durable per-attempt audit writes and postprocessing;
+it is not a measurement of generation time alone. No overall 143× model-run
+speedup is claimed. The observed preflight reduction comes from complete study
+scoping; expensive parent-wide operations remain unchanged.
+
+Audit latency improved, but the scientific validation remains inconclusive:
+all 300 groups were attempted, with only 83 decisive model references, and all
+99 attempted anchor requests failed evidence validation. Recall is unavailable.
+See [the final grouping checkpoint](LUNA_GROUP_VALIDATION.md#v2-final-eligible-queue-checkpoint--2026-10-17).
+The coordinator's exit code 1 reports its saved partial status, not an unrecorded
+crash. No further requests or retries were launched. The earlier audit follow-up
+was confirmed already paused.

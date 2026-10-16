@@ -101,6 +101,17 @@ the parent, with different retained scopes. This does not establish model qualit
 or eliminate expensive archive-wide checks. Continuation results must be shown
 separately; transfer is not completion of the grouping evaluation.
 
+The eligible queue is now exhausted: final result
+`da480ad8c3fa87ca41ddfe11530695f22246581419412193a2580d60dc4bc19a`
+retains 399 calls/2,735 article exposures, zero retries, 171 valid responses,
+227 invalid, one unknown and one execution-excluded/pending task. Eligible
+pending is zero. All 300 groups were attempted: 67 same-event, 16 mixed,
+88 uncertain and 129 unusable/unknown. The 80.7% complete-case value uses only
+83 decisive groups; unknown-inclusive bounds are 22.3%–94.7%. All 99 attempted
+anchor requests failed validation, so recall remains unavailable. No memberships
+changed. Do not retry, refill the unused call or relaunch this exhausted queue
+by default. See [the final checkpoint](docs/LUNA_GROUP_VALIDATION.md#v2-final-eligible-queue-checkpoint--2026-10-17).
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 
