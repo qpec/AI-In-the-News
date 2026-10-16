@@ -195,6 +195,7 @@ class Research:
             "test_collective_group_vectors": self._test_collective_group_vectors,
             "scale_event_vector_store": self._scale_event_vector_store,
             "plan_catalog_embeddings": self._plan_catalog_embeddings,
+            "index_catalog_embeddings": self._index_catalog_embeddings,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -990,6 +991,12 @@ class Research:
     @audited_handler
     def _plan_catalog_embeddings(self, session: str, context: Context, data: Json) -> Json:
         from .catalog_embedding_plan import execute
+
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _index_catalog_embeddings(self, session: str, context: Context, data: Json) -> Json:
+        from .catalog_vector_index import execute
 
         return execute(self, session, context, data)
 

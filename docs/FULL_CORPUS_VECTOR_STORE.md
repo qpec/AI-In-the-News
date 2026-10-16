@@ -324,3 +324,45 @@ identical, and query plans selected both expression indexes. These large ratios
 describe removal of repeated scans in this synthetic lookup workload only;
 they are not measured improvements to full audit preflight, provider requests
 or total corpus execution. Ruff passed for the benchmark script.
+
+### Offline indexing bridge prepared — 2026-10-16
+
+`index_catalog_embeddings` is implemented for a completed exact
+`embedding_checkpoint_result`. It binds the master result and all original
+per-batch plans/runs, registers a new offline method before source inspection,
+then invokes the original complete-run passage-index builder for each batch.
+It rechecks catalog/core source bodies, provider identity and exact mapping,
+and uses the original float64 sequential pooling method one source at a time.
+The parent catalog is copied into protected staging; old vectors, source history
+and every current group membership/artifact remain immutable.
+
+The new article representation uses bounded FlatIP shards of 2,048 rows (about
+101 shards if all 205,105 text-bearing versions become available). A canonical
+top-level manifest binds the namespace, sorted article ranges, component hashes
+and parent/execution lineage. Its internal all-shard retrieval primitive merges
+canonical reranked results and requires an active audited caller. It is not
+silently passed into the earlier single-index reader. Normal question retrieval,
+an optional compact approximate-search accelerator and actual numerical/latency
+benchmarks remain unfinished. Restoring and hashing every shard per query may
+be slow; no new fast-query claim follows from this implementation.
+
+Execution publishes a new supported `event_vector_store_result` and exact
+presentation only after full coverage reconciliation and catalog verification.
+Partial failures preserve completed immutable passage indexes for explicit reuse,
+without claiming a completed full snapshot. New source versions remain ungrouped
+and no new dossiers are accepted. Missing text/quarantines remain separate from
+negative research findings. No new model call is possible in this adapter.
+
+One focused source-free integration passed in 2.49 seconds using real core
+ingestion, catalog verification, original pooling, Faiss save/restore, shard
+merging and presentation; completed gateway/passage-index records were constructed
+fixtures. Ruff and mypy passed. This is software validation only: no actual
+full-corpus passage indexes or expanded article shards have been built at this
+checkpoint. After a complete paid result, run:
+
+```powershell
+uv run --offline --frozen python scripts/index_catalog_embeddings.py --execution COMPLETE_CHECKPOINT_ID --key full-catalog-vector-index-20261016-v1
+```
+
+The working dataset/import limit remains 20,000 per core dataset. This bridge
+does not change global settings or the frozen paid-execution checkout.
