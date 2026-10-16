@@ -403,6 +403,33 @@ class Gateway:
                         "failure": "provider_exception_with_unobserved_outcome", "observed_at": utc()})
                 yield futures[future], response
 
+    def luna_group_validation(self, session: str, context: Context, data: Json) -> Json:
+        if session not in self.engine._active:
+            raise AuditError("Luna screening requires an active audited gateway operation")
+        phase = data.get("phase")
+        if phase == "prepare":
+            from .luna_validation_study import prepare
+
+            return prepare(self.engine, session, context, {k: v for k, v in data.items() if k != "phase"})
+        if phase == "execute":
+            from .luna_validation_gateway import execute
+
+            content = {k: v for k, v in data.items() if k != "phase"}
+            plan = self.engine.ledger.get(content["plan"], "luna_group_validation_plan")
+            if context.versions and context.versions != plan["versions"]:
+                raise ResearchError("Luna execution must retain exact prepared versions")
+            for kind, reference in plan["versions"].items():
+                self.engine.ledger.get(reference, kind)
+            bound = Context(context.objective, context.actor, plan["versions"])
+            self.engine.ledger.append(session, "luna.execution.versions.bound",
+                {"plan": content["plan"], "versions": bound.versions})
+            if isinstance(content.get("run_approval"), dict):
+                content["run_approval"] = self.engine._version(session, bound,
+                    {"kind": "policy", "key": content["study_key"] + "-Codex-approval",
+                     "content": content["run_approval"]})["id"]
+            return execute(self.engine, session, bound, content)
+        raise ResearchError("Choose Luna prepare or execute; neither silently performs the other")
+
     def event_pair_experiment(self, session: str, context: Context, data: Json) -> Json:
         from .event_pair_experiment import _records, execute
         from .common import require_active

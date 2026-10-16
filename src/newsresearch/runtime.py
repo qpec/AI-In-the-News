@@ -196,6 +196,7 @@ class Research:
             "scale_event_vector_store": self._scale_event_vector_store,
             "plan_catalog_embeddings": self._plan_catalog_embeddings,
             "index_catalog_embeddings": self._index_catalog_embeddings,
+            "luna_group_validation": self._luna_group_validation,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -999,6 +1000,10 @@ class Research:
         from .catalog_vector_index import execute
 
         return execute(self, session, context, data)
+
+    @audited_handler
+    def _luna_group_validation(self, session: str, context: Context, data: Json) -> Json:
+        return self.gateway.luna_group_validation(session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:

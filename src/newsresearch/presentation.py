@@ -59,6 +59,7 @@ RESULT_KINDS = {
     "event_group_centroid_result",
     "event_vector_store_result", "event_vector_store_query",
     "catalog_embedding_plan_result",
+    "luna_group_validation_plan", "luna_group_validation_result",
 }
 
 

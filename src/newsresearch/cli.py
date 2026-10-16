@@ -64,6 +64,7 @@ def main() -> int:
             "scale_event_vector_store",
             "plan_catalog_embeddings",
             "index_catalog_embeddings",
+            "luna_group_validation",
             "vector_search",
             "evaluate_vector_index",
             "inspect_candidates",
