@@ -32,6 +32,7 @@ RESULT_KINDS = {
     "event_rule_application_result",
     "event_group_refinement_result",
     "event_temporal_result",
+    "event_window_result",
 }
 
 
