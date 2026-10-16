@@ -80,8 +80,18 @@ mocked provider. They do not establish live model quality.
 The final focused suite passed **81 tests in 35.41 s**, including full-runtime
 transfer/continuation, exact export/import reuse and malformed-import blocking.
 Ruff passed for source, scripts and tests; mypy passed for all 95 source modules
-and the coordinator. The broader documented suite is a separate check and its
-completion must be reported honestly.
+and the coordinator. The broader documented suite ran to completion: 906 passed
+and two failed in 729.38 s. One failure used the earlier integration fixture's
+batch-order assumption, already corrected in the passing focused suite. The other
+exposed an existing local-import name collision in collection recovery; that
+minimal repair is committed separately. Rerunning both cases plus the new
+malformed-import case passed all three in 7.53 s. The whole suite was not repeated.
+
+Imported copies also receive local durable artifact anchors, including the
+manifest itself. Deleting a copied request, response or other closure file is
+therefore a future preflight failure even if a cached operation would not read
+it. These anchors record new local verification observations, never fabricated
+historical dispatch or delivery timestamps.
 
 ## Operation
 

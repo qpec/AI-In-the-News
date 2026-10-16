@@ -398,6 +398,20 @@ def import_into(engine: Any, session: str, context: Context, data: Json) -> Json
         path = ledger.artifacts.verified_path(item["sha256"])
         if path.stat().st_size != item["bytes"]:
             raise AuditError("luna_transfer_artifact_size_mismatch")
+    # Make the complete imported closure required by every future preflight.
+    # These are new local observations of verified copies, not replayed history.
+    anchored = {json.loads(row[0]).get("artifact") for row in ledger.db.execute(
+        "SELECT payload FROM events WHERE kind='preparation.artifact.saved' "
+        "AND json_extract(payload,'$.import_provenance.manifest')=?", (data["manifest"],))}
+    required = [item["sha256"] for item in package["artifacts"]] + [data["manifest"]]
+    for reference in required:
+        if reference not in anchored:
+            ledger.append(session, "preparation.artifact.saved", {
+                "artifact": reference, "purpose": "Verified complete bounded-study artifact copy",
+                "full_content_hash_verified": True,
+                "import_provenance": {"manifest": data["manifest"], "parent": package["parent_provenance"],
+                    "import_session": session, "import_observed_at": utc(),
+                    "observation": "New local verified-copy observation; not an original parent event"}})
     provenance = {"transfer_id": package["transfer_id"], "manifest": data["manifest"],
         "parent": package["parent_provenance"], "import_session": session, "import_observed_at": utc()}
     for spec in package["records"]:

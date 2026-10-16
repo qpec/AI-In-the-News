@@ -168,6 +168,17 @@ def test_complete_evidence_and_spent_attempts_survive_bounded_transfer(tmp_path,
             assert "invalid" in {item["status"] for item in historical}
             assert child.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 0
             assert child.ledger.verify()["status"] == "verified"
+            # Imported retrieval/response files must remain required even when
+            # they are not directly read during a later cached continuation.
+            reference = plan["retrieval_artifact"]
+            retained = child.ledger.artifacts.read_bytes(reference)
+            (child.ledger.artifacts.root / reference).unlink()
+            with pytest.raises(AuditError, match="referenced artifact is missing"):
+                child.ledger.verify()
+            assert child.ledger.artifacts.put_bytes(retained) == reference
+            assert child.ledger.verify()["status"] == "verified"
+            assert child.ledger.db.execute("SELECT count(*) FROM events WHERE kind='preparation.artifact.saved' "
+                "AND json_extract(payload,'$.artifact')=?", (exported["import_input"]["manifest"],)).fetchone()[0] == 1
             with pytest.raises(ResearchError, match="[Tt]ransfer|ownership|owner"):
                 child.execute("luna_group_validation", {"phase": "execute", "plan": prior["plan"],
                     "study_key": prior["study_key"], "run_approval": "irrelevant-in-child"},
