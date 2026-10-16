@@ -69,6 +69,20 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
   Current memberships remain unchanged. Cumulative spend is now 84 primary plus
   one historical retry (85/100 attempts, 170/200 article exposures). Do not fill
   the unused six primary/nine retry slots or rerun the completed queue by default.
+- The user's requested [fast collective-vector test](docs/FAST_GROUP_VECTOR_MAPPING.md)
+  is completed as
+  `a7e33f7e0945b4b2485fa084fb08eca8a7a5d08c60265867932859d6ca5734e6`.
+  Body-deduplicated group centroids map nearby groups while retaining all five
+  original cached cross-article checks and one disjoint proposal pass. Warm
+  retrieval measured5.74ms median/8.08ms p95; the complete numerical default
+  took3.216s versus2.546s for the earlier cached-frame method (no cold-batch
+  speedup). Cutoffs0.90/0.95/0.975 proposed65/22/6 links, introducing3/2/0
+  different-event reference co-memberships. At0.975 none of the ten known
+  reviewed unions was selected; the six proposals are unjudged, so zero observed
+  conflicts does not validate their quality. No automatic merge policy was
+  adopted, no new models ran and current memberships/budgets remain unchanged.
+  Treat this as a fast retrieval prototype with inconclusive merge quality,
+  not a solved cutoff or an implemented persistent incremental service.
 
 ## Commit practice
 

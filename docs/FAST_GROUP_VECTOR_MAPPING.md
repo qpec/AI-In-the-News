@@ -107,3 +107,87 @@ alias radius, missing/invalid/zero vectors, bounded neighbor mapping, thread
 restoration, all-five-feature missingness, disjoint proposals, complete reference
 denominators/SQL, freeze before reference evaluation, audit failure/resume,
 method immutability and no adoption. Synthetic tests verify software only.
+
+## Executed corpus test — 2026-10-16
+
+Result `a7e33f7e0945b4b2485fa084fb08eca8a7a5d08c60265867932859d6ca5734e6`;
+manifest `85ffa188434fcb5cbc06056475c48c44a389f0e70f01f4ada72dee8550e626ed`;
+frozen candidates
+`d040b1fd7448df76cb4204483f86fc0822f57d63fdef48b306a4df18800a7322`.
+Exact prepared presentation artifact
+`1a2f63d05344359d2d62b0cd12b05323f92402b8aade8e3cf0ac3421ba63a2ff`.
+Recording is not verified UI delivery or human reading. All source titles,
+URLs, vectors, model payloads and detailed memberships remain protected.
+
+The original 20,000-article pilot produced 17,116 valid group vectors. All 1,579
+multi-article groups queried the full centroid index. The bounded search nominated
+11,389 distinct group pairs, with 3,948 excluded as same-window unions. No
+centroids were unprocessed and no queries had boundary-tie ambiguity. It
+nominated 161 of the previous method's 709 cosine-qualified cross-window pairs.
+That is descriptive candidate coverage, not semantic recall: the new frame omits
+singleton-to-singleton queries and truncates each query to eight neighbors.
+
+| Centroid cosine cutoff | Proposed disjoint links | Selected prior unions: supported / conflicting / uncertain | Newly joined different-event reference pairs |
+| --- | ---: | --- | ---: |
+| 0.900 | 65 | 1 / 1 / 1 | 3 |
+| 0.950 | 22 | 0 / 0 / 0 | 2 |
+| 0.975 | 6 | 0 / 0 / 0 | 0 |
+
+All 84 reused pair references and all ten previously judged unions were retained
+in the private comparisons, with together/separate/unprocessed and
+nominated/selected/not-selected outcomes. The strict experimental default has
+zero newly joined different-event reference pairs, but selects none of the ten
+known unions, including none of their three all-pair-supported cases. Therefore
+its zero observed conflicts **does not validate its six proposals**, estimate
+precision, or establish an extremely-high-probability same-event threshold.
+The less strict variants still introduce known model-reference conflicts.
+No variant is adopted as an automatic merge policy.
+
+| Observed time | Result |
+| --- | ---: |
+| Full numerical default route, including setup/conversions | 3.216 seconds |
+| Previous cached-feature full-frame preparation | 2.546 seconds |
+| Previous/default timing ratio | 0.79 |
+| Warm single-query retrieval median, 64 samples | 5.74 ms |
+| Warm single-query retrieval p95 | 8.08 ms |
+| Cold input/artifact loading | 6.09 seconds |
+| Full preflight plus registration, launcher-observed | 861.97 seconds |
+
+The default full numerical route is slower than the previous cached-frame route
+in this run, despite searching a different bounded frame. **No cold-batch speedup
+was demonstrated.** The useful speed result is cached centroid retrieval;
+neither that latency nor the 3.216-second numerical timer includes mandatory
+preflight, validation, result persistence and all surrounding workflow time.
+One process/order and one timed full run per route limit reproducibility claims.
+This is not an implemented persistent low-latency research service.
+
+At0.975, candidate dispositions were 6,580 below the centroid cutoff,849 needing
+cross-pair evidence review, six old-group reuse exclusions, six unjudged
+proposals and3,948 same-window exclusions. These are not different-event labels.
+One unjudged proposal had a collective cosine displayed as1.00000 across seven
+stored records over22 publication days, with zero saved semantic references.
+That numerical extreme supplies no independent evidence of event identity.
+Private source-linked examples and complete feature/membership records are in
+the captured presentation and comparison artifacts; no new source interpretation
+was performed outside the gateway.
+
+Missing article vectors remain424; unusable vector-bearing publication dates27.
+Saved-feature failures zero. Actual merges, accepted dossiers, new model calls,
+new embeddings and held-out label openings zero. The current seven-day groups
+and the cumulative85/100 attempts,170/200 article exposures remain unchanged.
+
+Recommended use: collective vectors for fast candidate mapping, followed by the
+original checks and explicit unresolved/review states. Safe automatic event
+merging remains unestablished. Do not choose0.975 as a validated operating
+cutoff, silently weaken the original five gates, or infer accuracy from the
+absence of reference overlap. Independent event-level review and checks of the
+stored text/representation remain necessary before adoption.
+
+Software verification: three numerical scenarios passed in0.19 seconds; after
+the full-route timing correction, the affected adapter integration passed in
+1.65 seconds. Ruff and mypy passed on the new files. Documentation reporting
+did not rerun the full suite or launch additional research. A supplementary
+audit-hook failure paused work; a direct lifecycle write and exact hook repeat
+succeeded before corpus execution. A sandbox Python-cache denial affected only
+source-free checks and was resolved with the approved local cache access. No
+audit history, global settings or preflight checks were bypassed.
