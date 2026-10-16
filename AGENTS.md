@@ -74,10 +74,10 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
   `a7e33f7e0945b4b2485fa084fb08eca8a7a5d08c60265867932859d6ca5734e6`.
   Body-deduplicated group centroids map nearby groups while retaining all five
   original cached cross-article checks and one disjoint proposal pass. Warm
-  retrieval measured5.74ms median/8.08ms p95; the complete numerical default
-  took3.216s versus2.546s for the earlier cached-frame method (no cold-batch
-  speedup). Cutoffs0.90/0.95/0.975 proposed65/22/6 links, introducing3/2/0
-  different-event reference co-memberships. At0.975 none of the ten known
+  retrieval measured 5.74 ms median/8.08 ms p95; the complete numerical default
+  took 3.216 s versus 2.546 s for the earlier cached-frame method (no cold-batch
+  speedup). Cutoffs 0.90/0.95/0.975 proposed 65/22/6 links, introducing 3/2/0
+  different-event reference co-memberships. At 0.975 none of the ten known
   reviewed unions was selected; the six proposals are unjudged, so zero observed
   conflicts does not validate their quality. No automatic merge policy was
   adopted, no new models ran and current memberships/budgets remain unchanged.

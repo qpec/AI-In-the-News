@@ -161,29 +161,29 @@ preflight, validation, result persistence and all surrounding workflow time.
 One process/order and one timed full run per route limit reproducibility claims.
 This is not an implemented persistent low-latency research service.
 
-At0.975, candidate dispositions were 6,580 below the centroid cutoff,849 needing
+At 0.975, candidate dispositions were 6,580 below the centroid cutoff, 849 needing
 cross-pair evidence review, six old-group reuse exclusions, six unjudged
-proposals and3,948 same-window exclusions. These are not different-event labels.
-One unjudged proposal had a collective cosine displayed as1.00000 across seven
-stored records over22 publication days, with zero saved semantic references.
+proposals and 3,948 same-window exclusions. These are not different-event labels.
+One unjudged proposal had a collective cosine displayed as 1.00000 across seven
+stored records over 22 publication days, with zero saved semantic references.
 That numerical extreme supplies no independent evidence of event identity.
 Private source-linked examples and complete feature/membership records are in
 the captured presentation and comparison artifacts; no new source interpretation
 was performed outside the gateway.
 
-Missing article vectors remain424; unusable vector-bearing publication dates27.
+Missing article vectors remain 424; unusable vector-bearing publication dates 27.
 Saved-feature failures zero. Actual merges, accepted dossiers, new model calls,
 new embeddings and held-out label openings zero. The current seven-day groups
-and the cumulative85/100 attempts,170/200 article exposures remain unchanged.
+and the cumulative 85/100 attempts, 170/200 article exposures remain unchanged.
 
 Recommended use: collective vectors for fast candidate mapping, followed by the
 original checks and explicit unresolved/review states. Safe automatic event
-merging remains unestablished. Do not choose0.975 as a validated operating
+merging remains unestablished. Do not choose 0.975 as a validated operating
 cutoff, silently weaken the original five gates, or infer accuracy from the
 absence of reference overlap. Independent event-level review and checks of the
 stored text/representation remain necessary before adoption.
 
-Software verification: three numerical scenarios passed in0.19 seconds; after
+Software verification: three numerical scenarios passed in 0.19 seconds; after
 the full-route timing correction, the affected adapter integration passed in
 1.65 seconds. Ruff and mypy passed on the new files. Documentation reporting
 did not rerun the full suite or launch additional research. A supplementary
