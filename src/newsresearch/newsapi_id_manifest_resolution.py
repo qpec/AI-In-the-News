@@ -35,6 +35,11 @@ def enumeration(page: int) -> Json:
     return {**collection_request((START, END), page), "includeArticleBody": False, "articleBodyLen": 0}
 
 
+def minimal_enumeration(page: int, title: bool = True) -> Json:
+    return {**enumeration(page), "includeArticleBasicInfo": True, "includeArticleTitle": title,
+        "includeArticleUrl": False, "includeArticleImage": False, "includeSourceTitle": False}
+
+
 def templates(ids: list[str], control: str) -> Json:
     values = _identifiers(ids, control)
     flags = {"includeArticleBody": False, "articleBodyLen": 0,
@@ -140,7 +145,7 @@ def parse_controls(sdk_response: Json, list_response: Json, ids: list[str], cont
 
 
 def validate_enumeration(receipts: list[Json], saved_ids: list[str],
-                         expected_ids: list[str] | None = None) -> Json:
+                         expected_ids: list[str] | None = None, *, allow_minimal: bool = False) -> Json:
     """Replay exact receipts; partial absence remains unknown, never a negative."""
     diagnostics: list[str] = []
     pages: dict[int, Json] = {}
@@ -159,7 +164,10 @@ def validate_enumeration(receipts: list[Json], saved_ids: list[str],
         if not isinstance(page, int) or isinstance(page, bool) or not 1 <= page <= MAX_PAGES:
             diagnostics.append("page_outside_cap")
             continue
-        if parameters != enumeration(page):
+        allowed = [enumeration(page)]
+        if allow_minimal:
+            allowed.extend([minimal_enumeration(page), minimal_enumeration(page, False)])
+        if parameters not in allowed:
             diagnostics.append("request_template_mismatch")
             continue
         if page in pages:

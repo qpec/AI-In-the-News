@@ -255,6 +255,32 @@ raw sort discrepancy; distinguish coverage of observed eligible IDs from an
 unproved fixed provider population. Independently replay metadata and cumulative
 budget including all appended receipt resolutions in the updated proof.
 
+The archive-date exact-ID diagnostic returned archive header0 and the two
+controls but none of the six suspect IDs. Adding dateStart did not force archive
+routing in this request. Actual cumulative charge became296tokens; conservative
+accounting416, with24unitemized usage-check reservations and one explicitly
+reconciled received response with unavailable content. Preserve this negative
+diagnostic instead of treating archive use as established.
+
+`nl-cyber-minimal-metadata-recovery-v1` registers a fresh complete keyword
+enumeration of the same disputed window and unchanged selection. Request basic
+metadata/title while omitting URL/image/source-title/body; the credential guard
+remains unchanged. Register every exact page1–30 template. After a knownHTTP200
+retention rejection only, append the existing received-response reconciliation
+without releasing fees, then permit one separately registered title-omitting
+request. Never retry an identical payload or reconcile transport-unknown events.
+Missing titles remain unavailable, not negative findings.
+
+Reserve25tokens per new exact minimal request: five times the repeatedly observed
+five-token single-year archive charge. This changes only future bounded templates;
+old charges and unknown-fee reservations remain intact under the original583cap.
+Require archive header1, stable totals, every expected page, unique IDs and
+returned original date/language scope. A fresh full pass avoids mixing its pages
+with the earlier partial enumeration. Independently replay permitted raw pages,
+costs and receipt resolutions; preserve all prior branch results. Save newly
+discovered metadata separately, with article bodies explicitly unfetched. Do not
+guess aliases or present provider-set coverage as an external news census.
+
 - https://newsapi.ai/plans
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/QueryArticles.py
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py

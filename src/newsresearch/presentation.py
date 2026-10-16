@@ -31,6 +31,8 @@ RESULT_KINDS = {
     "newsapi_id_manifest_resolution",
     "newsapi_id_manifest_archive_repair_preparation",
     "newsapi_id_manifest_archive_repair",
+    "newsapi_id_manifest_minimal_preparation",
+    "newsapi_id_manifest_minimal_recovery",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",

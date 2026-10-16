@@ -364,6 +364,10 @@ def verify_proof_bytes(raw: bytes) -> Json:
             if "archive-uri-repair.json" in checksums:
                 from .newsapi_id_manifest_archive_repair import verify_package
                 archive_repair = verify_package(archive, comparison)
+            minimal_recovery = None
+            if "minimal-metadata-recovery.json" in checksums:
+                from .newsapi_id_manifest_minimal_recovery import verify_package as verify_minimal
+                minimal_recovery = verify_minimal(archive, comparison)
     except (KeyError, ValueError, zipfile.BadZipFile, ResearchError) as error:
         raise AuditError("Proof package could not be independently replayed") from error
     return {"status": "verified", "files_checked": len(checksums), "raw_responses_checked": raw_count,
@@ -373,6 +377,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
         "final_scope_verification": final_scope,
         "resolution_verification": resolution_check,
         "archive_uri_repair": archive_repair,
+        "minimal_metadata_recovery": minimal_recovery,
         "outer_sha256": hashlib.sha256(raw).hexdigest(),
         "scope": "Byte integrity, raw-to-normalized IDs and available set-comparison replay; null absence remains unsettled, no independent provider attestation"}
 

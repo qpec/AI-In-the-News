@@ -95,11 +95,16 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
         policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
         if (policy.get("resolution_method") != "nl-cyber-id-manifest-resolution-v1"
                 or policy.get("authorization_id") != AUTH_ID or policy.get("max_tokens") != CAP
-                or parameters not in [*policy.get("resolution_templates", []), *policy.get("resolution_extension_templates", [])]
+                or parameters not in [*policy.get("resolution_templates", []), *policy.get("resolution_extension_templates", []), *policy.get("minimal_metadata_templates", [])]
                 or parameters.get("includeArticleBody") is not False or parameters.get("articleBodyLen") != 0):
             raise ResearchError("Resolution dispatch requires an exact registered metadata-only template")
     metadata = parameters.get("endpointVariant") == "article_info" or resolution
     reserve = USAGE_RESERVATION if usage else SEARCH_RESERVATION if metadata else RESERVATIONS[parameters["uriWgtListCount"]]
+    if resolution and parameters in policy.get("minimal_metadata_templates", []):
+        if (policy.get("minimal_metadata_method") != "nl-cyber-minimal-metadata-recovery-v1"
+                or policy.get("minimal_metadata_reservation") != 25):
+            raise ResearchError("Minimal metadata requires its exact registered empirical reservation")
+        reserve = 25
     if reserve_override is not None:
         policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
         if (usage or metadata or reserve_override != 50 or policy.get("block_reservation") != 50

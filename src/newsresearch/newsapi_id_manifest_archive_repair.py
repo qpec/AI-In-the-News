@@ -131,6 +131,8 @@ def verify_package(archive: Any, comparison: Json) -> Json:
     receipts = [json.loads(archive.read(name)) for name in archive.namelist() if name.startswith("receipts/")]
     intents = [json.loads(archive.read(name)) for name in archive.namelist() if name.startswith("intents/")]
     resolutions = doc["response_reconciliations"]
+    if "minimal-metadata-recovery.json" in archive.namelist():
+        resolutions = json.loads(archive.read("minimal-metadata-recovery.json"))["response_reconciliations"]
     by_id = {r["id"]: r for r in receipts}
     for item in resolutions:
         rejected = by_id[item["receipt"]]
