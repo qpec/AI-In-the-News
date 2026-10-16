@@ -18,6 +18,7 @@ RESULT_KINDS = {
     "newsapi_collection_missingness",
     "newsapi_collection_consistency",
     "newsapi_retrieval_audit",
+    "newsapi_id_manifest_test",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",

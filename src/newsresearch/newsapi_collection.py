@@ -152,6 +152,10 @@ def save_cost(engine: Research, session: str, identifier: str, receipt: Json) ->
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
+    if data.get("action") == "id_manifest_test":
+        from .newsapi_id_manifest import run as id_manifest_test
+
+        return id_manifest_test(engine, session, context, data)
     if data.get("action") == "retrieval_audit":
         from .newsapi_retrieval_audit import run as retrieval_audit
 
