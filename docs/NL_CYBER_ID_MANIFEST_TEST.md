@@ -51,6 +51,27 @@ sets in protected storage outside Git. Exact reports use `record_presentation`.
 The protected difference CSV contains all observed differing IDs and completeness
 flags; it does not fabricate titles/source URLs when only IDs are returned.
 
+The user's follow-up requests evidence that all matching provider articles were
+enumerated. Register a second pass with the same dates, predicates and 5,000-ID
+page size, sorted by descending date. Its pages must never supply or reuse the
+ascending pass's coverage. Require both complete exact sets to agree, and retain
+disagreement/incomplete status rather than declaring completeness from counts.
+Keep both passes and all charges under the original 583-token authorization.
+Save protected year-level ID lists, raw responses, parameters, immutable baseline
+references, version bindings, costs and file hashes as a reproducible proof
+package. This is evidence of the returned provider universe at retrieval time,
+not proof of every article published or a permanent provider snapshot.
+
+Identify at most ten manifest-only IDs with one exact-ID `getArticle` metadata
+batch, reserving 50 tokens from the same shared allowance. Set both documented
+body-length spellings to zero and `includeArticleBody=false`; reject unexpected
+body-bearing responses before retention. Match returned IDs exactly and keep
+unavailable metadata explicit. Extract saved-only titles/URLs from their original
+audited records, checking the immutable locator and record hash. Register this
+method before lookup. Retain actual receipt charges; metadata lookup pricing is
+not assumed to be zero or reduced by body suppression. No automatic repeat of
+the metadata request is authorized.
+
 Primary technical references:
 
 - https://newsapi.ai/plans

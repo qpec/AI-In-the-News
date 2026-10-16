@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 ENDPOINT = "https://eventregistry.org/api/v1/article/getArticles"
 ENDPOINTS = {"rest": ENDPOINT, "sdk": "https://eventregistry.org/api/v1/article",
+             "article_info": "https://eventregistry.org/api/v1/article/getArticle",
              "usage": "https://eventregistry.org/api/v1/usage",
              "service_status": "https://eventregistry.org/api/v1/getServiceStatus"}
 AUTHORIZATION = "nl-cyber-search-pilot-2026-10-15-200"

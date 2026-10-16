@@ -78,7 +78,8 @@ def records(engine: Research, kind: str) -> list[Json]:
 def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str) -> Json:
     require_active(engine, session)
     usage = parameters == {"endpointVariant": "usage"}
-    reserve = USAGE_RESERVATION if usage else RESERVATIONS[parameters["uriWgtListCount"]]
+    metadata = parameters.get("endpointVariant") == "article_info"
+    reserve = USAGE_RESERVATION if usage else SEARCH_RESERVATION if metadata else RESERVATIONS[parameters["uriWgtListCount"]]
     intents, receipts = records(engine, "newsapi_id_intent"), records(engine, "newsapi_id_receipt")
     balance = accounting(intents, receipts)
     if balance["conservative_accounted_tokens"] + reserve > CAP:
@@ -122,6 +123,9 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
                 raise ResearchError("Credential echo rejected")
             require_no_credentials(parsed)
             require_no_credentials(headers)
+            if metadata and any(isinstance(item, dict) and isinstance(item.get("info"), dict)
+                    and item["info"].get("body") for item in parsed.values()):
+                raise ResearchError("Unexpected article body rejected from metadata-only retention")
         except (ValueError, UnicodeError, ResearchError) as error:
             result = {**intent, "outcome": "unknown", "http_status": status, "billed_tokens": number(headers.get("req-tokens")),
                 "response": None, "raw_response": None, "raw_sha256": hashlib.sha256(raw).hexdigest(),
@@ -132,7 +136,7 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
             result = {**intent, "outcome": "received", "http_status": status, "headers": headers,
                 "billed_tokens": number(headers.get("req-tokens")), "response": parsed,
                 "raw_response": raw_ref, "raw_sha256": hashlib.sha256(raw).hexdigest(), "completed_at": utc()}
-            if not usage:
+            if not usage and not metadata:
                 result["manifest_status"] = "invalid"
                 try:
                     ids, total = parse_manifest(parsed)
