@@ -313,3 +313,14 @@ with mock HTTP, deterministic combined caps, complete-result reuse without
 repayment, observed-invalid and unknown-response stopping, and audit-write
 failure. These are engineering checks, not new corpus results or service access.
 Actual paid execution results are recorded separately when available.
+
+The reproducible `scripts/benchmark_embedding_intent_indexes.py` checks its SQL
+against the gateway/coordinator declarations, then uses an in-memory SQLite
+fixture with 25,000 synthetic intended attempts and 75,000 unrelated events.
+Three-repetition warm medians were 4,222.70 ms before versus 0.4977 ms after for
+250 task lookups (8,484 times), and 173.90 ms versus 20.3997 ms for ten policy
+lookups (8.52 times). Index construction took 35.57 ms. Returned results were
+identical, and query plans selected both expression indexes. These large ratios
+describe removal of repeated scans in this synthetic lookup workload only;
+they are not measured improvements to full audit preflight, provider requests
+or total corpus execution. Ruff passed for the benchmark script.
