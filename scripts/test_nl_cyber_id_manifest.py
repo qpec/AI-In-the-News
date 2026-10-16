@@ -15,8 +15,8 @@ from newsresearch.runtime import Research
 def overview(r, root):
     text = ("Query unchanged: `hack OR gehackt OR hackers OR ransomware OR datalek OR datalekken OR cyberaanval OR cyberaanvallen`, "
         "phrase mode, title/body, Dutch news, provider duplicates retained. Dates: **1 January 2020–15 October 2026**, "
-        "using the same eight saved nonoverlapping partitions (two in2023). Separate `uriWgtList` route, "
-        f"{PAGE_SIZE:,} IDs/page, date ascending.\n\n"
+        "using the same eight saved nonoverlapping partitions (two in2023). Alternate `uriWgtList` result type on the same provider endpoint, "
+        f"{r.get('page_size', PAGE_SIZE):,} IDs/page, date ascending. Prior calibration-page receipts remain separate and included in costs.\n\n"
         "| Year | Saved IDs | Manifest IDs seen | Complete | In manifest, absent from saved | Saved, absent from manifest | Tokens reported |\n"
         "|---|---:|---:|---|---:|---:|---:|\n")
     for y in r["years"]:
@@ -42,6 +42,7 @@ def main():
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--requests", type=int, default=8)
+    parser.add_argument("--page-size", type=int, choices=[1000, 5000])
     args = parser.parse_args()
     root = args.workspace.resolve()
     engine = Research(root, config=Config(offline=not args.execute))
@@ -72,6 +73,25 @@ def main():
             for kind, content in definitions.items():
                 versions[kind] = run("version", {"kind": kind, "key": METHOD, "content": content, "amend_latest": True, "reason": "Register concrete capped ID-manifest test before execution"})["id"]
             path.write_text(json.dumps(versions), encoding="utf-8")
+        if args.page_size is not None:
+            previous_policy = engine.ledger.get(versions["policy"], "policy")["content"]
+            old_size = previous_policy.get("page_size", PAGE_SIZE)
+            if args.page_size != old_size:
+                for kind in ["protocol", "selection", "policy"]:
+                    previous = engine.ledger.get(versions[kind], kind)["content"]
+                    amended = {**previous, "page_size": args.page_size,
+                        "phase_amendment": "After calibration of response format and actual charges, enumerate in a separate5000-ID/page phase with250-token reservations. Require req-archive=1 on every historical manifest response. Same predicates/dates/budget; do not combine1000-page offsets with5000-page offsets. Prior calibration receipts and charges remain preserved under the same583-token authorization"}
+                    if kind == "policy":
+                        amended["templates"] = [request(*p, 1, args.page_size) for p in previous_policy["periods"]]
+                    if kind == "protocol":
+                        amended["scope"] = "Same eight keyword phrases, title/body, nld news, keepAll and saved publication intervals. Alternate resultType uriWgtList with5000IDs/page, ascending date and archive confirmation on every page. Separate enumeration phase; no hidden SDK retries"
+                        amended["budget"] = "583newtokens maximum shared across all phases/versions under the unchanged authorization ID. Reserve250per5000-ID search and5perusage call before dispatch; actual receipt releases unused reservation; unknown charges retain reservation; unknown dispatch stops searches. Prior1000-ID calibration and all charges remain included.250is a conservative full-article-equivalent allowance, not a published manifest tariff or server-side cap. Stop when reservation cannot fit authorization/account allowance or a receipt exceeds reservation"
+                    if kind == "selection":
+                        amended["rules"] = {**previous["rules"], "query_templates": [request(*p, 1, args.page_size) for p in previous_policy["periods"]],
+                            "manifest_phase": "Separate page-set enumeration; exclude prior1000-ID phase from coverage, retain its receipts and costs"}
+                    versions[kind] = run("version", {"kind": kind, "key": METHOD + "-5000-phase", "content": amended,
+                        "supersedes": versions[kind], "reason": "Reduce paid call count after small calibration; retain independent page-set phases and all costs"})["id"]
+                path.write_text(json.dumps(versions), encoding="utf-8")
         if not args.execute:
             print(json.dumps({"status": "registered_only", "versions": versions, "paid_calls": 0}))
             return

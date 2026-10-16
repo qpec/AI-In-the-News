@@ -15,6 +15,15 @@ initially1,000 IDs/page, ascending date, with raw `URI:weight` entries preserved
 and normalized using the official SDK's first-colon rule. No ID-sort or fixed
 provider snapshot is claimed.
 
+The first live calibration used the 1,000-ID phase. Before further dispatch,
+register a separate 5,000-ID phase, with 250-token reservations per search.
+Never combine the two page-offset schemes: enumerate the larger phase from
+page one and compare only its own pages; retain calibration receipts and charges
+in the same authorization-wide budget. This amendment changes pagination only,
+not dates or search predicates. Require archive confirmation (`req-archive=1`)
+on each historical manifest page. The 5,000-ID phase requires a valid calibration
+receipt with a known charge within its initial 50-token reservation.
+
 Public pricing documents five tokens/searched archive year for article search,
 but no manifest-specific/count-sensitive tariff. Initially reserve50 tokens per
 1,000-ID search (a conservative full-article-equivalent allowance, not a proven

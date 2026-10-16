@@ -21,12 +21,15 @@ CAP = 583
 PAGE_SIZE = 1000
 SEARCH_RESERVATION = 50
 USAGE_RESERVATION = 5
+RESERVATIONS = {1000: SEARCH_RESERVATION, 5000: 250}
 
 
-def request(start: str, end: str, page: int) -> Json:
+def request(start: str, end: str, page: int, page_size: int = PAGE_SIZE) -> Json:
+    if page_size not in RESERVATIONS:
+        raise ResearchError("Use an explicitly supported ID-list page size")
     query = {k: v for k, v in collection_request((start, end), 1).items()
              if not k.startswith("articles") and k != "includeArticleBody"}
-    return {**query, "resultType": "uriWgtList", "uriWgtListCount": PAGE_SIZE,
+    return {**query, "resultType": "uriWgtList", "uriWgtListCount": page_size,
         "uriWgtListPage": page, "uriWgtListSortBy": "date", "uriWgtListSortByAsc": True}
 
 
@@ -75,7 +78,7 @@ def records(engine: Research, kind: str) -> list[Json]:
 def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str) -> Json:
     require_active(engine, session)
     usage = parameters == {"endpointVariant": "usage"}
-    reserve = USAGE_RESERVATION if usage else SEARCH_RESERVATION
+    reserve = USAGE_RESERVATION if usage else RESERVATIONS[parameters["uriWgtListCount"]]
     intents, receipts = records(engine, "newsapi_id_intent"), records(engine, "newsapi_id_receipt")
     balance = accounting(intents, receipts)
     if balance["conservative_accounted_tokens"] + reserve > CAP:
@@ -134,24 +137,27 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
                 try:
                     ids, total = parse_manifest(parsed)
                     page = parameters["uriWgtListPage"]
-                    expected = min(PAGE_SIZE, max(0, total - PAGE_SIZE * (page-1)))
-                    if status == 200 and total > 0 and len(ids) == expected and len(ids) == len(set(ids)):
+                    count = parameters["uriWgtListCount"]
+                    expected = min(count, max(0, total - count * (page-1)))
+                    if (status == 200 and headers.get("req-archive") == "1" and total > 0
+                            and len(ids) == expected and len(ids) == len(set(ids))):
                         result.update(manifest_status="valid", normalized_ids=ids, provider_total=total)
                     else:
-                        result["validation_reason"] = "empty_duplicate_or_unexpected_page_size"
+                        result["validation_reason"] = "archive_unconfirmed_empty_duplicate_or_unexpected_page_size"
                 except ResearchError:
                     result["validation_reason"] = "unsupported_manifest_shape"
     identifier = engine.ledger.record(session, "newsapi_id_receipt", attempt, result)
     return {"id": identifier, **result}
 
 
-def compare_partition(base_ids: set[str], receipts: list[Json]) -> Json:
-    valid = [r for r in receipts if r.get("manifest_status") == "valid"]
+def compare_partition(base_ids: set[str], receipts: list[Json], page_size: int = PAGE_SIZE) -> Json:
+    valid = [r for r in receipts if r.get("manifest_status") == "valid"
+             and r["parameters"].get("uriWgtListCount", PAGE_SIZE) == page_size]
     page_rows = {r["parameters"]["uriWgtListPage"]: r for r in valid}
     ids = {uri for r in valid for uri in r["normalized_ids"]}
     totals = sorted({r["provider_total"] for r in valid})
     total = totals[-1] if totals else None
-    expected_pages = (total+PAGE_SIZE-1)//PAGE_SIZE if total is not None else None
+    expected_pages = (total+page_size-1)//page_size if total is not None else None
     missing_pages = sorted(set(range(1, expected_pages+1))-set(page_rows)) if expected_pages is not None else None
     occurrences = sum(len(r["normalized_ids"]) for r in valid)
     complete = bool(valid) and len(totals) == 1 and not missing_pages and len(ids) == total and len(ids) == occurrences
@@ -172,7 +178,7 @@ def load_baseline(engine: Research, identifier: str) -> tuple[Json, Json]:
     return audit, engine.ledger.artifacts.read(audit["identity_manifest"])
 
 
-def snapshot(engine: Research, baseline: Json, identities: Json, context: Context) -> Json:
+def snapshot(engine: Research, baseline: Json, identities: Json, context: Context, page_size: int = PAGE_SIZE) -> Json:
     receipts = records(engine, "newsapi_id_receipt")
     periods = []
     manifest_sets: dict[str, set[str]] = {}
@@ -181,12 +187,13 @@ def snapshot(engine: Research, baseline: Json, identities: Json, context: Contex
         start, end = p["date_start"], p["date_end"]
         base_ids = set(identities[start]["uri_counts"])
         selected = [r for r in receipts if (r["parameters"].get("dateStart"), r["parameters"].get("dateEnd")) == (start, end)]
-        row = {"year": p["year"], "date_start": start, "date_end": end, **compare_partition(base_ids, selected),
+        phase_receipts = [r for r in selected if r["parameters"].get("uriWgtListCount") == page_size]
+        row = {"year": p["year"], "date_start": start, "date_end": end, **compare_partition(base_ids, phase_receipts, page_size),
             "attempts": len(selected), "invalid_attempts": sum(r.get("manifest_status") != "valid" for r in selected),
             "reported_tokens": sum(r["billed_tokens"] for r in selected if r.get("billed_tokens") is not None)}
         periods.append(row)
         year = p["year"]
-        manifest_sets.setdefault(year, set()).update(uri for r in selected if r.get("manifest_status") == "valid" for uri in r["normalized_ids"])
+        manifest_sets.setdefault(year, set()).update(uri for r in phase_receipts if r.get("manifest_status") == "valid" for uri in r["normalized_ids"])
         saved_sets.setdefault(year, set()).update(base_ids)
     years = []
     for year, saved_ids in sorted(saved_sets.items()):
@@ -201,7 +208,8 @@ def snapshot(engine: Research, baseline: Json, identities: Json, context: Contex
     usages = [r for r in receipts if r["purpose"].startswith("usage") and r.get("http_status") == 200 and r.get("outcome") == "received"]
     baseline_used = number(usages[0]["response"].get("usedTokens")) if usages else None
     final_used = number(usages[-1]["response"].get("usedTokens")) if usages else None
-    return {"versions": context.versions, "authorization_id": AUTH_ID, "baseline_audit": baseline["id"],
+    return {"versions": context.versions, "authorization_id": AUTH_ID, "baseline_audit": baseline["id"], "page_size": page_size,
+        "prior_phase_receipts": [r["id"] for r in receipts if r["purpose"] == "manifest" and r["parameters"].get("uriWgtListCount") != page_size],
         "periods": periods, "years": years,
         "budget": accounting(records(engine, "newsapi_id_intent"), receipts),
         "baseline_used": baseline_used, "latest_used": final_used,
@@ -214,8 +222,10 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
     policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
+    page_size = policy.get("page_size", PAGE_SIZE)
     if (policy.get("method") != METHOD or policy.get("authorization_id") != AUTH_ID or policy.get("max_tokens") != CAP
-            or policy.get("templates") != [request(p[0], p[1], 1) for p in policy.get("periods", [])]):
+            or page_size not in RESERVATIONS
+            or policy.get("templates") != [request(p[0], p[1], 1, page_size) for p in policy.get("periods", [])]):
         raise ResearchError("Exact 583-token ID-manifest test authorization required")
     baseline, identities = load_baseline(engine, policy["baseline_audit"])
     baseline = {"id": policy["baseline_audit"], **baseline}
@@ -228,13 +238,17 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("Explicit live ID-manifest execution required")
     if not os.environ.get("EVENTREGISTRY_API_KEY"):
         raise ResearchError("NewsAPI credential unavailable before dispatch")
+    if page_size == 5000 and not any(r.get("manifest_status") == "valid" and r["parameters"].get("uriWgtListCount") == 1000
+            and r.get("billed_tokens") is not None and r["billed_tokens"] <= SEARCH_RESERVATION
+            for r in records(engine, "newsapi_id_receipt")):
+        raise ResearchError("Successful, cost-confirmed 1000-ID calibration required before larger pages")
     unknown_collection = engine.ledger.db.execute("SELECT COUNT(*) FROM records i WHERE i.kind='newsapi_collection_intent' AND NOT EXISTS (SELECT 1 FROM records r WHERE r.kind='newsapi_collection_receipt' AND json_extract(r.payload,'$.attempt')=json_extract(i.payload,'$.attempt'))").fetchone()[0]
     if unknown_collection:
         raise ResearchError("An unresolved earlier collection dispatch blocks the test")
     limit = data.get("requests", 8)
     if not isinstance(limit, int) or not 1 <= limit <= 12:
         raise ResearchError("Use 1 through12 searches per checkpoint")
-    state = snapshot(engine, baseline, identities, context)
+    state = snapshot(engine, baseline, identities, context, page_size)
     if all(p["complete"] for p in state["periods"]):
         raise ResearchError("Manifest test is complete; do not spend more tokens")
     before = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_manifest_checkpoint")
@@ -242,7 +256,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("Account usage unavailable; no manifest dispatch")
     stop = "checkpoint"
     for _ in range(limit):
-        state = snapshot(engine, baseline, identities, context)
+        state = snapshot(engine, baseline, identities, context, page_size)
         if state["budget"]["unresolved_outcomes"]:
             stop = "unknown_outcome"
             break
@@ -255,12 +269,15 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
             break
         period = min(pending, key=lambda p: (p["pages"], p["date_start"]))
         page = min(period["pending_pages"]) if period["pending_pages"] else period["pages"]+1
-        params = request(period["date_start"], period["date_end"], page)
+        params = request(period["date_start"], period["date_end"], page, page_size)
         try:
             receipt = dispatch(engine, session, context, params, "manifest")
         except ResearchError as error:
             if str(error).startswith(("ID-manifest authorization budget", "Account allowance")):
                 stop = "budget_limit"
+                break
+            if str(error).startswith("No duplicate valid-page dispatch"):
+                stop = "invalid_manifest_response"
                 break
             raise
         print(json.dumps({"start": period["date_start"], "page": page, "ids": len(receipt.get("normalized_ids", [])),
@@ -281,7 +298,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     except ResearchError as error:
         if not str(error).startswith("ID-manifest authorization budget"):
             raise
-    result = snapshot(engine, baseline, identities, context)
+    result = snapshot(engine, baseline, identities, context, page_size)
     if all(p["complete"] for p in result["periods"]):
         stop = "manifest_complete"
     result["stop_reason"] = stop

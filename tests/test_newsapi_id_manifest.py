@@ -41,6 +41,33 @@ def test_unknown_charges_keep_reservations_and_unknown_dispatch_blocks():
     assert value["unresolved_outcomes"] == value["unknown_individual_costs"] == ["b"]
 
 
+def test_larger_phase_keeps_original_filters_and_never_mixes_offsets():
+    small = module.request("2020-01-01", "2020-12-31", 1)
+    large = module.request("2020-01-01", "2020-12-31", 1, 5000)
+    assert {**small, "uriWgtListCount": 5000} == large
+    receipts = [
+        {"id": "calibration", "manifest_status": "valid", "parameters": small,
+            "normalized_ids": ["a"], "provider_total": 1},
+        {"id": "new-phase", "manifest_status": "valid", "parameters": large,
+            "normalized_ids": ["a", "b"], "provider_total": 2},
+    ]
+    compared = module.compare_partition({"a", "b"}, receipts, page_size=5000)
+    assert compared["complete"] and compared["manifest_ids_seen"] == 2
+    assert compared["manifest_receipts"] == ["new-phase"]
+    assert compared["duplicate_id_occurrences"] == 0
+
+
+def test_budget_is_cumulative_across_page_sizes_and_missing_usage_costs():
+    intents = [{"attempt": "small", "reserved_tokens": 50},
+        {"attempt": "large", "reserved_tokens": 250}, {"attempt": "usage", "reserved_tokens": 5}]
+    receipts = [{"attempt": "small", "outcome": "received", "billed_tokens": 5},
+        {"attempt": "large", "outcome": "received", "billed_tokens": 5},
+        {"attempt": "usage", "outcome": "received", "billed_tokens": None}]
+    budget = module.accounting(intents, receipts)
+    assert budget["reported_tokens"] == 10 and budget["conservative_accounted_tokens"] == 15
+    assert budget["unknown_individual_costs"] == ["usage"] and not budget["unresolved_outcomes"]
+
+
 def setup(engine, monkeypatch):
     period = ["2024-01-01", "2024-12-31"]
     definitions = {"protocol": {"method": module.METHOD}, "question": {"text": "Synthetic capped ID test"},
@@ -83,3 +110,21 @@ def test_account_ceiling_stops_search_before_dispatch(engine, monkeypatch):
     assert result["stop_reason"] == "budget_limit" and result["budget"]["reported_tokens"] == 0
     assert all(p == {"endpointVariant": "usage"} for p in calls)
     assert result["years"][0]["saved_only_ids"] is None
+
+
+@pytest.mark.parametrize("archive,complete", [(None, False), ("0", False), ("1", True)])
+def test_archive_confirmation_required_for_accepting_manifest(engine, monkeypatch, archive, complete):
+    import json
+    run = setup(engine, monkeypatch)
+    def transport(params):
+        if params == {"endpointVariant": "usage"}:
+            return 200, {"req-tokens": "0"}, json.dumps({"usedTokens": 4400, "availableTokens": 5000}).encode()
+        headers = {"req-tokens": "5"}
+        if archive is not None:
+            headers["req-archive"] = archive
+        return 200, headers, json.dumps({"uriWgtList": {"totalResults": 2, "results": ["a:1", "b:1"]}}).encode()
+    monkeypatch.setattr(module, "transport", transport)
+    result = run()
+    assert result["years"][0]["complete"] is complete
+    assert result["budget"]["reported_tokens"] == 5
+    assert result["years"][0]["saved_only_ids"] == ([] if complete else None)
