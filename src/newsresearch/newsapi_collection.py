@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
+import hashlib
 import json
 import os
+import time
 from typing import TYPE_CHECKING
 import uuid
 
-from .common import Context, Json, ResearchError, canonical, require_active, require_no_credentials, utc
+from .common import Context, Json, ResearchError, canonical, digest, require_active, require_no_credentials, utc
 from .newsapi_probe import transport
 
 if TYPE_CHECKING:
@@ -23,6 +25,22 @@ CONTROL = {"endpointVariant": "sdk", "action": "getArticles", "resultType": "art
            "articlesSortBy": "date", "articlesSortByAsc": True}
 
 
+def diagnostics() -> list[Json]:
+    direct = {**CONTROL, "endpointVariant": "rest", "dateStart": "2024-01-01", "dateEnd": "2024-12-31"}
+    complex_request = {k: v for k, v in direct.items() if k not in {"lang", "dateStart", "dateEnd"}}
+    complex_request.update(endpointVariant="sdk", query=canonical({"$query": {"$and": [
+        {"dateStart": "2024-01-01", "dateEnd": "2024-12-31"}, {"lang": "nld"}]}}))
+    return [direct, complex_request]
+
+
+def collection_request(period: tuple[str, str], page: int) -> Json:
+    return {"endpointVariant": "rest", "action": "getArticles", "resultType": "articles",
+        "keyword": WORDS, "keywordOper": "or", "keywordSearchMode": "phrase", "keywordLoc": "body,title",
+        "lang": "nld", "dateStart": period[0], "dateEnd": period[1], "dataType": "news",
+        "isDuplicateFilter": "keepAll", "includeArticleBody": True, "articlesArticleBodyLen": -1,
+        "articlesPage": page, "articlesCount": 100, "articlesSortBy": "date", "articlesSortByAsc": True}
+
+
 def number(value: object) -> float | None:
     try:
         result = Decimal(str(value))
@@ -31,15 +49,21 @@ def number(value: object) -> float | None:
         return None
 
 
-def saved(engine: Research, kind: str, versions: dict[str, str]) -> list[Json]:
+def saved(engine: Research, kind: str, versions: dict[str, str] | None) -> list[Json]:
     values = [{"id": row["id"], **json.loads(row["payload"])} for row in engine.ledger.db.execute(
         "SELECT id,payload FROM records WHERE kind=? ORDER BY created_event", (kind,))]
-    return [row for row in values if row["versions"] == versions]
+    return [row for row in values if versions is None or row["versions"] == versions]
 
 
 def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str) -> Json:
-    receipts = saved(engine, "newsapi_collection_receipt", context.versions)
-    intents = saved(engine, "newsapi_collection_intent", context.versions)
+    require_active(engine, session)
+    # Billing projection references immutable receipts, avoiding repeated full-text reads.
+    missing = engine.ledger.db.execute("SELECT id FROM records WHERE kind='newsapi_collection_receipt' AND id NOT IN (SELECT json_extract(payload,'$.receipt_id') FROM records WHERE kind='newsapi_collection_cost')").fetchall()
+    for row in missing:
+        full = engine.ledger.get(row["id"], "newsapi_collection_receipt")
+        save_cost(engine, session, row["id"], full)
+    receipts = saved(engine, "newsapi_collection_cost", None)
+    intents = saved(engine, "newsapi_collection_intent", None)
     if len(receipts) != len(intents):
         raise ResearchError("Unknown account dispatch outcome; automatic re-dispatch blocked")
     usage = [r for r in receipts if r["purpose"].startswith("usage") and r["http_status"] == 200]
@@ -67,17 +91,59 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
         parsed = json.loads(raw)
     except (ValueError, UnicodeError):
         parsed = {"error_type": "non_json_response"}
-    require_no_credentials(parsed)
     if not isinstance(parsed, dict):
         raise ResearchError("Unexpected provider response type")
-    artifact = engine.ledger.artifacts.put_bytes(raw)
-    engine.ledger.append(session, "newsapi.collection.response.saved", {"artifact": artifact, "attempt": attempt})
+    artifact = None
+    quarantined = 0
+    try:
+        require_no_credentials(parsed)
+    except ResearchError:
+        # Preserve membership and hashes, never a matched value or raw secret-like text.
+        section = parsed.get("articles", {})
+        if not purpose.startswith("collect_") or not isinstance(section, dict) or not isinstance(section.get("results"), list):
+            raise ResearchError("Unretainable response outside registered article quarantine") from None
+        permitted = []
+        for article in section["results"]:
+            try:
+                require_no_credentials(article)
+                permitted.append(article)
+            except ResearchError:
+                locator = {}
+                unavailable = []
+                for field in ["uri", "date", "lang", "url"]:
+                    try:
+                        require_no_credentials(article.get(field))
+                        locator[field] = article.get(field)
+                    except ResearchError:
+                        unavailable.append(field)
+                permitted.append({**locator, "quarantined": True, "source_hash": digest(article),
+                                  "unavailable_locator_fields": unavailable,
+                                  "retention_reason": "credential_pattern_no_text_retained"})
+                quarantined += 1
+        parsed = {**parsed, "articles": {**section, "results": permitted}}
+        require_no_credentials(parsed)
+        engine.ledger.append(session, "newsapi.collection.response.quarantined", {
+            "attempt": attempt, "raw_sha256": hashlib.sha256(raw).hexdigest(), "quarantined_articles": quarantined})
+    else:
+        artifact = engine.ledger.artifacts.put_bytes(raw)
+        engine.ledger.append(session, "newsapi.collection.response.saved", {"artifact": artifact, "attempt": attempt})
     result = {"attempt": attempt, "versions": context.versions, "purpose": purpose,
               "parameters": parameters, "http_status": status, "headers": headers,
               "raw_response": artifact, "response": parsed, "completed_at": utc(),
+              "raw_sha256": hashlib.sha256(raw).hexdigest(), "quarantined_articles": quarantined,
               "billed_tokens": number(headers.get("req-tokens"))}
     identifier = engine.ledger.record(session, "newsapi_collection_receipt", attempt, result)
+    save_cost(engine, session, identifier, result)
     return {"id": identifier, **result}
+
+
+def save_cost(engine: Research, session: str, identifier: str, receipt: Json) -> None:
+    require_active(engine, session)
+    engine.ledger.record(session, "newsapi_collection_cost", receipt["attempt"], {
+        "receipt_id": identifier, "attempt": receipt["attempt"], "versions": receipt["versions"],
+        "purpose": receipt["purpose"], "http_status": receipt["http_status"], "billed_tokens": receipt["billed_tokens"],
+        "response": {k: receipt["response"].get(k) for k in ["usedTokens", "availableTokens"]}
+            if receipt["purpose"].startswith("usage") else {}})
 
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
@@ -93,10 +159,21 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         if not existing:
             raise ResearchError("No stored archive check is available")
         return existing[-1]
+    if data.get("action") == "materialize":
+        from .newsapi_materialize import materialize
+
+        return materialize(engine, session, context)
     if engine.config.offline or data.get("execute") is not True:
         raise ResearchError("Explicit online execution required")
-    if data.get("action") != "check":
+    if data.get("action") == "collect":
+        return collect(engine, session, context, data, policy)
+    if data.get("action") == "recover":
+        return recover(engine, session, context, policy)
+    if data.get("action") not in {"check", "diagnose"}:
         raise ResearchError("Archive access must be verified before enabling collection")
+    requests = diagnostics() if data.get("action") == "diagnose" else [CONTROL]
+    if data.get("action") == "diagnose" and policy.get("diagnostic_requests") != requests:
+        raise ResearchError("Register exact alternative archive diagnostics before dispatch")
     if existing:
         raise ResearchError("Archive check already recorded; preserve it and do not silently repeat paid tests")
     baseline = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_archive_check")
@@ -104,18 +181,27 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     if (baseline["http_status"] != 200 or number(before.get("usedTokens")) is None
             or number(before.get("availableTokens")) != 5000):
         raise ResearchError("Account balance unavailable or allowance differs from authorized 5000")
-    probe = dispatch(engine, session, context, CONTROL, "archive_access_control")
-    after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_archive_check")
-    section = probe["response"].get("articles", {})
-    articles = section.get("results", []) if isinstance(section, dict) else []
-    dates = [a.get("date", "") for a in articles if isinstance(a, dict)]
-    proof = (probe["http_status"] == 200 and any("2024-01-01" <= d <= "2024-01-02" for d in dates))
+    observations = []
+    for index, parameters in enumerate(requests):
+        probe = dispatch(engine, session, context, parameters, "archive_access_control_" + str(index))
+        after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_archive_check_" + str(index))
+        section = probe["response"].get("articles", {})
+        articles = section.get("results", []) if isinstance(section, dict) else []
+        dates = [a.get("date", "") for a in articles if isinstance(a, dict)]
+        end = "2024-12-31" if data.get("action") == "diagnose" else "2024-01-02"
+        proof = (probe["http_status"] == 200 and any("2024-01-01" <= d <= end for d in dates))
+        observations.append({"request": parameters, "receipt": probe["id"], "usage_receipt": after["id"],
+            "returned": len(articles), "http_status": probe["http_status"], "headers": probe["headers"],
+            "billed_tokens": probe["billed_tokens"], "proof": proof})
+        if proof or probe["http_status"] in {401, 403, 429, 503}:
+            break
     a, b = number(before.get("usedTokens")), number(after["response"].get("usedTokens"))
     result = {"versions": context.versions, "archive_access": "verified_by_historical_articles" if proof else "not_verified",
               "baseline_used": a, "final_observed_used": b, "account_observed_delta": b-a if a is not None and b is not None else None,
               "allowance": before.get("availableTokens"), "target_used": 4000,
               "remaining_to_target": max(0, 4000-b) if b is not None else None,
               "receipt_ids": [baseline["id"], probe["id"], after["id"]],
+              "diagnostics": observations, "control_date_end": end,
               "archive_headers": probe["headers"], "archive_http_status": probe["http_status"],
               "archive_provider_total": section.get("totalResults") if isinstance(section, dict) else None,
               "archive_control_returned": len(articles), "archive_control_dates": sorted(set(dates)),
@@ -124,4 +210,129 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
               "pending_years": [p[0][:4] for p in PERIODS], "model_calls": 0,
               "account_delta_attribution": "Observed balance difference; may include usage endpoint charges or concurrent account activity; not fabricated per-request billing"}
     identifier = engine.ledger.record(session, "newsapi_collection_check", str(uuid.uuid4()), result)
+    return {"id": identifier, **result}
+
+
+def collect(engine: Research, session: str, context: Context, data: Json, policy: Json) -> Json:
+    proof = engine.ledger.get(policy.get("archive_check", ""), "newsapi_collection_check")
+    if (policy.get("collection_enabled") is not True
+            or proof["archive_access"] != "verified_by_historical_articles"
+            or policy.get("templates") != [collection_request(p, 1) for p in PERIODS]):
+        raise ResearchError("Verified archive check and exact full-text collection templates required")
+    limit = data.get("pages", 20)
+    if not isinstance(limit, int) or not 1 <= limit <= 40:
+        raise ResearchError("Collect 1 through40 pages per checkpoint")
+    baseline = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_collection_batch")
+    if baseline["http_status"] != 200 or number(baseline["response"].get("usedTokens")) is None:
+        raise ResearchError("Live account usage unavailable")
+    stop = "checkpoint"
+    state = collection_state(engine)
+    for _ in range(limit):
+        candidates = [row for row in state["years"] if not row["exhausted"]]
+        if not candidates:
+            stop = "query_exhausted"
+            break
+        # Balance first-page coverage and continuing page counts across years.
+        year = min(candidates, key=lambda row: (row["pages"], row["year"]))
+        period = next(p for p in PERIODS if p[0][:4] == year["year"])
+        page = year["pages"] + 1
+        try:
+            receipt = dispatch(engine, session, context, collection_request(period, page),
+                               f"collect_{year['year']}_page_{page}")
+        except ResearchError as error:
+            if str(error).startswith("4000 total account usage"):
+                stop = "budget_target"
+                break
+            raise
+        section = receipt["response"].get("articles", {})
+        articles = section.get("results") if isinstance(section, dict) else None
+        if receipt["http_status"] != 200 or not isinstance(articles, list):
+            stop = "failed_page"
+            break
+        if any(not isinstance(a, dict) or not period[0] <= str(a.get("date", "")) <= period[1]
+               or a.get("lang") != "nld" for a in articles):
+            stop = "scope_validation_failed"
+            break
+        if receipt["billed_tokens"] is None:
+            stop = "unavailable_request_cost"
+            break
+        if receipt["billed_tokens"] > 5:
+            stop = "charge_exceeded_bound"
+            break
+        year["pages"] = page
+        year["exhausted"] = len(articles) < 100 or (isinstance(section.get("pages"), int) and section["pages"] <= page)
+        print(json.dumps({"year": year["year"], "page": page, "returned": len(articles),
+                          "cost": receipt["billed_tokens"], "provider_total": section.get("totalResults")}), flush=True)
+        time.sleep(.6)
+    after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_collection_batch")
+    result = {**collection_state(engine), "versions": context.versions, "stop_reason": stop,
+              "baseline_used": number(baseline["response"].get("usedTokens")),
+              "final_observed_used": number(after["response"].get("usedTokens")),
+              "target_used": 4000, "allowance": 5000, "model_calls": 0, "scored": 0,
+              "archive_check": policy["archive_check"], "completed_at": utc(),
+              "usage_receipts": [baseline["id"], after["id"]]}
+    if result["final_observed_used"] is not None:
+        result["remaining_to_target"] = max(0, 4000-result["final_observed_used"])
+    identifier = engine.ledger.record(session, "newsapi_collection_progress", str(uuid.uuid4()), result)
+    return {"id": identifier, **result}
+
+
+def collection_state(engine: Research) -> Json:
+    receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["purpose"].startswith("collect_")]
+    years, unique, examples = [], set(), []
+    for period in PERIODS:
+        selected = [r for r in receipts if r["parameters"]["dateStart"] == period[0]]
+        good = [r for r in selected if r["http_status"] == 200 and isinstance(r["response"].get("articles", {}).get("results"), list)]
+        articles = [a for r in good for a in r["response"]["articles"]["results"]]
+        valid = [a for a in articles if isinstance(a, dict) and period[0] <= str(a.get("date", "")) <= period[1] and a.get("lang") == "nld"]
+        for article in valid:
+            identity = article.get("uri") or article.get("url") or article.get("source_hash")
+            if identity:
+                unique.add(identity)
+        last = good[-1]["response"]["articles"] if good else {}
+        exhausted = bool(good) and (len(last["results"]) < 100 or
+            (isinstance(last.get("pages"), int) and last["pages"] <= good[-1]["parameters"]["articlesPage"]))
+        years.append({"year": period[0][:4], "pages": len(good), "failed_pages": len(selected)-len(good),
+                      "returned": len(valid), "scope_invalid": len(articles)-len(valid),
+                      "provider_total": last.get("totalResults"), "exhausted": exhausted,
+                      "missing_body": sum(not isinstance(a.get("body"), str) or not a["body"].strip() for a in valid),
+                      "quarantined": sum(a.get("quarantined") is True for a in valid),
+                      "reported_cost": sum(r["billed_tokens"] for r in selected if r["billed_tokens"] is not None),
+                      "unavailable_costs": sum(r["billed_tokens"] is None for r in selected)})
+        examples.extend([{k: a.get(k) for k in ["uri", "title", "url", "date"]} for a in valid[:1]])
+    return {"years": years, "unique_articles": len(unique), "returned_articles": sum(y["returned"] for y in years),
+            "missing_body": sum(y["missing_body"] for y in years), "failed_pages": sum(y["failed_pages"] for y in years),
+            "quarantined": sum(y["quarantined"] for y in years),
+            "scope_invalid": sum(y["scope_invalid"] for y in years),
+            "reported_collection_cost": sum(y["reported_cost"] for y in years),
+            "unavailable_costs": sum(y["unavailable_costs"] for y in years), "examples": examples,
+            "receipt_ids": [r["id"] for r in receipts]}
+
+
+def recover(engine: Research, session: str, context: Context, policy: Json) -> Json:
+    reason = policy.get("recovery_reason")
+    if not isinstance(reason, str) or not reason.strip():
+        raise ResearchError("Register an explicit recovery and retry rationale")
+    completed = {r["attempt"] for r in saved(engine, "newsapi_collection_receipt", None)}
+    unknown = [r for r in saved(engine, "newsapi_collection_intent", None) if r["attempt"] not in completed]
+    if not unknown or any(not r["purpose"].startswith("collect_") for r in unknown):
+        raise ResearchError("Recovery must identify interrupted collection attempts only")
+    for intent in unknown:
+        engine.ledger.record(session, "newsapi_collection_resolution", intent["attempt"], {
+            "attempt": intent["attempt"], "original_intent": intent["id"], "versions": context.versions,
+            "reason": reason, "outcome": "Response not retained after source-locator credential-pattern rejection",
+            "billed_tokens": None, "missing_processing": True,
+            "retry": "One explicit retry permitted after corrected retention and fresh account reconciliation; old attempt preserved"})
+        tombstone = {"attempt": intent["attempt"], "versions": intent["versions"],
+            "purpose": intent["purpose"], "parameters": intent["parameters"], "http_status": None,
+            "headers": {}, "raw_response": None, "raw_sha256": None, "response": {"error_type": "unretained_response"},
+            "billed_tokens": None, "completed_at": utc(), "resolved_unknown": True}
+        identifier = engine.ledger.record(session, "newsapi_collection_receipt", intent["attempt"], tombstone)
+        save_cost(engine, session, identifier, tombstone)
+    after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_explicit_recovery")
+    result = {**collection_state(engine), "versions": context.versions, "stop_reason": "recovery_reconciled",
+        "final_observed_used": number(after["response"].get("usedTokens")), "target_used": 4000,
+        "allowance": 5000, "recovered_attempts": [r["attempt"] for r in unknown], "model_calls": 0,
+        "recovery_reason": reason, "usage_receipts": [after["id"]]}
+    identifier = engine.ledger.record(session, "newsapi_collection_progress", str(uuid.uuid4()), result)
     return {"id": identifier, **result}

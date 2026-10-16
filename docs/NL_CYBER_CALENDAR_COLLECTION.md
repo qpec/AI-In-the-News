@@ -43,17 +43,63 @@ console output uses ASCII JSON escapes to support Windows terminal encodings;
 an earlier console-only Unicode rendering failure did not undo saved receipts
 or authorize repeated paid requests.
 
-## Remaining integration
+## Collection after verified user activation
 
-The general collector stays gated: bulk pagination, corpus ingestion and corpus
-exports are not enabled until usable archive access has been verified. These
-must use the same authorization, actual account budget and protected receipt
-history; no silent budget reset. Once verified, implement and exercise full-text
-100-item pages with initial coverage of each year and round-robin continuation,
-stop at exhaustion or near 4,000 total usage, retain restricted sources privately,
-and report per-year coverage, page failures, missing text and exact request costs.
-Do not pad spending when the query is exhausted.
+The user subsequently enabled archive search and historical retrieval succeeded.
+The collector registers the positive control ID and exact full-text templates
+before `--collect`: 100-item pages with initial coverage of every year and
+round-robin continuation in publication-date order. It stops at query exhaustion
+or near4,000 total account usage. It does not pad spending when results exhaust.
+The general-purpose `collect` operation remains disabled. Existing code neither
+classifies article relevance nor creates accepted incident/event dossiers.
+
+Full permitted responses stay in protected storage. Credential-pattern articles
+remain in the selected denominator with an original source hash, validated safe
+locator fields and explicit missing text; unsafe locator fields are also omitted
+and marked unavailable. Such responses retain a raw hash instead of prohibited
+bytes. The source key is never retained if echoed. A locator-pattern failure
+interrupted one attempt before this handling was corrected. Its original intent,
+explicit operator resolution, missing-response tombstone and unavailable request
+cost remain preserved; an explicitly registered retry follows fresh account
+reconciliation. Unknown outcomes block across method versions, and are never
+silently retried or treated as negatives. A lightweight immutable cost projection
+references the original receipts and avoids repeatedly parsing article bodies.
+
+`scripts/materialize_nl_cyber.py` registers a separate private-working-copy profile
+and uses the audited offline `materialize` action after exhaustion or budget stop.
+It creates one protected ZIP per calendar year with `artikelen.jsonl` and a
+provenance manifest, plus a per-request CSV. Every row preserves article data,
+receipt ID, item index, canonical materialized-record hash and original response
+hash. Exact duplicate record versions are removed within each year; changed
+source versions remain. Metadata-only quarantines stay explicit. These are local
+working artifacts, not public exports or accepted evidence assessments. Original
+permitted API responses remain separately preserved. Corpus ingestion, stable
+paragraph preparation, relevance review and event grouping are separate audited
+operations that have not been performed by this collector.
 
 The archive gate has four synthetic tests for historical proof, zero-result
 stopping, current-total budget checks, and pre-dispatch audit failure. These
 establish software behavior, not entitlement or historical completeness.
+
+## Paid-plan clarification and routing diagnostic amendment
+
+The user subsequently confirmed a paid plan with archive enabled. Preserve that
+as user-provided entitlement evidence; a failed request does not refute the plan
+or identify the cause. `--diagnose` registers new protocol/policy versions before
+two full-2024 Dutch controls: the documented REST direct query and the official
+SDK complex JSON-string query. Reconcile actual account usage after each. The
+official SDK enables archive by omitting `forceMaxDataTimeWindow`; no speculative
+archive flag, subscription change or unknown endpoint is introduced. See
+[official SDK query code](https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/QueryArticles.py)
+and [archive option transport](https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py).
+Unknown outcomes block dispatch across method versions in the entire collection
+workspace. The additional tests cover both registered routes and this cross-version
+guard. Actual diagnostic results and request charges stay in protected storage.
+
+Dedicated tests additionally exercise full-text round-robin exhaustion, the
+account-total budget, source and URL-pattern quarantine, explicit recovery with
+preserved unknown charges, and private ZIP lineage against immutable receipts.
+The earlier full-suite checkpoint passed716 tests; later collection extensions
+receive focused tests, lint and type checks. Tests prove software behavior, not
+archive completeness or semantic article relevance. No sources, working data,
+cost receipts, credentials or audit logs are committed to Git.
