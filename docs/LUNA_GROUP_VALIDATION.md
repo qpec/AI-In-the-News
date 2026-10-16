@@ -273,6 +273,39 @@ overlap may bias the model-reference estimates. This method description does
 not claim v2 execution, additional judgments, resolved remote generation or
 billing, improved accuracy or a new performance result.
 
+## V2 interim group checkpoint — 2026-10-16
+
+**This is an interim result; the remaining eligible anchor queue is still
+running.** Result
+`9cdba9481925b20b9ce993215633bc0e7c1246b889b4e14f8aeaa5ac79426391`
+retains cumulative **303/400 attempts and 797/6,000 article exposures**, with
+zero retries. Overall task counts are 171 valid, 131 invalid, one unknown and
+97 pending. The exact saved presentation
+`1b1e75c39c6b3efa5e549d884326368743d7c616568027aad98b1c03fa248d89`
+was reproduced in this chat.
+
+All **300 sampled groups were attempted**: 67 same-event, 16 mixed, 88 uncertain
+and 129 failed/unobserved. Complete-case precision against the provisional
+lead-only Luna references is **67/83 = 80.7%** among decisive groups. The other
+217 groups remain unknown for that calculation; bounds retaining all 300 groups
+are **22.3%–94.7%**. Attempting the full sample therefore does not establish
+useful grouping accuracy or turn failed processing into negative findings.
+
+The frozen 100-group held-out subset has 21 same-event, three mixed, 32 uncertain
+and 44 failed/unobserved outcomes. Its complete-case value is **21/24 = 87.5%**
+among only 24 decisive groups. These are model references, not human gold, and
+the existing article/event overlap limitations remain. Candidate-pool recall
+and full-corpus recall are unavailable at this checkpoint.
+
+Execution control
+`2233e18676d3d9fe3bf78a5d18c612ef261e8a7fe47fc48506537825a4fe80e3`
+retains one observed timeout as unknown and spent. Two source versions are
+quarantined, and one untouched task is explicitly excluded from dispatch while
+remaining null/pending in the original denominator. Of the 97 pending anchor
+tasks, **96 remain eligible**. No replacements, retries, group membership
+changes or accepted dossiers follow from this interim screen. Final coverage,
+recall and stopping status must come from the subsequent saved result.
+
 Before execution, all 34 selected source-free checks passed across the helper,
 continuation and transfer suites after fixture repairs. The initial new
 execution fixtures failed on an anchor-ID mismatch; the next pass exposed one

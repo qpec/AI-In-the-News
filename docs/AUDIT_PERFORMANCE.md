@@ -189,3 +189,21 @@ or a claim of additional completed research. Runtime-dependent exclusions may
 bias quality estimates. No v2 timing, new judgment, accuracy improvement or
 resolution of unknown remote activity is claimed here; actual outcomes and
 validation must be reported separately from the protected results.
+
+## V2 interim execution timing — 2026-10-16
+
+The v2 continuation's complete bounded-workspace preflight took **17.229 s**.
+This is one observed preflight timing with uncontrolled OS caches, alongside the
+earlier 17.171 s bounded check; it is not a new identical-workload speedup claim
+or the duration of the model study.
+
+Interim result
+`9cdba9481925b20b9ce993215633bc0e7c1246b889b4e14f8aeaa5ac79426391`
+reached 303 cumulative calls and 797 article exposures, with zero retries. All
+300 group tasks were attempted; 96 eligible anchor tasks remained pending,
+alongside one prospectively excluded task. One observed local timeout remains
+unknown, with two source versions quarantined. The exact saved interim overview
+was shown in chat. See the [grouping checkpoint](LUNA_GROUP_VALIDATION.md#v2-interim-group-checkpoint--2026-10-16)
+for the substantial uncertain/failed coverage and provisional precision limits.
+The queue is continuing; these counts and this timing are **not a final research
+result or a completed end-to-end performance measurement**.
