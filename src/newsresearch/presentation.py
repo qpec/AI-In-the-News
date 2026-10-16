@@ -61,6 +61,7 @@ RESULT_KINDS = {
     "catalog_embedding_plan_result",
     "luna_group_validation_plan", "luna_group_validation_result",
     "luna_group_validation_diagnostic",
+    "luna_study_transfer_result",
 }
 
 

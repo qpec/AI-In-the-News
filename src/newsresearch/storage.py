@@ -533,15 +533,12 @@ class Ledger:
                 raise AuditError("Source passage coverage is incomplete")
         if passage is not None:
             raise AuditError("Passage references a missing source")
-        if (
-            self.db.execute("SELECT count(*) FROM passage_fts").fetchone()[0]
-            != self.db.execute("SELECT count(*) FROM passages").fetchone()[0]
-        ):
-            raise AuditError("Search index coverage differs from passages")
-        if self.db.execute(
-            "SELECT 1 FROM passage_fts f LEFT JOIN passages p ON p.id=f.id WHERE p.id IS NULL OR p.text != f.text LIMIT 1"
-        ).fetchone():
-            raise AuditError("Search index content differs from passages")
+        from .preflight_fts import verify_projection
+
+        try:
+            verify_projection(self.db)
+        except AuditError as error:
+            raise AuditError("Search index coverage or content differs from passages") from error
         self.db.execute("INSERT INTO passage_fts(passage_fts) VALUES('integrity-check')")
         for row in self.db.execute("SELECT a.*,r.payload FROM accepted a JOIN records r ON r.id=a.id"):
             value = json.loads(row["payload"])

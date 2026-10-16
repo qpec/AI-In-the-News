@@ -28,6 +28,68 @@ CONTENT_VALIDATION_ERRORS = frozenset({
 })
 
 
+def _prior_attempts(engine: Any, study: str) -> dict[str, Json]:
+    imported: dict[str, Json] = {}
+    for row in engine.ledger.db.execute(
+            "SELECT id,logical_key,payload FROM records WHERE kind='study_prior_model_attempt'"):
+        value = json.loads(row[2])
+        intended = value.get("original_intended")
+        attempt = value.get("original_attempt")
+        if (value.get("study_key") != study or not isinstance(intended, dict)
+                or not isinstance(attempt, str) or not attempt or row[1] != attempt
+                or intended.get("attempt") != attempt or intended.get("luna_validation_study") != study
+                or value.get("status") not in {"valid", "invalid", "unknown"}
+                or not isinstance(value.get("parent_provenance"), dict) or not value["parent_provenance"]
+                or (value["status"] != "unknown" and not isinstance(value.get("assessment"), str))
+                or (value.get("assessment") is not None and not isinstance(value["assessment"], str))):
+            raise ResearchError("luna_imported_prior_attempt_binding_invalid")
+        if attempt in imported and imported[attempt]["value"] != value:
+            raise ResearchError("luna_conflicting_imported_prior_attempt")
+        imported[attempt] = {"record": row[0], "value": value}
+    return imported
+
+
+def _all_history(engine: Any, study: str, imported: dict[str, Json] | None = None) -> list[Json]:
+    """Carry every original reservation forward; an import is never a dispatch."""
+    history = original._history(engine, study)
+    by_attempt: dict[str, Json] = {}
+    for intended in history:
+        attempt = intended["attempt"]
+        if attempt in by_attempt:
+            raise ResearchError("luna_duplicate_parent_attempt_event")
+        by_attempt[attempt] = intended
+    for attempt, prior in sorted((imported if imported is not None else _prior_attempts(engine, study)).items()):
+        intended = prior["value"]["original_intended"]
+        if attempt in by_attempt:
+            if by_attempt[attempt] != intended:
+                raise ResearchError("luna_imported_and_local_attempt_conflict")
+        else:
+            history.append(intended)
+            by_attempt[attempt] = intended
+    return history
+
+
+def _transfer_provenance(engine: Any, study: str, imported: dict[str, Json]) -> Json | None:
+    if not imported:
+        return None
+    row = engine.ledger.db.execute(
+        "SELECT id,payload FROM records WHERE kind='study_execution_ownership' AND logical_key=? "
+        "ORDER BY created_event DESC LIMIT 1", (study,)).fetchone()
+    if row is None:
+        raise ResearchError("luna_imported_execution_owner_missing")
+    owner = json.loads(row[1])
+    if (owner.get("study_key") != study or owner.get("status") != "imported_owner"
+            or owner.get("allowed_operations") != ["luna_group_validation_continue"]
+            or not isinstance(owner.get("manifest"), str) or not owner["manifest"]):
+        raise ResearchError("luna_imported_execution_owner_invalid")
+    return {"ownership_record": row[0], "manifest": owner["manifest"],
+        "nonce": owner.get("nonce", owner.get("transfer_nonce")),
+        "child_workspace": owner.get("child_workspace", owner.get("owner_workspace")),
+        "prior_attempt_records": [prior["record"] for _, prior in sorted(imported.items())],
+        "parent_provenance": {digest(prior["value"]["parent_provenance"]): prior["value"]["parent_provenance"]
+                              for prior in imported.values()}}
+
+
 def _totals(history: list[Json]) -> tuple[int, int]:
     if any(type(item["article_exposures"]) is not int or item["article_exposures"] < 1 for item in history):
         raise ResearchError("luna_historical_budget_exceeded")
@@ -159,6 +221,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "require_exit_code": 0, "require_unknown_false": True, "require_complete_single_payload": True,
             "unchanged_answer_validator": True, "new_model_calls": 0, "retry": False,
             "old_response_payloads_and_attempt_projections_unchanged": True},
+        "imported_history": "Exact parent intents remain historical reservations; no imported dispatch event or budget reset",
         "criteria_or_membership_changes": False}
     # Register the control change before reading prior research results or packets.
     amendment = engine._version(session, context, {"kind": "protocol",
@@ -199,8 +262,12 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("luna_codex_executable_changed")
     if not plan["workload"]["within_budget"]:
         raise ResearchError("luna_prepared_workload_exceeds_budget")
-    history = original._history(engine, study)
+    imported = _prior_attempts(engine, study)
+    transfer = _transfer_provenance(engine, study, imported)
+    history = _all_history(engine, study, imported)
     spent, exposures = _totals(history)
+    if spent < old["workflow_model_attempts"] or exposures < old["workflow_article_exposures"]:
+        raise ResearchError("luna_prior_study_budget_missing")
     initial_spent = spent
     tasks = sorted(plan["tasks"], key=lambda task: (task["mode"] != "group", task["fold"] == "held_out", task["logical_id"]))
     if len({task["logical_id"] for task in tasks}) != len(tasks):
@@ -232,6 +299,13 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
                 raise ResearchError("luna_prior_attempt_binding_changed")
             row = engine.ledger.db.execute("SELECT status,result_id FROM attempts WHERE id=?",
                                            (intended["attempt"],)).fetchone()
+            prior = imported.get(intended["attempt"])
+            if prior is not None:
+                retained = prior["value"]
+                if row is not None and (row[0], row[1]) != (retained["status"], retained.get("assessment")):
+                    raise ResearchError("luna_imported_and_local_assessment_conflict")
+                if row is None:
+                    row = (retained["status"], retained.get("assessment"))
             if row is None or row[1] is None:
                 outcome = {"status": "unknown", "answer": None, "error": "luna_prior_attempt_unresolved",
                            "attempt": intended["attempt"]}
@@ -259,6 +333,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("luna_dispatch_history_outside_frozen_plan")
     diagnostic = {"method": METHOD, "versions": bound.versions, "original_result": data["result"],
         "plan": plan_id, "study_key": study, "control_amendment": amendment,
+        "parent_transfer": transfer, "imported_prior_attempts": len(imported),
         "workflow_model_attempts": spent, "workflow_article_exposures": exposures,
         "untouched_tasks": len(pending), "new_model_calls": 0, "automatic_retries": 0,
         "outcome_codes": [{"mode": key[0], "status": key[1], "error": key[2],
@@ -275,6 +350,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
     manifest = original._artifact(engine, session, {"binding": binding, "control_amendment": amendment,
         "continuation_implementation_sha256": implementation, "original_result": data["result"],
         "continuation_implementation_artifact": implementation_artifact,
+        "parent_transfer": transfer,
         "untouched_tasks": pending, "existing_attempts": [item["attempt"] for item in history],
         "diagnostic": diagnostic_id, "scope": {"max_requests": 400, "max_article_exposures": 6000, "automatic_retries": 0}},
         "Continuation control, original bindings, existing spend and untouched request manifest before dispatch")
@@ -304,6 +380,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "historical_study_budget_changed": False,
             "model_metadata": "Observed identity and usage retained per attempt; unavailable stays null",
             "continuation_method": METHOD, "control_amendment": amendment, "original_result": data["result"],
+            "parent_transfer": transfer, "imported_prior_attempts": len(imported),
             "new_model_attempts": spent - initial_spent, "interim_group_result": interim,
             "retained_output_revalidation_counts": {
                 "attempted": sum(bool(item.get("revalidation")) for item in outcomes.values()),

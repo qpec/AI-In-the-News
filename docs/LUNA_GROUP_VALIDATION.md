@@ -199,3 +199,16 @@ before its lazy import, method registration or any continuation dispatch.
 Runtime identity is captured after preflight, and the control additionally
 retains the exact continuation module source bytes and SHA-256. This is a
 guarded software recovery path, not a claim about the actual failure cause.
+
+## Bounded audit workspace
+
+The user's subsequent request to fix audit latency adds the
+[bounded study transfer](AUDIT_PERFORMANCE.md). It preserves complete source
+evidence and the existing frozen study, authorization and cumulative spend while
+sealing parent dispatch and moving execution to a separately verified protected
+workspace. It avoids repeatedly reading unrelated parent embedding history.
+`scripts/run_luna_bounded.py` coordinates audited export/import and the existing
+parallel untouched-task continuation. Model failures remain missing, unknown
+outcomes still block execution, and no retries or new policy budget are created.
+Engineering tests and benchmarks are distinct from actual transfer or new Luna
+judgments; executed outcomes must be appended from protected results.

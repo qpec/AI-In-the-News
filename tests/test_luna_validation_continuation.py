@@ -13,7 +13,7 @@ from newsresearch.gateway import ProviderResponse
 from test_luna_validation_gateway import MemoryLedger
 
 
-def fixture(tmp_path, monkeypatch, failure="content"):
+def fixture(tmp_path, monkeypatch, failure="content", four_prior=False):
     monkeypatch.setattr(original, "require_active", lambda *args: None)
     monkeypatch.setattr(continuation, "require_active", lambda *args: None)
     monkeypatch.setattr(original, "_implementation", lambda: {"fixture": "unchanged"})
@@ -26,6 +26,16 @@ def fixture(tmp_path, monkeypatch, failure="content"):
 
     monkeypatch.setattr(original, "validate_answer", validate)
     ledger = MemoryLedger(tmp_path)
+    ledger.db.execute("CREATE TABLE records(id TEXT PRIMARY KEY,kind TEXT,logical_key TEXT,payload TEXT,created_event INTEGER)")
+    record = ledger.record
+
+    def catalogue(session, kind, key, value):
+        identifier = record(session, kind, key, value)
+        ledger.db.execute("INSERT OR IGNORE INTO records VALUES (?,?,?,?,?)",
+            (identifier, kind, key, json.dumps(value), len(ledger.records)))
+        return identifier
+
+    ledger.record = catalogue
     executable = tmp_path / "never-executed"
     executable.write_bytes(b"source-free provider fixture")
     config = {"codex_executable": str(executable), "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
@@ -39,12 +49,19 @@ def fixture(tmp_path, monkeypatch, failure="content"):
             "articles": [{"source_version": source} for source in sources]})
         tasks.append({"mode": mode, "logical_id": identifier, "source_versions": sources,
             "request_ref": request, "status": "prepared", "fold": fold})
+    if four_prior:
+        request = ledger.put({"id": "b", "mode": "anchor", "versions": {},
+            "articles": [{"source_version": source} for source in ["b", "a", "c"]]})
+        tasks.append({"mode": "anchor", "logical_id": "b", "source_versions": ["b", "a", "c"],
+            "request_ref": request, "status": "prepared", "fold": "audit"})
     plan = {"versions": {}, "study_key": "fixture-continuation", "config": config, "tasks": tasks,
         "workload": {"within_budget": True}, "group_result": "frozen-groups", "groups": ["G", "H"],
         "membership": {"a": "G", "b": "G", "c": "H", "d": "H"},
         "sampling": {"group_frame": {"seed": "frozen"}}, "anchor_frames": [
             {"anchor": "a", "candidates": [{"candidate": "b"}, {"candidate": "c"}]},
             {"anchor": "c", "candidates": [{"candidate": "d"}, {"candidate": "a"}]}]}
+    if four_prior:
+        plan["anchor_frames"].append({"anchor": "b", "candidates": [{"candidate": "a"}, {"candidate": "c"}]})
     plan_id = ledger.record("test", "luna_group_validation_plan", "plan", plan)
     policy = {"method": "luna-validation-run-approval-v1", "plan": plan_id, "study_key": plan["study_key"],
         "approved_by": "fixture-only", "instruction": "Constructed mock transport only",
@@ -78,7 +95,7 @@ def fixture(tmp_path, monkeypatch, failure="content"):
                     value = None
                     raw.update(failure="luna_uncited_factual_field" if failure == "transport_spoof" else "codex_final_json_invalid",
                         unknown_outcome=failure == "unknown")
-            if request["id"] == "c":
+            if request["id"] == "c" and any("new_model_calls" in item for item in presentations):
                 assert any(item.get("interim_group_result") for item in presentations)
             yield index, ProviderResponse(value, "source-free-mock", None, raw_response=raw)
 
@@ -94,8 +111,8 @@ def fixture(tmp_path, monkeypatch, failure="content"):
         _version=lambda session, context, data: {"id": ledger.record(session, data["kind"], data["key"], data["content"])})
     context = Context("Constructed continuation verification", "test", {})
     old = original.execute(engine, "test", context, {"plan": plan_id, "study_key": plan["study_key"],
-        "run_approval": policy_id, "reuse_cache": True, "workers": 1})
-    assert calls == ["G", "a"]
+        "run_approval": policy_id, "reuse_cache": True, "workers": 4 if four_prior else 1})
+    assert calls == (["G", "a", "b", "c"] if four_prior else ["G", "a"])
     presentations.clear()
     data = {"result": old["id"], "study_key": plan["study_key"], "continue_untouched": True,
         "authorization_instruction": "Continue untouched source-free tasks only", "reuse_cache": True}
@@ -130,6 +147,66 @@ def test_attempt_and_exposure_caps_include_every_historical_intent():
     for history in ([{"article_exposures": 1}] * 401, [{"article_exposures": 6001}]):
         with pytest.raises(ResearchError, match="historical_budget_exceeded"):
             continuation._totals(history)
+
+
+def imported_fixture(engine, data):
+    """Represent a completed synthetic transfer; the transfer runtime is tested separately."""
+    ledger = engine.ledger
+    history = original._history(engine, data["study_key"])
+    for intended in history:
+        row = ledger.db.execute("SELECT status,result_id FROM attempts WHERE id=?", (intended["attempt"],)).fetchone()
+        ledger.record("test", "study_prior_model_attempt", intended["attempt"], {
+            "study_key": data["study_key"], "original_attempt": intended["attempt"], "original_intended": intended,
+            "status": row[0], "assessment": row[1],
+            "parent_provenance": {"workspace": "constructed-parent", "head": "constructed-sealed-head"}})
+    ledger.db.execute("DELETE FROM events WHERE kind='model.attempt.intended'")
+    ledger.db.execute("DELETE FROM attempts")
+    ledger.unresolved.clear()
+    ledger.record("test", "study_execution_ownership", data["study_key"], {
+        "study_key": data["study_key"], "status": "imported_owner", "owner_workspace": str(ledger.root),
+        "nonce": "constructed-transfer", "manifest": "f" * 64,
+        "allowed_operations": ["luna_group_validation_continue"]})
+    return history
+
+
+def test_four_imported_attempts_continue_only_untouched_with_exact_spend_and_owner_seal(tmp_path, monkeypatch):
+    engine, context, data, calls, _ = fixture(tmp_path, monkeypatch, four_prior=True)
+    imported_fixture(engine, data)
+    value = continuation.run(engine, "test", context, data)
+    assert calls == ["G", "a", "b", "c", "H"]
+    assert value["imported_prior_attempts"] == 4 and value["new_model_attempts"] == 1
+    assert value["workflow_model_attempts"] == 5 and value["workflow_article_exposures"] == 13
+    assert value["parent_transfer"]["manifest"] == "f" * 64
+    assert engine.ledger.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0] == 1
+    again = continuation.run(engine, "test", context, data)
+    assert len(calls) == 5 and again["new_model_attempts"] == 0
+    assert again["workflow_model_attempts"] == 5 and again["workflow_article_exposures"] == 13
+
+
+def test_imported_unknown_keeps_reservation_and_blocks_untouched_calls(tmp_path, monkeypatch):
+    engine, context, data, calls, _ = fixture(tmp_path, monkeypatch, failure="unknown")
+    imported_fixture(engine, data)
+    value = continuation.run(engine, "test", context, data)
+    assert calls == ["G", "a"] and value["new_model_attempts"] == 0
+    assert value["workflow_model_attempts"] == 2 and value["workflow_article_exposures"] == 5
+    assert value["task_counts"]["unknown"] == 1 and value["task_counts"]["pending"] == 2
+
+
+def test_duplicate_parent_event_and_conflicting_import_never_reset_spend(tmp_path, monkeypatch):
+    engine, _, data, _, _ = fixture(tmp_path, monkeypatch)
+    history = imported_fixture(engine, data)
+    engine.ledger.append("test", "model.attempt.intended", history[0])
+    assert len(continuation._all_history(engine, data["study_key"])) == 2  # exact local/import reference deduplicated
+    conflict = {**history[0], "article_exposures": 99}
+    engine.ledger.db.execute("DELETE FROM events WHERE kind='model.attempt.intended'")
+    engine.ledger.append("test", "model.attempt.intended", conflict)
+    with pytest.raises(ResearchError, match="imported_and_local_attempt_conflict"):
+        continuation._all_history(engine, data["study_key"])
+    engine.ledger.db.execute("DELETE FROM events WHERE kind='model.attempt.intended'")
+    engine.ledger.append("test", "model.attempt.intended", history[0])
+    engine.ledger.append("test", "model.attempt.intended", history[0])
+    with pytest.raises(ResearchError, match="duplicate_parent_attempt_event"):
+        continuation._all_history(engine, data["study_key"])
 
 
 @pytest.mark.parametrize("condition", ["valid", "content_invalid", "malformed", "prohibited", "unknown", "oversize"])

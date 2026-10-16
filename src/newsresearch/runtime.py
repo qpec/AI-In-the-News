@@ -198,6 +198,8 @@ class Research:
             "index_catalog_embeddings": self._index_catalog_embeddings,
             "luna_group_validation": self._luna_group_validation,
             "luna_group_validation_continue": self._luna_group_validation_continue,
+            "luna_study_export": self._luna_study_export,
+            "luna_study_import": self._luna_study_import,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -238,6 +240,9 @@ class Research:
                 raise ResearchError("Metadata-only retention forbids storing a body/raw record")
             request = self.ledger.artifacts.put(content)
             self.ledger.append(session, "operation.intended", {"operation": operation, "input": request})
+            from .study_ownership import enforce
+
+            enforce(self, session, operation, content)
             result = handlers[operation](session, context, content)
             result_ref = self.ledger.artifacts.put(result)
             self.ledger.append(session, "operation.completed", {"operation": operation, "result": result_ref})
@@ -1011,6 +1016,18 @@ class Research:
         from .luna_validation_continuation import run
 
         return run(self, session, context, data)
+
+    @audited_handler
+    def _luna_study_export(self, session: str, context: Context, data: Json) -> Json:
+        from .luna_study_transfer import export
+
+        return export(self, session, context, data)
+
+    @audited_handler
+    def _luna_study_import(self, session: str, context: Context, data: Json) -> Json:
+        from .luna_study_transfer import import_into
+
+        return import_into(self, session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:
