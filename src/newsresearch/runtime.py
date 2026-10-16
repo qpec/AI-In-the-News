@@ -194,6 +194,7 @@ class Research:
             "judge_cross_window_event_review": self._judge_cross_window_event_review,
             "test_collective_group_vectors": self._test_collective_group_vectors,
             "scale_event_vector_store": self._scale_event_vector_store,
+            "plan_catalog_embeddings": self._plan_catalog_embeddings,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -983,6 +984,12 @@ class Research:
     @audited_handler
     def _scale_event_vector_store(self, session: str, context: Context, data: Json) -> Json:
         from .event_vector_scale import execute
+
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _plan_catalog_embeddings(self, session: str, context: Context, data: Json) -> Json:
+        from .catalog_embedding_plan import execute
 
         return execute(self, session, context, data)
 

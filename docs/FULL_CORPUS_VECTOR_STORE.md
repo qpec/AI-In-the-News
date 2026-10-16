@@ -183,3 +183,33 @@ the new implementation. The final integration run was two tests in 1.60 seconds;
 the initial three helper checks passed in the prior combined run. Only affected
 checks were repeated after failures. These are synthetic software checks,
 not independent scientific validation.
+
+
+## Bounded gateway planning integration
+
+The additional plan_catalog_embeddings operation implements the previously
+unfinished bridge without modifying the core import cap or embedding gateway.
+It reads the exact protected catalog snapshot only after complete runtime
+preflight and fresh full binary hashing. It explicitly reuses that snapshot's
+already completed full SQL/record/occurrence/FTS verification; it does not replace
+full-content verification with file metadata. It then revalidates every selected
+body and source identity, imports at most20,000 sources per core dataset, prepares
+the original exact-offset chunks and invokes the existing shared gateway planner.
+The planner independently validates source passages, offsets, hashes, token limits,
+model profile and request bodies. All original occurrences remain linked through
+the protected catalog/source mapping.
+
+The complete source frame is registered before bounded imports. Dataset versions,
+chunk artifacts, standard embedding plans, exact request counts, tokens and costs
+are retained. Cached batches are reused explicitly with exact source selection
+and executable-code identity. No policy granting paid execution is created.
+A changed executable code snapshot stops planning; source code must remain pinned
+for later dispatch. Independent source code changes elsewhere in the shared
+checkout can invalidate ordinary embedding plans because the existing gateway
+binds all source files. A frozen committed checkout avoids that race while keeping
+unrelated work intact. No audit/code-binding enforcement is weakened.
+
+The expanded synthetic integration exercises two actual bounded core imports/
+gateway paths with constructed source bodies, exact token/chunk reconciliation,
+profile preservation, resume and a transport sentinel that rejects paid calls.
+Production execution and its actual coverage are recorded separately below.

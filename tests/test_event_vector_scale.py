@@ -1,6 +1,7 @@
 """Real SQLite/Faiss with two constructed archives; no actual sources/models."""
 from pathlib import Path
 import hashlib
+import importlib.metadata
 import zipfile
 
 import faiss
@@ -8,6 +9,7 @@ import numpy as np
 import pytest
 
 from newsresearch import event_vector_scale as scale
+from newsresearch import embeddings
 from newsresearch import event_vector_store as store
 from newsresearch.common import AuditError, ResearchError, canonical, digest
 from newsresearch.runtime import Research
@@ -33,14 +35,14 @@ def test_full_registry_versions_occurrences_fts_snapshot_resume_and_audit(tmp_pa
                         "kind": "article-bundle", "cohort": cohort})
     inventory = {"legacy_inventory": "constructed-inventory", "cyber_checksums": [], "bundles": bundles,
                  "expected_rows_by_cohort": {"legacy": 5, "cybercrime-nl": 3}}
-    profile = engine.execute("version", {"kind": "embedding_profile", "key": "fixture", "content": {
-        "model": "constructed", "dimensions": 2}}, objective="Register synthetic vector profile", actor="test")["id"]
-    spec = {"embedding_profile": profile, "provider": "constructed", "model": "constructed", "dimensions": 2,
-            "chunking": "constructed", "pooling": "constructed", "normalization": "l2"}
+    profile = engine.execute("version", {"kind": "embedding_profile", "key": "openai-embedding-candidates", "content": {
+        **embeddings.PROFILE, "tiktoken_version": importlib.metadata.version("tiktoken")}}, objective="Register synthetic vector profile", actor="test")["id"]
+    spec = {"embedding_profile": profile, "provider": "openai", "model": "text-embedding-3-large", "dimensions": 3072,
+            "chunking": "unicode-window-1600-overlap-200-v1", "pooling": "constructed", "normalization": "l2"}
     metadata = {f"s-{row['uri']}": {"source_version": f"s-{row['uri']}", "body_sha256": hashlib.sha256(row["body"].encode()).hexdigest(),
         "published_at": "2026-01-01"} for row in (first, second)}
     inputs = {"spec": spec, "profile": {"usd_per_million_input_tokens": ".13", "price_checked_on": "synthetic-fixture"},
-        "mapping": [{"source_version": key} for key in metadata], "pooled": np.array([[1., 0.], [0., 1.]], dtype=np.float32),
+        "mapping": [{"source_version": key} for key in metadata], "pooled": np.eye(2, 3072, dtype=np.float32),
         "identities": {f"s-{row['uri']}": (row["uri"], hashlib.sha256(row["body"].encode()).hexdigest()) for row in (first, second)},
         "metadata": metadata, "groups": [{"group_id": "G-a", "members": ["s-a"]}, {"group_id": "G-b", "members": ["s-b"]}],
         "plan": {"manifest": "constructed-plan", "pooled_vectors_artifact": "constructed-vectors", "index": "constructed-passage-index"},
@@ -50,7 +52,11 @@ def test_full_registry_versions_occurrences_fts_snapshot_resume_and_audit(tmp_pa
     class Tokenizer:
         def encode(self, text, **kwargs):
             return list(text.encode("utf-8"))
+        def encode_ordinary(self, text):
+            return self.encode(text)
     monkeypatch.setattr(scale, "offline_tokenizer", Tokenizer)
+    monkeypatch.setattr(embeddings, "offline_tokenizer", Tokenizer)
+    monkeypatch.setattr(embeddings.OpenAIEmbeddingTransport, "send", lambda *args: pytest.fail("No paid requests allowed"))
     monkeypatch.setattr(engine.gateway.provider, "complete", lambda *args: pytest.fail("No models allowed"))
     data = {"data_root": str(root), "plan": "constructed-plan", "group_result": "constructed-groups",
             "key": "constructed-store", "instruction": "Constructed offline registry test", "retention": "permitted", "batch_size": 2}
@@ -83,6 +89,21 @@ def test_full_registry_versions_occurrences_fts_snapshot_resume_and_audit(tmp_pa
         assert result["presentation"]["markdown"] == scale.render(result)
         assert len(result["presentation"]["results"]) == 3
         assert result["new_model_calls"] == result["actual_group_merges"] == result["network_calls"] == 0
+        planned = engine.execute("plan_catalog_embeddings", {"snapshot":result["id"],"key":"fixture-full-plan",
+            "instruction":"Prepare exact bounded offline gateway plans", "batch_size":2},
+            objective="Verify actual gateway planning from synthetic catalog sources",actor="test:software")
+        assert planned["articles"] == planned["selected_articles"] == 2 and len(planned["batches"]) == 1
+        assert planned["input_tokens"] == result["catalog"]["pending"]["input_tokens"]
+        assert planned["chunks"] == result["catalog"]["pending"]["chunks"]
+        assert planned["model_calls"] == planned["paid_calls"] == planned["pending_articles"] == 0
+        for batch in planned["batches"]:
+            plan = engine.ledger.get(batch["plan"],"embedding_plan")
+            assert plan["versions"]["embedding_profile"] == spec["embedding_profile"]
+            assert plan["source_records"] <= 2
+            assert plan["status"] == "planned; paid execution not authorized"
+        assert engine.execute("plan_catalog_embeddings", {"snapshot":result["id"],"key":"fixture-full-plan",
+            "instruction":"Prepare exact bounded offline gateway plans", "batch_size":2},
+            objective="Reuse exact synthetic gateway plans",actor="test:software")["batches"] == planned["batches"]
         engine.ledger.verify()
         monkeypatch.setattr(scale, "_existing", lambda *args: pytest.fail("Snapshot rebuilt"))
         assert run()["id"] == result["id"]
