@@ -41,6 +41,7 @@ RESULT_KINDS = {
     "event_group_link_result",
     "event_group_evidence_result",
     "event_group_evidence_judgment_result",
+    "event_group_centroid_result",
 }
 
 
