@@ -93,6 +93,22 @@ therefore a future preflight failure even if a cached operation would not read
 it. These anchors record new local verification observations, never fabricated
 historical dispatch or delivery timestamps.
 
+## Rejected compact-hash experiment
+
+An isolated alternative hashes every passage and FTS body, using a private
+64 MiB scratch SQLite index of IDs/digests to avoid full-body random joins. Its
+six integrity/cleanup checks pass. On a fictional reordered fixture of 10,000
+passages × 8 KiB, two alternating calls per method gave medians of 0.235 s for
+the active content join and 0.529 s for the compact hash method: **2.25× slower**.
+The main cache was 2 MiB; both tables' logical text payload was 163,840,000 bytes.
+The database SHA-256 was unchanged and OS caches were uncontrolled. This is not
+a production or complete-preflight benchmark. An initial benchmark invocation
+failed after its metadata-field mismatch; the corrected run used a new fixture.
+
+The prototype and reproducible `scripts/benchmark_fts_hashes.py` are retained,
+but **the runtime does not call it**. No actual research sources were used and
+no optimization is claimed from this negative result.
+
 ## Operation
 
 `scripts/run_luna_bounded.py` runs audited offline export, audited offline import,
