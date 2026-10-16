@@ -72,11 +72,11 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Final finite five-feature threshold-family screen](docs/EVENT_PAIR_MONOTONE_FINAL.md)
 - [Complete-preflight performance and reproducible synthetic benchmarks](docs/PREFLIGHT_PERFORMANCE.md)
 
-```powershell
-uv run --frozen pytest -q
-uv run --frozen ruff check src tests scripts
-uv run --frozen mypy src
-```
+Use [proportionate software checks](docs/TESTING.md): run the tests for the
+changed behavior and its direct dependencies once after the code is ready.
+Documentation-only changes need link/diff checks. Reserve the full suite for
+shared audit/runtime changes, broad refactors and releases; do not repeat it for
+each research result or commit. The full-suite commands remain in that guide.
 
 Live NewsAPI collection and substantive dossier-model transports remain unfinished. An OpenAI embedding transport is implemented behind offline defaults and explicit plan-bound paid-run permission; selecting a provider or creating a cost plan sends no model requests. Population estimation, independent scientific validation, authenticated multi-user review and externally anchored tamper detection are also unfinished. Synthetic tests verify software invariants only.
 
