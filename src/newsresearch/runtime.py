@@ -143,6 +143,7 @@ class Research:
             "status": self._status,
             "collect": self._collect,
             "newsapi_probe": self._newsapi_probe,
+            "newsapi_collection": self._newsapi_collection,
             "keyword_study": self._keyword_study,
             "newsapi_overview": self._newsapi_overview,
             "hook": self._hook,
@@ -640,6 +641,12 @@ class Research:
     @audited_handler
     def _keyword_study(self, session: str, context: Context, data: Json) -> Json:
         from .keyword_study import run
+
+        return run(self, session, context, data)
+
+    @audited_handler
+    def _newsapi_collection(self, session: str, context: Context, data: Json) -> Json:
+        from .newsapi_collection import run
 
         return run(self, session, context, data)
 
