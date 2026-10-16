@@ -372,6 +372,8 @@ def consistent_pages(receipts: list[Json]) -> tuple[list[Json], list[Json]]:
     good = [r for r in shaped if r not in bad]
     anomalies = [{"receipt_id": r["id"], "year": r["parameters"]["dateStart"][:4],
         "page": r["parameters"]["articlesPage"], "observed_positive_total": maximum,
+        "response_top_level_keys": sorted(r["response"]),
+        "provider_diagnostics": {k: r["response"][k] for k in ["error", "warning", "errorCode", "message"] if k in r["response"]},
         "reason": "Empty page reports zero total despite earlier positive matches within expected pages",
         "successful_retry": any(canonical(r["parameters"]) == canonical(ok["parameters"]) for ok in good)} for r in bad]
     return good, anomalies

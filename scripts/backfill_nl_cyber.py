@@ -54,7 +54,7 @@ def main() -> None:
                 previous = engine.ledger.get(versions[kind], kind)["content"]
                 versions[kind] = run("version", {"kind": kind, "key": "nl-cyber-zero-total-consistency-v1", "content": {
                     **previous, "consistency_rule": "empty-zero-total-within-prior-positive-pages-v1",
-                    "consistency_amendment": "2022page44 unexpectedly returned empty total0 after9547matches. Preserve original response and five-token charge, exclude contradictory empty pages from successful pagination and recompute contiguous coverage; stop rather than treating empty as exhaustion. Require an immutable offline diagnostic and receipt-bound retry permission before one retry; unknown-outcome guard remains"},
+                    "consistency_amendment": "A historical page unexpectedly returned empty total0 after earlier positive matches. Preserve original response and five-token charge, exclude contradictory empty pages from successful pagination and recompute contiguous coverage; stop rather than treating empty as exhaustion. Require an immutable offline diagnostic and receipt-bound retry permission before one retry; unknown-outcome guard remains"},
                     "supersedes": versions[kind], "reason": "Correct false exhaustion caused by provider total collapsing below already retrieved articles"})["id"]
             inspected = run("newsapi_collection", {"action": "backfill_consistency"}, versions)
             (root / "backfill-consistency.json").write_text(json.dumps(inspected, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -79,13 +79,13 @@ def main() -> None:
             prior = json.loads(progress_path.read_text(encoding="utf-8"))
             if not args.repair_inconsistent and any(isinstance(y.get("provider_total"), (int, float)) and y["provider_total"] < y["returned"] for y in prior["years"]):
                 raise RuntimeError("Provider total collapsed below already returned rows; pause for an audited consistency check, do not dispatch more searches")
-            if prior["stop_reason"] != "checkpoint":
+            if prior["stop_reason"] != "checkpoint" and not (args.repair_inconsistent and prior["stop_reason"] == "inconsistent_provider_response"):
                 raise RuntimeError("Backfill has already stopped; preserve it rather than dispatching more calls")
         result = run("newsapi_collection", {"action": "backfill", "execute": args.execute, "pages": args.pages}, versions)
         progress_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         text = ("Query: `hack OR gehackt OR hackers OR ransomware OR datalek OR datalekken OR cyberaanval OR cyberaanvallen`, title/body, Dutch-language news. "
                 "**Backfill: 1 January 2020 through 14 October 2023**, separate calendar-year requests,100articles/page, ascending publication date.\n\n"
-                "| Year | Pages retrieved | Articles | Provider matches | Reported search tokens | Exhausted |\n|---|---:|---:|---:|---:|---:|---|\n")
+                "| Year | Pages retrieved | Articles | Provider matches | Reported search tokens | Exhausted |\n|---|---:|---:|---:|---:|---|\n")
         for y in result["years"]:
             text += f"| {y['year']} | {y['pages']} | {y['returned']:,} | {y['provider_total']} | {y['reported_cost']:g} | {y['exhausted']} |\n"
         text += (f"\n**{result['unique_articles']:,} unique candidate articles**, {result['missing_body']} missing texts, {result['failed_pages']} historical failed/inconsistent attempts and {result['scope_invalid']} invalid-scope rows. "
