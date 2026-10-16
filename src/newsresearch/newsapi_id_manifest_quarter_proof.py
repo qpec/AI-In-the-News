@@ -26,9 +26,10 @@ def templates() -> list[Json]:
         for start, end in WINDOWS for ascending in (True, False)]
 
 
-def inspect_windows(receipts: list[Json], allow_recent: bool = False) -> list[Json]:
+def inspect_windows(receipts: list[Json], allow_recent: bool = False,
+                    windows: list[tuple[str, str]] | None = None) -> list[Json]:
     rows = []
-    for start, end in WINDOWS:
+    for start, end in WINDOWS if windows is None else windows:
         row: Json = {"date_start": start, "date_end": end, "year": start[:4]}
         for ascending, direction in ((True, "ascending"), (False, "reverse")):
             expected = {**request(start, end, 1, 5000), "uriWgtListSortByAsc": ascending}
@@ -58,13 +59,14 @@ def inspect_windows(receipts: list[Json], allow_recent: bool = False) -> list[Js
 
 
 def compare_quarters(baseline: Json, identities: Json, old: Json, old_frames: dict[str, Json],
-                     receipts: list[Json], allow_recent: bool = False) -> tuple[Json, dict[str, Json]]:
-    windows = inspect_windows(receipts, allow_recent)
+                     receipts: list[Json], allow_recent: bool = False,
+                     windows: list[tuple[str, str]] | None = None) -> tuple[Json, dict[str, Json]]:
+    inspected = inspect_windows(receipts, allow_recent, windows)
     frames = {start: {**frame} for start, frame in old_frames.items()}
     years = []
     for previous in old["years"]:
         year = previous["year"]
-        selected = [w for w in windows if w["year"] == year]
+        selected = [w for w in inspected if w["year"] == year]
         if not selected:
             if not previous["complete"] or not previous["ascending_reverse_equal"]:
                 raise ResearchError("Only the five previously matching years may reuse their annual ID sets")
@@ -96,7 +98,7 @@ def compare_quarters(baseline: Json, identities: Json, old: Json, old_frames: di
             "quarters_only_vs_old_ascending": sorted(asc-old_asc),
             "old_reverse_only_vs_quarters": sorted(old_reverse-reverse) if complete else None,
             "quarters_only_vs_old_reverse": sorted(reverse-old_reverse),
-            "pages": sum(w[d]["complete"] for w in selected for d in ("ascending", "reverse")), "expected_pages": 8}
+            "pages": sum(w[d]["complete"] for w in selected for d in ("ascending", "reverse")), "expected_pages": 2*len(selected)}
         row.update(reverse_ids_seen=row["reverse_ids"], reverse_only_vs_saved_ids=row["manifest_only_ids"],
             saved_only_vs_reverse_ids=row["saved_only_ids"], saved_coverage_of_reverse_percent=row["saved_coverage_of_manifest_percent"])
         years.append(row)
@@ -105,8 +107,8 @@ def compare_quarters(baseline: Json, identities: Json, old: Json, old_frames: di
             raise ResearchError("Quarter refinement requires exactly one original interval for each targeted year")
         frames[starts[0]] = {"year": year, "saved": saved_ids, "ascending": asc, "reverse": reverse}
     complete = all(y["complete"] for y in years)
-    return {"years": years, "windows": windows, "complete": complete,
-        "all_windows_enumerated": all(w["enumerated"] for w in windows),
+    return {"years": years, "windows": inspected, "complete": complete,
+        "all_windows_enumerated": all(w["enumerated"] for w in inspected),
         "ascending_reverse_equal": False if any(y["ascending_reverse_equal"] is False for y in years) else True if complete else None,
         "saved_equals_reverse": all(y["saved_equals_reverse"] for y in years) if complete else None}, frames
 

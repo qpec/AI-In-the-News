@@ -103,6 +103,45 @@ append corrected decisions under new protocol/policy versions. The proof replay
 reads the same version-bound rule and original timestamps. A later observation
 date must never be substituted to make an older response qualify.
 
+The corrected quarter comparison settled 2020 at the original 8,312 IDs, but
+2026 remained inconsistent: the annual reverse set had 9,307 IDs and the
+quarter-based reverse union had 9,225. No complete 2026 set or coverage percentage
+was accepted. The next version, `nl-cyber-id-manifest-archive-block-v1`, tests
+whether keeping the entire last interval on the archive route resolves that
+archive/recent discrepancy. This is a diagnostic explanation to test, not an
+established cause.
+
+`scripts/check_nl_cyber_archive_blocks.py` first invokes an audited, offline
+source lookup and binds the exact preceding quarter-proof and diagnostic IDs in
+new protocol/policy versions. It requests only three disjoint 2026 intervals:
+1 January–30 April, 1 May–31 August and 1 September–15 October, each in both
+date orders. The six exact templates keep the original keyword/filter predicates,
+use page one with at most 5,000 IDs, and require `req-archive=1`. Each request must
+return its complete reported total without repeated IDs. Each pair must agree
+exactly, and blocks must have zero ID overlap. The six previously settled years
+reuse their immutable agreeing proofs, including the 2020 quarter resolution.
+Their original observation times remain explicit; this is not a simultaneous
+provider snapshot.
+
+Reserve 50 tokens per new block query under the original authorization and
+583-token cumulative cap. The lower reservation is limited to these exact
+manifest requests after the observed archive manifest tariff in prior phases;
+it does not claim a new general tariff. Preserve all prior charges and unknown
+charge reservations. Stop if the next reservation does not fit, a charge exceeds
+its reservation, an unknown outcome exists, or auditing fails. At most one
+additional bounded exact-ID metadata batch is permitted by the inherited method,
+without bodies or automatic repetition. Retain previously observed annual
+missing-ID candidates even if the new comparison is unsettled. Resume the same
+version-bound lineage and never repeat a valid exact query.
+
+Save `id-manifest-block-proof.zip`, its protected JSON report and difference CSV.
+The proof includes raw responses, exact normalized ID sets, original baseline
+references, previous disagreements, method versions, costs and checksums; replay
+validates the retained responses and recomputes set comparisons. An incomplete
+or inconsistent replay does not establish completeness. The exact result overview
+is recorded through `record_presentation` before being shown. No source evidence,
+working database, credential or protected proof package belongs in Git.
+
 Primary technical references:
 
 - https://newsapi.ai/plans

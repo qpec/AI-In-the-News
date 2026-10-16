@@ -75,11 +75,19 @@ def records(engine: Research, kind: str) -> list[Json]:
     return [r for r in saved(engine, kind, None) if r.get("authorization_id") == AUTH_ID]
 
 
-def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str) -> Json:
+def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str,
+             reserve_override: int | None = None) -> Json:
     require_active(engine, session)
     usage = parameters == {"endpointVariant": "usage"}
     metadata = parameters.get("endpointVariant") == "article_info"
     reserve = USAGE_RESERVATION if usage else SEARCH_RESERVATION if metadata else RESERVATIONS[parameters["uriWgtListCount"]]
+    if reserve_override is not None:
+        policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
+        if (usage or metadata or reserve_override != 50 or policy.get("block_reservation") != 50
+                or policy.get("block_method") != "nl-cyber-id-manifest-archive-block-v1"
+                or parameters not in policy.get("block_templates", [])):
+            raise ResearchError("Empirical block reservation requires its exact registered request and policy")
+        reserve = reserve_override
     intents, receipts = records(engine, "newsapi_id_intent"), records(engine, "newsapi_id_receipt")
     balance = accounting(intents, receipts)
     if balance["conservative_accounted_tokens"] + reserve > CAP:

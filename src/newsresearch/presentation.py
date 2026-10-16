@@ -22,6 +22,8 @@ RESULT_KINDS = {
     "newsapi_id_manifest_details",
     "newsapi_id_manifest_proof",
     "newsapi_id_manifest_quarter_proof",
+    "newsapi_id_manifest_block_source",
+    "newsapi_id_manifest_block_proof",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",

@@ -300,14 +300,20 @@ def verify_proof_bytes(raw: bytes) -> Json:
                         if ids != receipt["normalized_ids"] or total != receipt["provider_total"]:
                             raise AuditError("Raw manifest differs from retained normalized IDs")
             comparison = json.loads(archive.read("comparison.json"))
-            quarter_count = 0
+            quarter_count = block_count = 0
+            window_documents = []
             if "quarter-verification.json" in checksums:
                 from .newsapi_id_manifest_quarter_proof import WINDOWS
-                windows = json.loads(archive.read("quarter-verification.json"))["windows"]
                 validation_policy = json.loads(archive.read("versions/policy.json"))["content"]
                 allow_recent = validation_policy.get("recent_window_validation") == RECENT_WINDOW_METHOD
-                if [(w["date_start"], w["date_end"]) for w in windows] != WINDOWS:
-                    raise AuditError("Quarter proof does not contain the registered disjoint date ranges")
+                window_documents.append(("quarter-verification.json", WINDOWS, allow_recent))
+            if "block-verification.json" in checksums:
+                window_documents.append(("block-verification.json", [("2026-01-01", "2026-04-30"),
+                    ("2026-05-01", "2026-08-31"), ("2026-09-01", "2026-10-15")], False))
+            for filename, expected_windows, allow_recent in window_documents:
+                windows = json.loads(archive.read(filename))["windows"]
+                if [(w["date_start"], w["date_end"]) for w in windows] != expected_windows:
+                    raise AuditError("Window proof does not contain the registered disjoint date ranges")
                 for window in windows:
                     for direction in ("ascending", "reverse"):
                         item = window[direction]
@@ -327,7 +333,10 @@ def verify_proof_bytes(raw: bytes) -> Json:
                     if (window["enumerated"] != enumerated or window["ascending_reverse_equal"] != equal
                             or bool(window["complete"]) != bool(enumerated and equal)):
                         raise AuditError("Quarter-pair comparison is not reproduced by its packaged ID lists")
-                quarter_count = len(windows)
+                if filename == "quarter-verification.json":
+                    quarter_count = len(windows)
+                else:
+                    block_count = len(windows)
             for row in comparison["years"]:
                 def year_ids(direction: str) -> set[str]:
                     return set(archive.read(f"years/{row['year']}/{direction}-ids.txt").decode().splitlines())
@@ -343,6 +352,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
     return {"status": "verified", "files_checked": len(checksums), "raw_responses_checked": raw_count,
         "years_checked": len(comparison["years"]), "complete_year_comparisons": sum(bool(r["complete"]) for r in comparison["years"]),
         "quarter_pairs_checked": quarter_count,
+        "archive_block_pairs_checked": block_count,
         "outer_sha256": hashlib.sha256(raw).hexdigest(),
         "scope": "Byte integrity, raw-to-normalized IDs and available set-comparison replay; null absence remains unsettled, no independent provider attestation"}
 
@@ -350,7 +360,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
 def export_proof(engine: Research, session: str, reference: str, filename: str = "id-manifest-proof.zip") -> str:
     """Write the same anchored bytes to one fixed, protected, user-readable path."""
     raw = engine.ledger.artifacts.read_bytes(reference)
-    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip"}:
+    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip", "id-manifest-block-proof.zip"}:
         raise ResearchError("Use a fixed registered proof filename in protected storage")
     target = engine.ledger.root / filename
     if target.is_symlink() or target.is_junction():
