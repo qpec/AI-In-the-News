@@ -190,6 +190,7 @@ class Research:
             "check_event_time_spans": self._check_event_time_spans,
             "compare_event_group_windows": self._compare_event_group_windows,
             "propose_cross_window_group_links": self._propose_cross_window_group_links,
+            "prepare_cross_window_event_review": self._prepare_cross_window_event_review,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -959,6 +960,11 @@ class Research:
     @audited_handler
     def _propose_cross_window_group_links(self, session: str, context: Context, data: Json) -> Json:
         from .event_group_link_study import execute
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _prepare_cross_window_event_review(self, session: str, context: Context, data: Json) -> Json:
+        from .event_group_evidence_study import execute
         return execute(self, session, context, data)
 
     @audited_handler

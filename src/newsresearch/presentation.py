@@ -37,6 +37,7 @@ RESULT_KINDS = {
     "event_temporal_result",
     "event_window_result",
     "event_group_link_result",
+    "event_group_evidence_result",
 }
 
 

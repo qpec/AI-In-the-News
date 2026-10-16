@@ -72,6 +72,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Final finite five-feature threshold-family screen](docs/EVENT_PAIR_MONOTONE_FINAL.md)
 - [Offline provisional application to every pilot article](docs/EVENT_RULE_APPLICATION.md)
 - [Offline complete-link group refinement and comparison](docs/EVENT_GROUP_REFINEMENT.md)
+- [Complete-source cross-window event-review preparation](docs/CROSS_WINDOW_EVENT_REVIEW.md)
 - [Complete-preflight performance and reproducible synthetic benchmarks](docs/PREFLIGHT_PERFORMANCE.md)
 
 Use [proportionate software checks](docs/TESTING.md): run the tests for the
