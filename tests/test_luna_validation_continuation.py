@@ -1,6 +1,7 @@
 """Source-free continuation: preserve spend/failures, and block unsafe dispatch."""
 from datetime import datetime, timedelta, timezone
 import hashlib
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -129,3 +130,56 @@ def test_attempt_and_exposure_caps_include_every_historical_intent():
     for history in ([{"article_exposures": 1}] * 401, [{"article_exposures": 6001}]):
         with pytest.raises(ResearchError, match="historical_budget_exceeded"):
             continuation._totals(history)
+
+
+@pytest.mark.parametrize("condition", ["valid", "content_invalid", "malformed", "prohibited", "unknown", "oversize"])
+def test_retained_output_cap_reparse_is_only_local_provisional_revalidation(tmp_path, monkeypatch, condition):
+    ledger = MemoryLedger(tmp_path)
+    context = Context("Source-free retained byte reparse", "test", {})
+    request_id = ledger.put({"versions": {}, "fixture": True})
+    payload = {"fixture_answer": True}
+    stream = "\n" * 270000 + "\n".join(json.dumps(event) for event in [
+        {"type": "turn.started"},
+        {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(payload)}},
+        {"type": "turn.completed", "usage": {"input_tokens": 1, "output_tokens": 1}}])
+    raw = {"failure": continuation.OUTPUT_CAP_ERROR, "unknown_outcome": False,
+        "exit_code": 0, "stdout": stream, "stderr": "", "transport_status": "invalid_or_unknown"}
+    if condition == "malformed":
+        raw["stdout"] = "not a complete JSON stream"
+    elif condition == "unknown":
+        raw["unknown_outcome"] = True
+    elif condition == "oversize":
+        raw["stdout"] = " " * (continuation.REPARSE_BYTE_CAP + 1)
+    response_id = ledger.put({"payload": None, "raw_response": raw})
+    outcome = {"status": "invalid", "error": continuation.OUTPUT_CAP_ERROR, "answer": None,
+        "attempt": "unchanged-attempt", "assessment": "unchanged-assessment", "request": request_id,
+        "response": response_id}
+    checks = []
+
+    def validate(request, answer):
+        checks.append((request, answer))
+        if condition == "content_invalid":
+            raise ResearchError("luna_uncited_factual_field")
+        return {"status": "valid"}
+
+    def credential_check(value):
+        assert value["stdout"] == raw["stdout"]
+        if condition == "prohibited":
+            raise ResearchError("prohibited-constructed-output")
+
+    monkeypatch.setattr(original, "validate_answer", validate)
+    monkeypatch.setattr(continuation, "require_no_credentials", credential_check)
+    engine = SimpleNamespace(ledger=ledger)
+    result = continuation._recover_output_cap(engine, "test", context,
+        {"request_ref": request_id}, outcome, "frozen-control")
+    assert ledger.read(response_id) == {"payload": None, "raw_response": raw}
+    assert outcome["status"] == "invalid" and outcome["error"] == continuation.OUTPUT_CAP_ERROR
+    if condition in {"valid", "content_invalid"}:
+        assert checks and result["original_status"] == "invalid" and result["revalidation"]
+        check = ledger.get(result["revalidation"], "luna_lead_revalidation")
+        assert check["model_calls"] == 0 and check["old_attempt_projection_unchanged"] is True
+        assert result["status"] == ("valid" if condition == "valid" else "invalid")
+        assert continuation._classification(engine, result) == ("valid" if condition == "valid" else "known_content_validation_failure")
+    else:
+        assert result is outcome and not checks
+        assert continuation._classification(engine, result) == "transport_or_unrecognized_failure"

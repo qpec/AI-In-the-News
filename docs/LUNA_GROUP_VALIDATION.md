@@ -182,3 +182,20 @@ Ruff and mypy passed. These checks cover cumulative caps, no-repeat reuse,
 group-first/interim reporting, and blocking transport/unknown failures. They
 do not establish the cause of the three real rejected responses; that diagnosis
 must first be read through the audited operation.
+
+The continuation also registers a narrow local-output recovery policy before
+reading outcomes. The original provider retains complete permitted output when
+only its local byte-acceptance limit is exceeded. Such bytes may be reparsed
+without another model call only with a zero process exit, explicitly known
+outcome, complete recognized event stream, credential checks, a 2 MiB ceiling
+and the unchanged answer validator. Separate revalidation records link the
+original request/response/assessment; original invalid attempt rows remain
+unchanged. Other transport errors still stop dispatch. Revalidated usable
+assessments are reported separately from original attempt statuses.
+
+The expanded source-free suite passed 11 tests in 0.27 seconds; Ruff and mypy
+passed. The final module and tests were committed during storage preflight,
+before its lazy import, method registration or any continuation dispatch.
+Runtime identity is captured after preflight, and the control additionally
+retains the exact continuation module source bytes and SHA-256. This is a
+guarded software recovery path, not a claim about the actual failure cause.

@@ -12,11 +12,14 @@ from pathlib import Path
 from typing import Any
 import uuid
 
-from .common import Context, Json, ResearchError, digest, require_active, utc
+from .common import AuditError, Context, Json, ResearchError, digest, require_active, require_no_credentials, utc
+from .codex_provider import _parse_events
 from . import luna_validation_gateway as original
 
 
 METHOD = "luna-untouched-primary-continuation-v1"
+OUTPUT_CAP_ERROR = "codex_output_acceptance_limit_exceeded"
+REPARSE_BYTE_CAP = 2 * 1024 * 1024
 CONTENT_VALIDATION_ERRORS = frozenset({
     "luna_schema_invalid", "luna_incomplete_passage_coverage", "luna_incomplete_source_coverage",
     "luna_blank_rationale", "luna_quote_invalid", "luna_single_article_group_claim_invalid",
@@ -42,6 +45,12 @@ def _classification(engine: Any, outcome: Json) -> str:
     if outcome["status"] == "unknown":
         return "unknown"
     if outcome["status"] == "invalid" and outcome.get("error") in CONTENT_VALIDATION_ERRORS:
+        if outcome.get("retained_transport_revalidated") is True and outcome.get("revalidation"):
+            check = engine.ledger.get(outcome["revalidation"], "luna_lead_revalidation")
+            if (check["status"] == "invalid" and check["error"] == outcome["error"]
+                    and check["request"] == outcome["request"] and check["response"] == outcome["response"]
+                    and check["transport_verified"] is True):
+                return "known_content_validation_failure"
         response = engine.ledger.artifacts.read(outcome["response"])
         transport = response.get("raw_response")
         if (response.get("payload") is not None and isinstance(transport, dict)
@@ -49,6 +58,58 @@ def _classification(engine: Any, outcome: Json) -> str:
                 and transport.get("failure") is None and not transport.get("unknown_outcome")):
             return "known_content_validation_failure"
     return "transport_or_unrecognized_failure"
+
+
+def _recover_output_cap(engine: Any, session: str, context: Context, task: Json,
+                        outcome: Json, amendment: str) -> Json:
+    """Reparse permitted retained bytes only; never redispatch or alter old records."""
+    if outcome.get("status") != "invalid" or outcome.get("error") != OUTPUT_CAP_ERROR:
+        return outcome
+    response = engine.ledger.artifacts.read(outcome["response"])
+    raw = response.get("raw_response")
+    if (not isinstance(raw, dict) or response.get("payload") is not None
+            or raw.get("failure") != OUTPUT_CAP_ERROR or raw.get("unknown_outcome") is not False
+            or type(raw.get("exit_code")) is not int or raw["exit_code"] != 0
+            or not isinstance(raw.get("stdout"), str) or not isinstance(raw.get("stderr"), str)):
+        return outcome
+    stdout, stderr = raw["stdout"], raw["stderr"]
+    if len(stdout.encode("utf-8")) + len(stderr.encode("utf-8")) > REPARSE_BYTE_CAP:
+        return outcome
+    try:
+        require_no_credentials({"stdout": stdout, "stderr": stderr})
+    except AuditError:
+        raise
+    except ResearchError:
+        return outcome
+    events, payload, failure, observed_model, usage = _parse_events(stdout)
+    if failure is not None or payload is None or not any(event.get("type") == "turn.completed" for event in events):
+        return outcome
+    request = engine.ledger.artifacts.read(task["request_ref"])
+    if request.get("versions") != context.versions:
+        raise ResearchError("luna_revalidation_request_versions_changed")
+    validation, error = {}, None
+    try:
+        validation = original.validate_answer(request, payload)
+    except AuditError:
+        raise
+    except ResearchError as problem:
+        error = str(problem)
+    value = {"method": "retained-output-cap-reparse-v1", "versions": context.versions,
+        "control_amendment": amendment, "original_attempt": outcome["attempt"],
+        "original_assessment": outcome["assessment"], "request": task["request_ref"],
+        "response": outcome["response"], "original_status": outcome["status"], "original_error": outcome["error"],
+        "transport_verified": True, "retained_bytes": len(stdout.encode("utf-8")) + len(stderr.encode("utf-8")),
+        "byte_cap": REPARSE_BYTE_CAP, "status": "valid" if error is None else "invalid", "error": error,
+        "answer": payload if error is None else None, "validation": validation,
+        "observed_model": observed_model, "usage": usage, "human_validated": False,
+        "model_calls": 0, "retry": False, "old_attempt_projection_unchanged": True}
+    identifier = engine.ledger.record(session, "luna_lead_revalidation", digest(value), value)
+    engine.ledger.append(session, "luna.continuation.response.revalidated", {
+        "attempt": outcome["attempt"], "assessment": outcome["assessment"], "revalidation": identifier,
+        "status": value["status"], "error": error, "control_amendment": amendment, "model_calls": 0})
+    return {**outcome, "status": value["status"], "error": error, "answer": value["answer"],
+        "validation": validation, "original_status": outcome["status"], "original_error": outcome["error"],
+        "revalidation": identifier, "retained_transport_revalidated": True}
 
 
 def render_diagnostic(value: Json) -> str:
@@ -59,6 +120,8 @@ def render_diagnostic(value: Json) -> str:
         "Retained outcomes by mode and recorded validation/transport code:"]
     lines.extend(f"- {row['mode']}: {row['status']}; {row['error'] or 'none'}; {row['classification']}: {row['count']}"
                  for row in value["outcome_codes"])
+    lines.append(f"Retained byte-cap responses revalidated without new model calls: {len(value['revalidations'])}. "
+        "Original invalid attempt projections and responses remain unchanged; recovered outcomes link separate revalidation records.")
     lines.append(f"Dispatch guard: {value['obstacle'] or 'only previously untouched primary tasks may continue'}. "
         "No rejected attempt is retried, no packet or inclusion criterion changes, and missing judgments remain missing.")
     return "\n\n".join(lines)
@@ -77,9 +140,14 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("luna_workers_outside_1_4")
     if engine.config.offline:
         raise ResearchError("luna_codex_execution_requires_explicit_online_mode")
-    implementation = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    source_bytes = Path(__file__).read_bytes()
+    implementation = hashlib.sha256(source_bytes).hexdigest()
+    implementation_artifact = original._artifact(engine, session, {
+        "module": Path(__file__).name, "sha256": implementation, "source_utf8": source_bytes.decode("utf-8")},
+        "Exact continuation implementation source bytes before control registration or prior-result reads")
     control = {"method": METHOD, "original_result": data["result"], "study_key": data["study_key"],
         "authorization_instruction": data["authorization_instruction"], "implementation_sha256": implementation,
+        "implementation_artifact": implementation_artifact,
         "untouched_primary_tasks_only": True, "answer_validation_unchanged": True,
         "continue_after_only": sorted(CONTENT_VALIDATION_ERRORS),
         "max_requests": 400, "max_article_exposures": 6000, "automatic_retries": 0,
@@ -87,6 +155,10 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         "execution_order": ["group audit", "group held_out", "anchor audit", "anchor held_out"],
         "no_label_tuning": True, "interim_group_result_before_anchors": True,
         "heldout_policy": "All packets already frozen; held-out groups precede audit anchors without adaptation",
+        "retained_output_revalidation": {"only_error": OUTPUT_CAP_ERROR, "byte_cap": REPARSE_BYTE_CAP,
+            "require_exit_code": 0, "require_unknown_false": True, "require_complete_single_payload": True,
+            "unchanged_answer_validator": True, "new_model_calls": 0, "retry": False,
+            "old_response_payloads_and_attempt_projections_unchanged": True},
         "criteria_or_membership_changes": False}
     # Register the control change before reading prior research results or packets.
     amendment = engine._version(session, context, {"kind": "protocol",
@@ -177,6 +249,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
                         "attempt": intended["attempt"], "versions": bound.versions,
                         "assessment": row[1], "luna_validation_study": study,
                         "continuation_control_amendment": amendment})
+        outcome = _recover_output_cap(engine, session, bound, task, outcome, amendment)
         outcomes[task["logical_id"]] = outcome
         classification = _classification(engine, outcome)
         codes[(task["mode"], outcome["status"], outcome.get("error"), classification)] += 1
@@ -190,6 +263,10 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         "untouched_tasks": len(pending), "new_model_calls": 0, "automatic_retries": 0,
         "outcome_codes": [{"mode": key[0], "status": key[1], "error": key[2],
             "classification": key[3], "count": count} for key, count in sorted(codes.items())],
+        "revalidations": [{"attempt": outcome["attempt"], "revalidation": outcome["revalidation"],
+            "original_status": outcome["original_status"], "original_error": outcome["original_error"],
+            "status": outcome["status"], "error": outcome.get("error")}
+            for outcome in outcomes.values() if outcome.get("revalidation")],
         "obstacle": blocked, "source_text_included": False}
     diagnostic_id = engine.ledger.record(session, "luna_group_validation_diagnostic", digest(diagnostic), diagnostic)
     diagnostic_presentation = engine._record_presentation(session, bound, {
@@ -197,6 +274,7 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         "markdown": render_diagnostic(diagnostic), "destination": "codex_chat", "status": "prepared_for_delivery"})
     manifest = original._artifact(engine, session, {"binding": binding, "control_amendment": amendment,
         "continuation_implementation_sha256": implementation, "original_result": data["result"],
+        "continuation_implementation_artifact": implementation_artifact,
         "untouched_tasks": pending, "existing_attempts": [item["attempt"] for item in history],
         "diagnostic": diagnostic_id, "scope": {"max_requests": 400, "max_article_exposures": 6000, "automatic_retries": 0}},
         "Continuation control, original bindings, existing spend and untouched request manifest before dispatch")
@@ -227,12 +305,18 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "model_metadata": "Observed identity and usage retained per attempt; unavailable stays null",
             "continuation_method": METHOD, "control_amendment": amendment, "original_result": data["result"],
             "new_model_attempts": spent - initial_spent, "interim_group_result": interim,
+            "retained_output_revalidation_counts": {
+                "attempted": sum(bool(item.get("revalidation")) for item in outcomes.values()),
+                "valid": sum(bool(item.get("revalidation")) and item["status"] == "valid" for item in outcomes.values()),
+                "invalid": sum(bool(item.get("revalidation")) and item["status"] == "invalid" for item in outcomes.values()),
+                "original_attempt_projections_changed": False},
             "diagnostic": {"id": diagnostic_id, "presentation": diagnostic_presentation}}
         identifier = engine.ledger.record(session, "luna_group_validation_result", digest(result), result)
         presentation = engine._record_presentation(session, bound, {
             "results": [{"kind": "luna_group_validation_result", "id": identifier}],
             "markdown": original.render_result(result) + f"\n\nContinuation control {amendment}: "
                 f"{spent - initial_spent} previously untouched primary attempts; rejected attempts retained without retry. "
+                f"Retained byte-cap revalidation counts: {result['retained_output_revalidation_counts']}. "
                 + ("Interim whole-group result, saved before the anchor phase." if interim else "Frozen group-first execution; no label tuning."),
             "destination": "codex_chat", "status": "prepared_for_delivery"})
         return {"id": identifier, **result, "presentation": presentation}
@@ -290,10 +374,13 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         for index, response in engine.gateway.codex_dispatch(session, provider, prepared, workers):
             task, intended = dispatched[index]
             outcome = original._complete(engine, session, task, intended, response)
+            outcome = _recover_output_cap(engine, session, bound, task, outcome, amendment)
             outcomes[task["logical_id"]] = outcome
             engine.ledger.append(session, "luna.continuation.task.completed", {"mode": task["mode"],
                 "status": outcome["status"], "error": outcome.get("error"),
-                "logical_id": task["logical_id"], "attempt": intended["attempt"]})
+                "logical_id": task["logical_id"], "attempt": intended["attempt"],
+                "original_status": outcome.get("original_status"), "original_error": outcome.get("original_error"),
+                "revalidation": outcome.get("revalidation")})
             if _classification(engine, outcome) in {"unknown", "transport_or_unrecognized_failure"}:
                 blocked = "New unknown, transport or unrecognized failure; further dispatch stopped"
     return capture_result()
