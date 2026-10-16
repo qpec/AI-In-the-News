@@ -72,6 +72,25 @@ method before lookup. Retain actual receipt charges; metadata lookup pricing is
 not assumed to be zero or reduced by body suppression. No automatic repeat of
 the metadata request is authorized.
 
+The actual reverse annual pass disagreed with the first pass: 2020 retained
+8,312 IDs but two members changed, and 2026 grew from 9,301 to 9,307. Counts and
+complete pages alone therefore did not establish a stable provider universe.
+The first proof package retains that negative result; do not label it successful
+set agreement or treat the first pass's two-title list as the reverse-pass gaps.
+
+The follow-up `nl-cyber-id-manifest-quarter-proof-v1` checks only the two unstable
+years in four disjoint calendar quarters each (2026 Q4 ends on 15 October).
+Request each quarter in both date orders, 5,000 IDs/page one, and require a
+complete single page, matching totals and matching exact sets in each pair,
+with zero cross-quarter ID overlap. This uses no offset pagination in those
+windows. Reuse the five matching annual checks explicitly, with their original
+retrieval times and versions. Provider data can change after any observation;
+this is no permanent snapshot or external recall census. Keep all phases under
+the same 583-token authorization. At most ten additional exact-ID metadata
+lookups fit one bounded batch; excess or failed metadata stays unavailable and
+does not negate an observed ID. Preserve the earlier disagreements and the new
+requests together in a separate, replay-checked protected quarter proof package.
+
 Primary technical references:
 
 - https://newsapi.ai/plans

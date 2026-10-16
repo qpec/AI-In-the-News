@@ -152,11 +152,17 @@ def _state(engine: Research, baseline: Json, identities: Json, first: Json,
 
 
 def evidence_zip(engine: Research, session: str, context: Context, baseline: Json,
-                 first: Json, result: Json, frames: dict[str, Json]) -> str:
+                 first: Json, result: Json, frames: dict[str, Json], *,
+                 extra_json: dict[str, Json] | None = None, method: str = CONFIRM_METHOD) -> str:
     """Freeze exact allowed evidence; original article text is referenced, never copied."""
     files: dict[str, bytes] = {}
     def json_file(name: str, value: object) -> None:
         files[name] = canonical(value).encode("utf-8")
+
+    for name, value in (extra_json or {}).items():
+        if "/" in name or "\\" in name or not name.endswith(".json") or name in {"comparison.json", "file-sha256.json"}:
+            raise ResearchError("Extra proof document must have a distinct safe JSON basename")
+        json_file(name, value)
 
     json_file("comparison.json", result)
     json_file("baseline-audit.json", baseline)
@@ -171,6 +177,9 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
         for direction in ("saved", "ascending", "reverse"):
             files[f"partitions/{start}/{direction}-ids.txt"] = ("\n".join(sorted(frame[direction]))+"\n").encode("utf-8")
     references: list[Json] = []
+    historical_versions = {(kind, ref) for kind, ref in context.versions.items()}
+    historical_versions.update(first.get("versions", {}).items())
+    historical_versions.update(baseline.get("versions", {}).items())
     sessions = {session}
     def record_reference(identifier: str) -> Json:
         row = engine.ledger.db.execute("SELECT r.id,r.kind,r.artifact,r.created_event,e.session_id FROM records r JOIN events e ON e.seq=r.created_event WHERE r.id=?", (identifier,)).fetchone()
@@ -187,6 +196,7 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
         identifier = result["metadata_result"]
         ref = record_reference(identifier)
         files["differing-id-metadata-result.json"] = engine.ledger.artifacts.read_bytes(ref["artifact"])
+        historical_versions.update(json.loads(files["differing-id-metadata-result.json"]).get("versions", {}).items())
     original_receipt_ids = list(dict.fromkeys(ref for p in baseline["periods"] for ref in p.get("receipt_ids", [d["receipt"] for d in p["page_details"]])))
     query = "SELECT id,artifact,json_extract(payload,'$.parameters') AS parameters_json,json_extract(payload,'$.raw_response') AS raw_response_artifact,json_extract(payload,'$.raw_sha256') AS original_response_sha256 FROM records WHERE kind='newsapi_collection_receipt' AND id=?"
     originals = []
@@ -200,6 +210,7 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
         "retention": "References/hashes and exact retrieval parameters only; publisher texts and original full-article payloads are not duplicated"})
     missing_raw = []
     for receipt in records(engine, "newsapi_id_receipt"):
+        historical_versions.update(receipt.get("versions", {}).items())
         record_reference(receipt["id"])
         json_file(f"receipts/{receipt['id']}.json", receipt)
         if receipt.get("raw_response"):
@@ -207,10 +218,14 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
         else:
             missing_raw.append(receipt["id"])
     for intent in records(engine, "newsapi_id_intent"):
+        historical_versions.update(intent.get("versions", {}).items())
         record_reference(intent["id"])
         json_file(f"intents/{intent['id']}.json", intent)
     for kind, identifier in context.versions.items():
         json_file(f"versions/{kind}.json", {"id": identifier, **engine.ledger.get(identifier, kind)})
+    for kind, identifier in sorted(historical_versions):
+        record_reference(identifier)
+        json_file(f"versions/history/{kind}/{identifier}.json", {"id": identifier, **engine.ledger.get(identifier, kind)})
     json_file("record-references.json", references)
     provenance = []
     for identifier in sorted(sessions):
@@ -223,7 +238,7 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
         files[f"code-identities/{reference}.json"] = engine.ledger.artifacts.read_bytes(reference)
         provenance.append({"session_started_event": event, "identity_artifact": reference})
     json_file("session-provenance.json", provenance)
-    json_file("evidence-manifest.json", {"method": CONFIRM_METHOD, "authorization_id": AUTH_ID,
+    json_file("evidence-manifest.json", {"method": method, "authorization_id": AUTH_ID,
         "versions": context.versions, "baseline_audit": first["baseline_audit"], "ascending_result": first["id"],
         "metadata_result": result.get("metadata_result"), "comparison": "comparison.json",
         "missing_raw_response_receipts": missing_raw, "limitation": LIMITATION,
@@ -237,7 +252,7 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, raw)
     reference = engine.ledger.artifacts.put_bytes(buffer.getvalue())
-    engine.ledger.append(session, "retrieval.artifact.saved", {"artifact": reference, "method": CONFIRM_METHOD,
+    engine.ledger.append(session, "retrieval.artifact.saved", {"artifact": reference, "method": method,
         "files": len(files), "baseline_audit": first["baseline_audit"], "ascending_result": first["id"]})
     return reference
 
@@ -268,26 +283,57 @@ def verify_proof_bytes(raw: bytes) -> Json:
                         if ids != receipt["normalized_ids"] or total != receipt["provider_total"]:
                             raise AuditError("Raw manifest differs from retained normalized IDs")
             comparison = json.loads(archive.read("comparison.json"))
+            quarter_count = 0
+            if "quarter-verification.json" in checksums:
+                from .newsapi_id_manifest_quarter_proof import WINDOWS
+                windows = json.loads(archive.read("quarter-verification.json"))["windows"]
+                if [(w["date_start"], w["date_end"]) for w in windows] != WINDOWS:
+                    raise AuditError("Quarter proof does not contain the registered disjoint date ranges")
+                for window in windows:
+                    for direction in ("ascending", "reverse"):
+                        item = window[direction]
+                        if not item["complete"]:
+                            continue
+                        source = json.loads(archive.read(f"receipts/{item['receipt']}.json"))
+                        expected = {**request(window["date_start"], window["date_end"], 1, 5000),
+                            "uriWgtListSortByAsc": direction == "ascending"}
+                        actual_ids, total = parse_manifest(json.loads(archive.read(f"responses/{item['receipt']}.json")))
+                        if (canonical(source["parameters"]) != canonical(expected) or source.get("http_status") != 200
+                                or source.get("headers", {}).get("req-archive") != "1" or not 0 <= total <= 5000
+                                or len(actual_ids) != total or len(set(actual_ids)) != total
+                                or sorted(actual_ids) != item["ids"] or total != item["provider_total"]):
+                            raise AuditError("Quarter ID list does not reproduce its raw response and registered request")
+                    enumerated = window["ascending"]["complete"] and window["reverse"]["complete"]
+                    equal = window["ascending"]["ids"] == window["reverse"]["ids"] if enumerated else None
+                    if (window["enumerated"] != enumerated or window["ascending_reverse_equal"] != equal
+                            or bool(window["complete"]) != bool(enumerated and equal)):
+                        raise AuditError("Quarter-pair comparison is not reproduced by its packaged ID lists")
+                quarter_count = len(windows)
             for row in comparison["years"]:
                 def year_ids(direction: str) -> set[str]:
                     return set(archive.read(f"years/{row['year']}/{direction}-ids.txt").decode().splitlines())
                 saved_ids, ascending_ids, reverse_ids = year_ids("saved"), year_ids("ascending"), year_ids("reverse")
                 if (len(saved_ids) != row["saved_ids"] or len(reverse_ids) != row["reverse_ids"]
                         or sorted(reverse_ids-saved_ids) != row["manifest_only_ids"]
-                        or sorted(saved_ids-reverse_ids) != row["saved_only_ids"]
-                        or (ascending_ids == reverse_ids) != row["ascending_reverse_equal"]):
+                        or (row["saved_only_ids"] is not None and sorted(saved_ids-reverse_ids) != row["saved_only_ids"])
+                        or (row["ascending_reverse_equal"] is not None and (row["complete"] or row["ascending_reverse_equal"])
+                            and (ascending_ids == reverse_ids) != row["ascending_reverse_equal"])):
                     raise AuditError("Packaged year IDs do not reproduce the reported set comparison")
     except (KeyError, ValueError, zipfile.BadZipFile, ResearchError) as error:
         raise AuditError("Proof package could not be independently replayed") from error
     return {"status": "verified", "files_checked": len(checksums), "raw_responses_checked": raw_count,
-        "years_checked": len(comparison["years"]), "outer_sha256": hashlib.sha256(raw).hexdigest(),
-        "scope": "Byte integrity, raw-to-normalized IDs and set-comparison replay; no independent provider attestation"}
+        "years_checked": len(comparison["years"]), "complete_year_comparisons": sum(bool(r["complete"]) for r in comparison["years"]),
+        "quarter_pairs_checked": quarter_count,
+        "outer_sha256": hashlib.sha256(raw).hexdigest(),
+        "scope": "Byte integrity, raw-to-normalized IDs and available set-comparison replay; null absence remains unsettled, no independent provider attestation"}
 
 
-def export_proof(engine: Research, session: str, reference: str) -> str:
+def export_proof(engine: Research, session: str, reference: str, filename: str = "id-manifest-proof.zip") -> str:
     """Write the same anchored bytes to one fixed, protected, user-readable path."""
     raw = engine.ledger.artifacts.read_bytes(reference)
-    target = engine.ledger.root / "id-manifest-proof.zip"
+    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip"}:
+        raise ResearchError("Use a fixed registered proof filename in protected storage")
+    target = engine.ledger.root / filename
     if target.is_symlink() or target.is_junction():
         raise AuditError("Protected proof export cannot follow a link")
     if target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == reference:

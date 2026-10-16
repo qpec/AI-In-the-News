@@ -152,6 +152,9 @@ def save_cost(engine: Research, session: str, identifier: str, receipt: Json) ->
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
+    if data.get("action") == "id_manifest_quarter_proof":
+        from .newsapi_id_manifest_quarter_proof import run as id_manifest_quarter_proof
+        return id_manifest_quarter_proof(engine, session, context, data)
     if data.get("action") == "id_manifest_proof":
         from .newsapi_id_manifest_proof import run as id_manifest_proof
         return id_manifest_proof(engine, session, context, data)
