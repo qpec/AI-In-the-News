@@ -59,3 +59,62 @@ on these new helpers/adapter/launcher/tests, mypy on the new modules, and
 `git diff --check`. Runtime changes only dispatch to this additive adapter;
 presentation changes only allow its result kind. Existing audit machinery is
 unchanged. Synthetic checks establish software behavior only.
+
+## Executed pilot result — 2026-10-16
+
+Result: `4d3e55fb3ad50d023bf21cfc47018513585bf956e30b48256e12152ad5dddd7e`.
+Manifest: `e0f41f389eb05af9b2d0a83d5ae7ba15507e77bb5a7836e65d5072f8351a5fae`.
+Exact prepared chat presentation artifact:
+`1b061cbc1e4801eb7340a320a6ffb0e4544f5df563e500cfbded664e89b3f56f`.
+Prepared does not establish verified UI delivery or reading.
+
+The single offline runtime operation completed across the original 20,000-article
+pilot. It checked all 191,600,100 unordered pairs of 19,576 retained vectors,
+scored 184,995 pooled-threshold candidates and reused every original 88,088
+feature row. Missing vectors: 424; unusable publication dates among vector-bearing
+articles: 27. Feature failures and pending pairs: zero. The seven-day replay
+reproduced all original candidates and passing pairs exactly.
+
+The same 19,549 dated-vector articles were used for every cap:
+
+| Publication cap | Five-feature passing pairs | Distinct articles in passing pairs | Development reference passes: same / different / uncertain |
+| --- | ---: | ---: | --- |
+| 7 days | 11,668 | 4,704 | 12/14; 1/26; 2/14 |
+| 14 days | 13,700 | 5,128 | 12/14; 5/26; 3/14 |
+| 30 days | 15,861 | 5,504 | 12/14; 8/26; 4/14 |
+| 90 days | 17,149 | 5,731 | 12/14; 9/26; 5/14 |
+| Unlimited | 17,182 | 5,744 | 12/14; 9/26; 5/14 |
+
+Six unknown-gap pairs pass the similarities; they are separate from the table.
+These are pair-rule candidates, not validated links or event counts. No new
+partition was constructed. Current 1,579 multi-article groups have median span
+1 day, nearest-rank p90 of 6 days and maximum 7 days, as constrained by the method.
+
+Provider metadata has 9,420 populated eventUri strings, 10,129 nulls and 451
+missing fields. There are 1,396 repeated provider IDs, all with at least two dated
+articles; 11 have observed publication spans over seven days, with maximum
+235 days. Exact provider-ID agreement is not semantic validation.
+
+Every original development reference was retained with its original probability,
+weight and uncertainty: 14 same-event, 26 different-event, 14 uncertain; none
+unprocessed. Of those beyond seven days, one is labeled same-event, 18 different
+and ten uncertain by the original models. The 11-day same-event reference fails
+the unchanged similarity rule even without a date cap. Therefore widening the
+gate alone recovers no additional known-same reference, while permitting more
+known-different references. No held-out labels were opened. This is a development
+diagnostic, not independent accuracy or a validated choice of wider cutoff.
+
+Complete feature tables, all longer-gap passing pairs, original reference
+comparisons, spans and source-linked numerical examples remain in protected
+storage. Examples are unjudged; source quality and event identity were not newly
+assessed. Active groups unchanged; accepted dossiers zero; new model, embedding
+and network calls zero. Use time to prioritize review, with evidence-based event
+identity required for long-gap merges. Do not simply replace seven with 30 or
+90 days as a validated automatic grouping rule.
+
+Software verification: five numerical/summary tests passed; the integrated
+synthetic runtime scenario passed after corrections, including durable audit
+failure, exact completed-result reuse, immutable-method rejection, unknown dates,
+missing vectors, provider JSON types and zero acceptance. Ruff and mypy passed
+for the new modules/launcher. No full-suite rerun; this additive diagnostic does
+not modify the shared audit machinery. `git diff --check` passed.
