@@ -197,6 +197,7 @@ class Research:
             "plan_catalog_embeddings": self._plan_catalog_embeddings,
             "index_catalog_embeddings": self._index_catalog_embeddings,
             "luna_group_validation": self._luna_group_validation,
+            "luna_group_validation_continue": self._luna_group_validation_continue,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -1004,6 +1005,12 @@ class Research:
     @audited_handler
     def _luna_group_validation(self, session: str, context: Context, data: Json) -> Json:
         return self.gateway.luna_group_validation(session, context, data)
+
+    @audited_handler
+    def _luna_group_validation_continue(self, session: str, context: Context, data: Json) -> Json:
+        from .luna_validation_continuation import run
+
+        return run(self, session, context, data)
 
     @audited_handler
     def _tag(self, session: str, context: Context, data: Json) -> Json:

@@ -143,3 +143,42 @@ mocked provider; Ruff and mypy on the changed code passed. A preparation-only
 process was interrupted during preflight before it returned a plan or dispatched
 a model. These are engineering checks, not new corpus results. Actual preparation,
 coverage and judgments must be appended from the resulting protected records.
+
+## Executed preparation and first model block — 2026-10-16
+
+Preparation result `46ecdc59d0f67e7c4405ad0f685c35ca1217cea949f8a21b6be320d8a444ff11`
+froze 300 of 1,579 multi-article groups and 100 of 19,549 eligible article
+anchors. All 400 requests were prepared, with no missing sources or oversize
+packets. The planned workload was 2,755 article exposures. The anchor retrieval
+scored 1,954,800 pairs and retained 1,918 union candidates without a time gate.
+The exact preparation overview is protected artifact
+`9a8158619b9027c7b5c171a0e6a3174112df828e2252138441847c3228379b23`
+and was presented in this chat.
+
+The initial result
+`7a95c0a4eab337f8ccfe50cde846fa92b7b8b01e2ea176d4ea21daa5f8f5046d`
+is **partial**: four calls/63 exposures, one valid group assessment, three invalid
+anchor responses, zero unknown outcomes and 396 untouched tasks. The valid group
+was labelled same-event. No recall relations passed validation. Whole-group
+quality is inconclusive: 299 of 300 groups remain pending, giving identified
+bounds of 1/300 through 1. The displayed complete-case 100% is one group out of
+one and is not a useful estimate. No group memberships changed and no retries
+were dispatched. The exact partial overview is protected artifact
+`3ac0e7d314e7cdb6652bff6190a39820defa8366241e063230e6c338702156ad`
+and was presented in this chat.
+
+The user then explicitly requested parallel Luna execution and prioritized
+speed. A separate execution-control amendment diagnoses those saved failures
+and may continue only untouched primary tasks within the same cumulative
+400-call/6,000-exposure ceiling. It retains the original six implementation
+files, policy, frozen evidence, criteria and failed attempts; it cannot reset
+spend or retry them. Only known content-validation errors permit this
+continuation; audit, transport and unknown failures still stop dispatch.
+Four workers share the audited writer. Group checks are prioritized and their
+interim result is presented before remaining anchor checks. Actual continuation
+outcomes must come from protected records, not these engineering intentions.
+The focused continuation suite passed five source-free tests in 0.22 seconds;
+Ruff and mypy passed. These checks cover cumulative caps, no-repeat reuse,
+group-first/interim reporting, and blocking transport/unknown failures. They
+do not establish the cause of the three real rejected responses; that diagnosis
+must first be read through the audited operation.
