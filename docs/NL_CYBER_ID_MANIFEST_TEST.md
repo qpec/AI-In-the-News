@@ -229,6 +229,32 @@ not establish deletion or article eligibility and never silently removes IDs
 from the raw manifest. Save both prior and updated proof packages, with an
 additional independent replay of all resolution receipts and calculations.
 
+The executed controlled lookup returned valid metadata for its saved control
+but explicit invalid-URI errors or omissions for all six suspects. The fresh
+archive keyword enumeration returned two valid100-record pages against a2,700
+total; page3 returned HTTP200 and a knownfive-token charge but failed the
+permitted-response validation, leaving no usable content. Preserve that exact
+partial outcome: 295known/405conservatively-accounted tokens, one received
+response with unavailable content, and no inferred absence for pending pages.
+
+The next registered branch, `nl-cyber-archive-uri-repair-v1`, reconciles only
+observable dispatch receipt under `observed-http200-known-cost-no-retained-data-v1`.
+An HTTP200 response, known cost, validation error type and original response hash
+are required; transport-unknown attempts cannot qualify. Append the resolution
+without changing the original receipt, claiming an unavailable rejection cause,
+releasing its cost or retrying that page. Every fee remains accounted.
+
+Test one distinct exact-ID article-list request with dateStart2026-01-01, the
+same six suspect IDs, and both a saved date-form control and a retained numeric
+control. Adding a date is a routing hypothesis, not a guarantee; inspect the
+returned archive header and exact metadata. Never generate alternate IDs.
+Register the exact extension template before dispatch, reserve50tokens plus
+usage checks under the same583cap, retain date/language decisions and save a
+separate metadata supplement. Preserve the partial full-window enumeration and
+raw sort discrepancy; distinguish coverage of observed eligible IDs from an
+unproved fixed provider population. Independently replay metadata and cumulative
+budget including all appended receipt resolutions in the updated proof.
+
 - https://newsapi.ai/plans
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/QueryArticles.py
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py

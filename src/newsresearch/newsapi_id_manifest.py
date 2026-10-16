@@ -51,10 +51,11 @@ def parse_manifest(response: Json) -> tuple[list[str], int]:
     return identifiers, total
 
 
-def accounting(intents: list[Json], receipts: list[Json]) -> Json:
+def accounting(intents: list[Json], receipts: list[Json], resolutions: list[Json] | None = None) -> Json:
     by_attempt = {r["attempt"]: r for r in receipts}
     known = upper = 0.0
     unknown, unresolved, excess = [], [], []
+    reconciled = []
     for intent in intents:
         receipt = by_attempt.get(intent["attempt"])
         cost = number(receipt.get("billed_tokens")) if receipt else None
@@ -62,12 +63,22 @@ def accounting(intents: list[Json], receipts: list[Json]) -> Json:
         upper += cost if cost is not None else intent["reserved_tokens"]
         if cost is None:
             unknown.append(intent["attempt"])
-        if receipt is None or receipt.get("outcome") == "unknown":
+        resolved = receipt is not None and any(
+            r.get("attempt") == intent["attempt"] and r.get("receipt") == receipt.get("id")
+            and r.get("resolution") == "http_response_received_retention_rejected"
+            and receipt.get("http_status") == 200 and receipt.get("error_type") == "ResearchError"
+            and receipt.get("raw_response") is None and receipt.get("raw_sha256") == r.get("raw_sha256")
+            and cost is not None and cost == r.get("billed_tokens")
+            for r in resolutions or [])
+        if resolved:
+            reconciled.append(intent["attempt"])
+        if receipt is None or (receipt.get("outcome") == "unknown" and not resolved):
             unresolved.append(intent["attempt"])
         if cost is not None and cost > intent["reserved_tokens"]:
             excess.append(intent["attempt"])
     return {"reported_tokens": known, "conservative_accounted_tokens": upper,
         "unknown_individual_costs": unknown, "unresolved_outcomes": unresolved,
+        "known_received_retention_rejections": reconciled,
         "reservation_exceeded_attempts": excess, "limit": CAP}
 
 
@@ -84,7 +95,7 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
         policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
         if (policy.get("resolution_method") != "nl-cyber-id-manifest-resolution-v1"
                 or policy.get("authorization_id") != AUTH_ID or policy.get("max_tokens") != CAP
-                or parameters not in policy.get("resolution_templates", [])
+                or parameters not in [*policy.get("resolution_templates", []), *policy.get("resolution_extension_templates", [])]
                 or parameters.get("includeArticleBody") is not False or parameters.get("articleBodyLen") != 0):
             raise ResearchError("Resolution dispatch requires an exact registered metadata-only template")
     metadata = parameters.get("endpointVariant") == "article_info" or resolution
@@ -97,7 +108,7 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
             raise ResearchError("Empirical block reservation requires its exact registered request and policy")
         reserve = reserve_override
     intents, receipts = records(engine, "newsapi_id_intent"), records(engine, "newsapi_id_receipt")
-    balance = accounting(intents, receipts)
+    balance = accounting(intents, receipts, records(engine, "newsapi_id_receipt_resolution"))
     if balance["conservative_accounted_tokens"] + reserve > CAP:
         raise ResearchError("ID-manifest authorization budget reached")
     if not usage:

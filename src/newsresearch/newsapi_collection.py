@@ -158,6 +158,9 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     if data.get("action") in {"id_manifest_resolution_prepare", "id_manifest_resolution"}:
         from .newsapi_id_manifest_resolution_run import prepare, run as resolve
         return (prepare if data["action"] == "id_manifest_resolution_prepare" else resolve)(engine, session, context, data)
+    if data.get("action") in {"id_manifest_archive_repair_prepare", "id_manifest_archive_repair"}:
+        from .newsapi_id_manifest_archive_repair import prepare, run as repair
+        return (prepare if data["action"] == "id_manifest_archive_repair_prepare" else repair)(engine, session, context, data)
     if data.get("action") == "id_manifest_final_source":
         from .newsapi_id_manifest_final_audit import source as id_manifest_final_source
         return id_manifest_final_source(engine, session, context, data)

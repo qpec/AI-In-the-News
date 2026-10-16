@@ -209,6 +209,11 @@ def evidence_zip(engine: Research, session: str, context: Context, baseline: Jso
 
     for identifier in [first["id"], first["baseline_audit"], *context.versions.values()]:
         record_reference(identifier)
+    for identifier in result.get("supplemental_record_refs", []):
+        ref = record_reference(identifier)
+        item = json.loads(engine.ledger.artifacts.read_bytes(ref["artifact"]))
+        json_file(f"supplemental-records/{identifier}.json", item)
+        historical_versions.update(item.get("versions", {}).items())
     if result.get("metadata_result"):
         identifier = result["metadata_result"]
         ref = record_reference(identifier)
@@ -355,6 +360,10 @@ def verify_proof_bytes(raw: bytes) -> Json:
             if "resolution-verification.json" in checksums:
                 from .newsapi_id_manifest_resolution_run import verify_resolution_package
                 resolution_check = verify_resolution_package(archive, comparison)
+            archive_repair = None
+            if "archive-uri-repair.json" in checksums:
+                from .newsapi_id_manifest_archive_repair import verify_package
+                archive_repair = verify_package(archive, comparison)
     except (KeyError, ValueError, zipfile.BadZipFile, ResearchError) as error:
         raise AuditError("Proof package could not be independently replayed") from error
     return {"status": "verified", "files_checked": len(checksums), "raw_responses_checked": raw_count,
@@ -363,6 +372,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
         "archive_block_pairs_checked": block_count,
         "final_scope_verification": final_scope,
         "resolution_verification": resolution_check,
+        "archive_uri_repair": archive_repair,
         "outer_sha256": hashlib.sha256(raw).hexdigest(),
         "scope": "Byte integrity, raw-to-normalized IDs and available set-comparison replay; null absence remains unsettled, no independent provider attestation"}
 
