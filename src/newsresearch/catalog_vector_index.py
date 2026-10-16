@@ -13,6 +13,7 @@ from pathlib import Path
 import shutil
 import sqlite3
 import tempfile
+import time
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -20,7 +21,7 @@ import numpy as np
 from . import event_vector_store as store
 from . import retrieval
 from .aws_clustering_evaluation import aggregate, vectors
-from .common import AuditError, Context, Json, ResearchError, canonical, require_active
+from .common import AuditError, Context, Json, ResearchError, canonical, digest, require_active
 from .event_vector_scale import _persist, _save
 from .legacy import sha256
 
@@ -31,6 +32,14 @@ METHOD = "full-catalog-complete-embedding-index-v1"
 CODE = ("catalog_vector_index.py", "event_vector_store.py", "event_vector_scale.py",
         "retrieval.py", "embeddings.py", "aws_clustering_evaluation.py")
 SHARD_ROWS = 2048
+BENCHMARK: Json = {"queries": 16, "selection": "Lowest SHA256(seed, article_id), deterministic without replacement",
+    "seed": "full-catalog-article-index-numerical-check-v1", "k": 8, "candidate_limit_per_shard": 64,
+    "exclude": "The query article's own ID", "tie_tolerance": 0.000001,
+    "reference": "Exhaustive canonical saved float32 rows; normalized query and cosine dot in float64; stable article-ID ties",
+    "max_reference_block_rows": 4096, "reference_block_bytes": 80000000,
+    "reference_memory": "Bounded float64 vector block, score block, row norms and at most16 query vectors; no full-corpus float64 copy",
+    "timing": "One up-to16-query all-shard batch including fresh full component hashes and every shard restore; batch and amortized time, not independent single-query or warm-resident latency",
+    "interpretation": "Numerical neighbor recall only; no semantic event recall or grouping accuracy"}
 
 
 def _files(engine: Research, manifest_ref: str, spec: Json, level: str) -> tuple[Json, dict[str, Path]]:
@@ -190,7 +199,8 @@ def query_shards(engine: Research, session: str, manifest_ref: str, queries: Any
 
     This is a technical retrieval primitive. Its calling research operation must
     log query intent and publish the exact results; no standalone search route is
-    supplied here. Latency across all shards remains unmeasured.
+    supplied here. The caller measures latency around the complete invocation;
+    this primitive creates no timing estimate of its own.
     """
     require_active(engine, session)
     manifest = engine.ledger.artifacts.read(manifest_ref)
@@ -222,19 +232,125 @@ def query_shards(engine: Research, session: str, manifest_ref: str, queries: Any
     return {"results": [[{**row, "rank": rank} for rank, row in enumerate(rows, 1)] for rows in output or []],
         "namespace": manifest["namespace"], "level": "article", "shards": len(manifest["shards"]),
         "candidate_limit_per_shard": candidate_limit, "scanned_vectors": count,
-        "latency": "Unmeasured; every shard is restored and checked; no fast-service claim",
+        "latency": "Every shard is restored and checked; caller must measure the complete invocation; no fast-service claim",
         "score": "Canonical float32 vectors; float64 cosine reranking; not event probability"}
+
+
+def _benchmark(engine: Research, session: str, manifest_ref: str, query_ids: list[str], queries: Any) -> Json:
+    """Saved/restored numerical retrieval against a bounded exhaustive reference."""
+    require_active(engine, session)
+    manifest = engine.ledger.artifacts.read(manifest_ref)
+    count, dimensions = manifest["count"], manifest["spec"]["dimensions"]
+    if (not query_ids or len(query_ids) > BENCHMARK["queries"] or len(query_ids) != len(queries)
+            or len(set(query_ids)) != len(query_ids)):
+        raise AuditError("Numerical benchmark requires its exact bounded distinct query frame")
+    frame = _save(engine, session, {"manifest": manifest_ref, "method": BENCHMARK, "query_ids": query_ids},
+        "Deterministic numerical benchmark query frame before restored retrieval")
+    engine.ledger.append(session, "catalog_vector.benchmark.intended", {"manifest": manifest_ref,
+        "frame": frame, "queries": len(query_ids), "vector_count": count, "method": BENCHMARK})
+    started = time.perf_counter()
+    exclusions: list[str | None] = list(query_ids)
+    actual = query_shards(engine, session, manifest_ref, queries, top_k=BENCHMARK["k"],
+        candidate_limit=BENCHMARK["candidate_limit_per_shard"], exclude_ids=exclusions)["results"]
+    restored_seconds = time.perf_counter() - started
+    reference_started = time.perf_counter()
+    query_vectors = np.asarray(queries, dtype=np.float32).astype(np.float64)
+    # Use exactly the query normalization applied by store.query.
+    for vector in query_vectors:
+        vector /= np.linalg.norm(vector)
+    block_rows = min(BENCHMARK["max_reference_block_rows"], max(1,
+        (BENCHMARK["reference_block_bytes"] - query_vectors.nbytes) // (8*(dimensions+len(query_ids)+1))))
+    expected: list[list[Json]] = [[] for _ in query_ids]
+    scored = [0 for _ in query_ids]
+    max_float64_bytes = query_vectors.nbytes
+    seen_queries = set()
+    for shard in manifest["shards"]:
+        current, paths = _files(engine, shard["manifest"], manifest["spec"], "article")
+        ids = json.loads(paths["mapping"].read_text(encoding="utf-8"))
+        if (not isinstance(ids, list) or len(ids) != current["count"] or ids != sorted(set(ids))
+                or len(ids) != shard["count"] or ids[0] != shard["first_id"] or ids[-1] != shard["last_id"]):
+            raise AuditError("Exhaustive reference mapping differs from saved article shard")
+        matrix = np.memmap(paths["vectors"], mode="r", dtype="<f4", shape=(len(ids), dimensions))
+        try:
+            for start in range(0, len(ids), block_rows):
+                labels = ids[start:start+block_rows]
+                wide = np.asarray(matrix[start:start+block_rows], dtype=np.float64)
+                # einsum avoids the equally large square-of-matrix temporary.
+                norms = np.einsum("ij,ij->i", wide, wide)
+                np.sqrt(norms, out=norms)
+                if not np.isfinite(wide).all() or np.any(norms <= 0):
+                    raise AuditError("Exhaustive reference contains an invalid canonical vector")
+                scores = wide @ query_vectors.T
+                scores /= norms[:, None]
+                np.clip(scores, -1., 1., out=scores)
+                max_float64_bytes = max(max_float64_bytes,
+                    query_vectors.nbytes + wide.nbytes + norms.nbytes + scores.nbytes)
+                for ordinal, query_id in enumerate(query_ids):
+                    chosen = []
+                    for position, identifier in enumerate(labels):
+                        if identifier == query_id:
+                            seen_queries.add(identifier)
+                            continue
+                        chosen.append({"id": identifier, "score": float(scores[position, ordinal])})
+                    scored[ordinal] += len(chosen)
+                    chosen.sort(key=lambda row: (-row["score"], row["id"]))
+                    expected[ordinal].extend(chosen[:BENCHMARK["k"]])
+                    expected[ordinal].sort(key=lambda row: (-row["score"], row["id"]))
+                    del expected[ordinal][BENCHMARK["k"]:]
+                del scores, norms, wide
+        finally:
+            getattr(matrix, "_mmap").close()
+    reference_seconds = time.perf_counter() - reference_started
+    if (seen_queries != set(query_ids) or any(value != count-1 for value in scored)
+            or max_float64_bytes > BENCHMARK["reference_block_bytes"]):
+        raise AuditError("Exhaustive benchmark coverage or bounded temporary memory differs")
+    rows = []
+    for query_id, found, wanted, evaluated in zip(query_ids, actual, expected, scored, strict=True):
+        expected_ids = {row["id"] for row in wanted}
+        if (len(found) != len({row["id"] for row in found}) or any(row["id"] == query_id for row in found)
+                or len(found) > BENCHMARK["k"]):
+            raise AuditError("Restored benchmark returned duplicate, self or excess neighbors")
+        cutoff = wanted[-1]["score"] if wanted else None
+        rows.append({"query_id": query_id, "actual": found,
+            "expected": [{**row, "rank": rank} for rank, row in enumerate(wanted, 1)],
+            "strict_hits": sum(row["id"] in expected_ids for row in found),
+            "tie_aware_hits": sum(cutoff is not None and row["score"] >= cutoff-BENCHMARK["tie_tolerance"] for row in found),
+            "denominator": len(wanted), "boundary_score": cutoff, "exhaustive_scored_vectors": evaluated,
+            "returned": len(found), "missing_or_failed_queries": 0})
+    denominator = sum(row["denominator"] for row in rows)
+    rows_ref = _save(engine, session, rows, "Per-query restored/exhaustive neighbors, numerical hits, denominators and score boundaries")
+    value = {"method": BENCHMARK, "frame_artifact": frame, "rows_artifact": rows_ref,
+        "queries": len(rows), "k": BENCHMARK["k"], "candidate_limit_per_shard": BENCHMARK["candidate_limit_per_shard"],
+        "strict_hits": sum(row["strict_hits"] for row in rows), "tie_aware_hits": sum(row["tie_aware_hits"] for row in rows),
+        "denominator": denominator,
+        "numerical_recall_at_8": sum(row["strict_hits"] for row in rows)/denominator if denominator else None,
+        "tie_aware_numerical_recall_at_8": sum(row["tie_aware_hits"] for row in rows)/denominator if denominator else None,
+        "restored_all_shard_batch_ms": 1000*restored_seconds,
+        "amortized_ms_per_query": 1000*restored_seconds/len(rows),
+        "exhaustive_reference_seconds": reference_seconds,
+        "reference_block_rows": block_rows, "max_float64_temporary_bytes": max_float64_bytes,
+        "scored_vectors_per_query": count-1, "failed_queries": 0, "pending_queries": 0,
+        "status": "completed", "semantic_quality": "unvalidated", "latency_scope": BENCHMARK["timing"]}
+    engine.ledger.append(session, "catalog_vector.benchmark.completed", {"manifest": manifest_ref, "frame": frame,
+        "rows": rows_ref, "queries": len(rows), "denominator": denominator,
+        "strict_hits": value["strict_hits"], "tie_aware_hits": value["tie_aware_hits"]})
+    return value
 
 
 def render(value: Json) -> str:
     c = value["catalog"]["summary"]
+    benchmark = value["article_index"]["benchmark"]
+    strict = f"{benchmark['numerical_recall_at_8']:.1%}" if benchmark['numerical_recall_at_8'] is not None else "unavailable (zero eligible neighbors)"
+    tied = f"{benchmark['tie_aware_numerical_recall_at_8']:.1%}" if benchmark['tie_aware_numerical_recall_at_8'] is not None else "unavailable (zero eligible neighbors)"
     return "\n".join(["Full-corpus offline vector-index result", "",
         f"Vector coverage: {c['available_embeddings']:,}/{c['articles']:,} article versions; retained-text versions {c['with_text']:,}.",
         f"Built {len(value['new_passage_indexes']):,} complete passage-index batches from {value['new_passage_vectors']:,} saved vectors. Total retained passage vectors: {value['passage_vectors']:,}.",
-        f"The immutable article snapshot has {value['article_index']['count']:,} vectors in {value['article_index']['shards']:,} bounded FlatIP shards. Numerical retrieval benchmarking is pending; all-shard latency is unmeasured.",
+        f"The immutable article snapshot has {value['article_index']['count']:,} vectors in {value['article_index']['shards']:,} bounded FlatIP shards.",
+        f"Numerical check: {benchmark['queries']:,} deterministic article queries; strict recall@8 {strict}, tie-aware recall@8 {tied} (tolerance 1e-6); {benchmark['denominator']:,} eligible reference neighbors, {benchmark['scored_vectors_per_query']:,} exhaustive reference scores per query. Failed/pending benchmark queries: 0/0.",
+        f"Restored all-shard batch time: {benchmark['restored_all_shard_batch_ms']/1000:.3f}s for all {benchmark['queries']:,} queries; amortized {benchmark['amortized_ms_per_query']:.2f}ms/query. This includes full component hashing and every shard restore; it is not independent single-query or warm-resident latency. Exhaustive reference: {benchmark['exhaustive_reference_seconds']:.3f}s; maximum application-controlled float64 temporary {benchmark['max_float64_temporary_bytes']:,} bytes.",
         f"Text unavailable: {c['without_text']:,}, including {c['quarantined_articles']:,} quarantines. Retained-text articles still missing vectors: {value['catalog']['pending']['articles']:,}; failed/pending indexing rows: 0/0.",
         f"Preserved {value['group_index']['count']:,} existing group vectors and every seven-day membership. New source versions remain ungrouped; new accepted dossiers and group merges: 0/0.",
-        "New model/network calls: 0/0. This step reuses the exact authorized saved embedding results. Similarity is not event identity or probability; semantic event quality remains unvalidated."])
+        "New model/network calls: 0/0. This step reuses the exact authorized saved embedding results. Numerical neighbor recall does not measure event recall or semantic grouping accuracy; event quality remains unvalidated."])
 
 
 def _present(engine: Research, session: str, context: Context, identifier: str, value: Json) -> Json:
@@ -284,6 +400,7 @@ def execute(engine: Research, session: str, context: Context, data: Json) -> Jso
         "passage_index": retrieval.METHOD, "pooling": "Original aggregate per contiguous source; exact float64 order and f32 output",
         "source_validation": "Complete parent catalog.verify plus every new core/catalog provider/body/map identity; full artifact hashes",
         "immutable_reuse": "Parent catalog backed up to staging; original article vectors byte-preserved; group artifacts/memberships reused by exact hashes",
+        "numerical_benchmark": BENCHMARK,
         "scope": "Offline retrieval representation expansion only; no new source collection, models, grouping, acceptance or semantic quality claim"}
     prior = engine.ledger.db.execute("SELECT id FROM records WHERE kind='catalog_vector_index_manifest' AND logical_key=?", (data["key"],)).fetchone()
     if prior and engine.ledger.get(prior[0], "catalog_vector_index_manifest")["method"] != method:
@@ -397,6 +514,9 @@ def execute(engine: Research, session: str, context: Context, data: Json) -> Jso
             pending = dict(catalog.db.execute(pending_sql).fetchone())
             if summary["available_embeddings"] != len(ids) or pending["articles"]:
                 raise AuditError("Final article vector references do not cover every retained-text version")
+            query_positions = sorted(range(len(ids)), key=lambda ordinal: digest({"seed": BENCHMARK["seed"], "article_id": ids[ordinal]}))[:BENCHMARK["queries"]]
+            query_ids = [ids[ordinal] for ordinal in query_positions]
+            query_vectors = np.array(matrix[query_positions], dtype=np.float32, copy=True)
         finally:
             if matrix is not None:
                 getattr(matrix, "_mmap").close()
@@ -404,14 +524,15 @@ def execute(engine: Research, session: str, context: Context, data: Json) -> Jso
         catalog_ref = _save(engine, session, target, "New immutable catalog preserving original records, occurrences, memberships and references", file=True)
         article_value = {"method": METHOD, "kind": "sharded_flat", "namespace": store.namespace(spec), "spec": spec,
             "level": "article", "count": len(ids), "shard_rows": SHARD_ROWS, "shards": shards,
-            "parent_snapshot": master["snapshot"], "execution": data["execution"], "benchmark": "pending; all-shard latency unmeasured"}
+            "parent_snapshot": master["snapshot"], "execution": data["execution"], "benchmark_method": BENCHMARK}
         article_ref = _save(engine, session, article_value, "Complete immutable bounded article-shard manifest")
+        benchmark = _benchmark(engine, session, article_ref, query_ids, query_vectors)
     value = {"versions": versions, "manifest": manifest_id, "method": METHOD, "execution": data["execution"],
         "parent_snapshot": master["snapshot"], "master": checkpoint["master"], "spec": spec,
         "catalog": {**snapshot["catalog"], "artifact": catalog_ref, "summary": summary, "pending": pending,
             "original_pending_queue": snapshot["catalog"]["pending"], "pending_sql": pending_sql},
         "article_index": {"manifest": article_ref, "count": len(ids), "shards": len(shards), "kind": "sharded_flat",
-            "benchmark": {"status": "pending", "semantic_quality": "unvalidated", "latency": "unmeasured"}},
+            "benchmark": benchmark},
         "group_index": snapshot["group_index"], "group_memberships": snapshot["group_memberships"],
         "original_passage_index": snapshot["original_passage_index"], "new_passage_indexes": built,
         "new_passage_vectors": sum(row["passage_vectors"] for row in built),

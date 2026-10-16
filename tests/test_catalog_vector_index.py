@@ -130,6 +130,21 @@ def test_complete_catalog_expansion_preserves_parent_and_exact_pooling(tmp_path,
         assert result["catalog"]["summary"]["without_text"] == 2
         assert result["catalog"]["pending"]["articles"] == 0
         assert result["article_index"]["shards"] == 2
+        benchmark = result["article_index"]["benchmark"]
+        assert benchmark["status"] == "completed" and benchmark["queries"] == 3
+        assert benchmark["denominator"] == benchmark["strict_hits"] == benchmark["tie_aware_hits"] == 6
+        assert benchmark["numerical_recall_at_8"] == benchmark["tie_aware_numerical_recall_at_8"] == 1.
+        assert benchmark["scored_vectors_per_query"] == 2
+        assert 0 <= benchmark["restored_all_shard_batch_ms"]
+        assert benchmark["reference_block_rows"] <= 4096
+        assert benchmark["max_float64_temporary_bytes"] <= 80000000
+        checked = engine.ledger.artifacts.read(benchmark["rows_artifact"])
+        assert {row["query_id"] for row in checked} == {state["old"], state["new_a"], state["new_b"]}
+        assert all(row["denominator"] == row["exhaustive_scored_vectors"] == 2 for row in checked)
+        assert all(row["query_id"] not in {neighbor["id"] for neighbor in row["actual"]} for row in checked)
+        tied = next(row for row in checked if row["query_id"] == state["new_a"])
+        assert [row["id"] for row in tied["expected"]] == sorted((state["old"], state["new_b"]))
+        assert [row["id"] for row in tied["actual"]] == sorted((state["old"], state["new_b"]))
         assert result["group_index"] == state["snapshot"]["group_index"]
         assert result["group_memberships"] == state["snapshot"]["group_memberships"]
         assert result["new_model_calls"] == result["network_calls"] == result["actual_group_merges"] == 0

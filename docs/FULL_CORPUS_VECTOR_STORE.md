@@ -342,8 +342,8 @@ top-level manifest binds the namespace, sorted article ranges, component hashes
 and parent/execution lineage. Its internal all-shard retrieval primitive merges
 canonical reranked results and requires an active audited caller. It is not
 silently passed into the earlier single-index reader. Normal question retrieval,
-an optional compact approximate-search accelerator and actual numerical/latency
-benchmarks remain unfinished. Restoring and hashing every shard per query may
+an optional compact approximate-search accelerator remain unfinished. Actual
+full-corpus numerical/latency measurements are pending. Restoring and hashing every shard per query may
 be slow; no new fast-query claim follows from this implementation.
 
 Execution publishes a new supported `event_vector_store_result` and exact
@@ -366,3 +366,16 @@ uv run --offline --frozen python scripts/index_catalog_embeddings.py --execution
 
 The working dataset/import limit remains 20,000 per core dataset. This bridge
 does not change global settings or the frozen paid-execution checkout.
+
+The bridge now implements a registered numerical check before publication:
+up to 16 SHA-ranked article-vector queries, self excluded, top eight neighbors
+and 64 candidates per shard. Saved/restored retrieval is compared with an
+exhaustive normalized float64 reference processed in bounded blocks. Exact
+neighbor IDs, strict and tie-aware hits/denominators (tolerance 0.000001),
+query selection and timings remain protected. Application-controlled float64
+buffers are limited to 80,000,000 bytes; native-library and whole-process memory
+are not covered by that bound. The timing covers one restored all-shard batch;
+the separately labelled amortized per-query value is not a standalone or warm
+service latency. This diagnoses numerical neighbors only, not event accuracy.
+The expanded existing integration passed in 2.53 seconds; no extra corpus run
+or model call followed from this software check.
