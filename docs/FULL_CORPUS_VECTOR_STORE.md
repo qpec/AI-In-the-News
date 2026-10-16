@@ -268,3 +268,48 @@ and mypy passed. This validates the bridge's software behavior only. The actual
 185,529-source preparation above supplies the observed production coverage.
 Existing 19,576 embedded article versions, seven-day memberships, held-out labels
 and all model-reference study exposure budgets are unchanged.
+
+### Authorized execution coordinator — 2026-10-16
+
+The user explicitly answered `yes` to executing all ten prepared OpenAI plans
+under a combined USD25 estimated-cost cap. The saved credential is loaded only
+into the execution process. This authorization covers the existing master result
+above, with no model/profile/input expansion, judging, collection or automatic
+membership adoption. The successful-input estimate remains USD22.42183112;
+reservations include failed and unknown attempts, and are not an observed invoice.
+
+`scripts/run_catalog_embeddings.py` extends only the audited `embed` handler.
+It retains the original `Research.execute()` preflight, durable operation intent,
+session provenance, active-session checks and original shared gateway. Its exact
+script bytes/hash and explicit permission are registered before any dispatch.
+The frozen `src` and lockfile digest remains unchanged. Ordinary per-plan version
+bindings and wire bodies are checked by the original gateway.
+
+Ten immutable child policies divide USD25 in proportion to planned cost, rounding
+down to eight decimal places and assigning the remainder to the final plan.
+Their caps sum exactly to USD25; every resume reuses the same policies and spend
+reservations. An operator-selected expiry of 2026-10-23T23:59:59Z narrows the
+execution window; it was not a date supplied by the user. Policy renewal or
+redistribution must never reset cumulative accounting. Other policies already
+used for one of these plans block execution pending reconciliation.
+
+All policies and the execution manifest are durable before dispatch. Observed
+failures and unknown outcomes stop the coordinator without automatic retry.
+Exact request/chunk coverage, fully completed articles, failures, unknowns and
+pending tasks are retained in a representation checkpoint; the existing
+`embedding_checkpoint_result` presentation contract captures its exact overview.
+Partial-batch article completion requires every planned chunk for that source.
+Audit failures still abort immediately rather than fabricating a completed result.
+
+Two additional SQLite expression indexes accelerate the unchanged gateway's
+task/permission reservation queries. Their exact SQL and creation are audited;
+no journal data, full integrity checks or synchronous durability are removed.
+Before every attempt intent, the coordinator requires a 65 GiB free-space reserve
+for downstream local vectors/indexes and audit storage. This guard does not
+guarantee future disk availability. The key launcher changes no global setting.
+
+Four source-free tests passed in 5.93 seconds, covering actual gateway composition
+with mock HTTP, deterministic combined caps, complete-result reuse without
+repayment, observed-invalid and unknown-response stopping, and audit-write
+failure. These are engineering checks, not new corpus results or service access.
+Actual paid execution results are recorded separately when available.
