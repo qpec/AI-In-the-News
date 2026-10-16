@@ -186,6 +186,7 @@ class Research:
             "event_pair_monotone_screen": self._event_pair_monotone_screen,
             "apply_event_rule": self._apply_event_rule,
             "refine_event_groups": self._refine_event_groups,
+            "check_event_time_spans": self._check_event_time_spans,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -934,6 +935,11 @@ class Research:
     @audited_handler
     def _refine_event_groups(self, session: str, context: Context, data: Json) -> Json:
         from .event_group_refinement_study import execute
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _check_event_time_spans(self, session: str, context: Context, data: Json) -> Json:
+        from .event_temporal_study import execute
         return execute(self, session, context, data)
 
     @audited_handler
