@@ -281,6 +281,35 @@ costs and receipt resolutions; preserve all prior branch results. Save newly
 discovered metadata separately, with article bodies explicitly unfetched. Do not
 guess aliases or present provider-set coverage as an external news census.
 
+The minimal pass completed all27pages and returned2,700distinct records, with
+stable totals, confirmed archive routing, no duplicate IDs, no scope/validation
+issues and no title-omitting fallback. It recovered the exact six disputed IDs:
+all were Dutch-language records dated September16–18,2026 and absent from the
+original saved collection. No alias mapping or deletion inference was needed.
+The recent direct-ID paths had returned invalid/omitted outcomes while the
+archive keyword path returned these same IDs. This demonstrates lookup-path
+inconsistency; the provider's internal mechanism remains unobserved.
+
+The current verified2026 population is9,307 IDs, combining6,607 from the earlier
+agreeing January–August blocks and2,700 from the fresh disputed-window pass.
+The original9,301-ID collection was six short, with99.9355% coverage of this
+observed provider population. All six missing metadata records are now retained
+in the protected supplement; article bodies and publisher URLs were not fetched
+in this pass. The earlier2020–2025 zero-missing agreeing checks retain their
+original observation times. No fixed provider snapshot or external news census
+is claimed, and raw ascending/descending discrepancies remain preserved.
+
+Final actual cumulative charges were431/583tokens, matching account usage
+4,417→4,848/5,000. This user-requested continuation added153tokens to the
+previous278-token checkpoint. Conservative accounting is561/583, including
+26unitemized usage-check reservations atfive each. There are zero unresolved
+dispatch outcomes and one explicitly reconciled received response with rejected
+retention, whosefive-token cost and unavailable content remain preserved.
+The updated proof independently replayed all permitted raw evidence, exact ID
+comparisons, method versions and cumulative costs successfully. The last change
+passed61targeted regression tests, lint and a four-module type check; earlier
+branches passed111 and88relevant checks as recorded in their implementation.
+
 - https://newsapi.ai/plans
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/QueryArticles.py
 - https://github.com/EventRegistry/event-registry-python/blob/master/eventregistry/EventRegistry.py
