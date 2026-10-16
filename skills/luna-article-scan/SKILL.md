@@ -45,6 +45,14 @@ and stop at the registered scope/budget. No automatic retry, API-key fallback,
 external browsing or global setting change is part of this skill. Existing
 study approvals do not transfer to a new evaluation.
 
+For an existing transferred study, use its recorded owning workspace rather than
+the parent archive. The 2026-10-16 pilot owner is
+`%LOCALAPPDATA%/AI-In-the-News/luna-seven-day-validation-20261016-v1`.
+Use the audited `scripts/run_luna_bounded.py --continue-only` route for an
+authorized resume of untouched tasks. Keep the exact original result/study
+binding, budget and failed attempts; do not prepare or execute a duplicate plan.
+Read `docs/AUDIT_PERFORMANCE.md` for scope, transfer provenance and limitations.
+
 Show concrete results in the same chat after every completed step: actual
 sample/coverage, labels, uncertainty, missing/failed/pending tasks, source-linked
 examples and clearly labelled precision/recall definitions. Capture the exact

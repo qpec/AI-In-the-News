@@ -86,6 +86,21 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 ## Commit practice
 
+### Luna audit workspace — 2026-10-16
+
+The frozen Luna pilot study `luna-seven-day-validation-20261016-v1` has transferred
+execution to `%LOCALAPPDATA%/AI-In-the-News/luna-seven-day-validation-20261016-v1`.
+Use that owner for authorized continuation; do not reopen the parent merely to
+discover its state or create a duplicate plan. The audited export/import results
+are documented in [AUDIT_PERFORMANCE](docs/AUDIT_PERFORMANCE.md). The complete
+20,000-source pilot, exact passages, frozen packets and four spent calls/63
+exposures were preserved. The original independent 400-call/6,000-exposure,
+zero-retry ceiling remains. Parent dispatch is sealed; current group memberships
+are unchanged. Full own-store preflight measured 17.171 s versus 2,458.061 s in
+the parent, with different retained scopes. This does not establish model quality
+or eliminate expensive archive-wide checks. Continuation results must be shown
+separately; transfer is not completion of the grouping evaluation.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

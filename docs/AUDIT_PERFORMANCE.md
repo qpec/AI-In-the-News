@@ -109,6 +109,39 @@ The prototype and reproducible `scripts/benchmark_fts_hashes.py` are retained,
 but **the runtime does not call it**. No actual research sources were used and
 no optimization is claimed from this negative result.
 
+## Executed transfer and actual timings — 2026-10-16
+
+Export `487cc1b94ea85d6eedc183b902bb86bb9fca2df3883da3feb908d1c38a5a129e`
+completed after a 2,458.061 s complete parent preflight (208,161 events). The
+entire export operation took 2,513.278 s. It retained the parent and sealed
+execution of this study there.
+
+Import `a44d1fac6a6d06041ccedf2a5c7a98733eee806cd0540cfe9d7fd1960c9e4bc4`
+completed in 58.433 s: 20,000 complete pilot source versions, 408,054 exact
+passages, 29 transferred records and 452 transferred artifacts / 1,279,022,459
+bytes, plus the manifest and new local audit records. All four earlier calls and
+63 model article exposures carried over. There were zero transfer model calls,
+retries or membership changes. Both exact saved transfer presentations were
+shown in this chat.
+
+The completed import's full own-store verification took 16.722 s. The following
+continuation's full preflight took **17.171 s**, versus the parent's **2,458.061 s**:
+about **143× shorter**. This is an observed reduction from changing the audit
+scope, not acceleration of identical workloads. The child verifies all its
+retained data; it does not reverify omitted unrelated parent embedding history.
+There is one timing per stage, uncontrolled OS caches, and no claim about all
+future operations or archive-wide performance. The 2.860 s pre-import check had
+no source/record projections yet and is not the comparable completed-study check.
+
+Current execution owner: `%LOCALAPPDATA%/AI-In-the-News/luna-seven-day-validation-20261016-v1`.
+Continuation resumed there using the original study approval and four workers.
+Diagnostic `4b6a2f35418c0843eecbb171105ed95ce7f924bbdf2ac16746c9bb1e14a50008`
+identified three earlier anchor validation failures: decisive event anchors,
+incomplete passage coverage and an uncited factual field. None was a local
+byte-cap rejection, so zero byte-cap recoveries occurred. These failed calls
+remain spent and missing. Subsequent model coverage and quality results must be
+reported from the continuation result, not inferred from the speed improvement.
+
 ## Operation
 
 `scripts/run_luna_bounded.py` runs audited offline export, audited offline import,
