@@ -179,6 +179,24 @@ costs and checksums. Capture the exact final overview with `record_presentation`
 Even agreeing eligible sets establish only the observed provider universe at
 the retained request times, not a permanent snapshot or all published-news recall.
 
+The final metadata-only run completed and its proof replay passed. All six
+candidate metadata results remained unavailable, so no scope exclusion was made.
+2020–2025 had zero missing IDs against their retained agreeing provider sets;
+2026 remained unsettled. Its first two archive blocks agreed (3,451 and 3,156
+IDs), while September 1–October 15 returned 2,694 ascending versus 2,700 reverse
+IDs. Preserve the six observed candidate IDs as unknown-scope observations,
+not six confirmed eligible omissions or a final missing total.
+
+Observed test charges were 278 tokens in total (277 before this final step plus
+1 for metadata); account usage rose from 4,417 to 4,695 of 5,000. Conservative
+accounting was 378 of the shared 583-token cap, including twenty unitemized
+usage-check charges reserved at five each. There were zero unknown request
+outcomes. No additional keyword request or article-body retrieval occurred in
+the final step. The protected final proof, audit JSON, difference CSV and exact
+recorded overview retain this partial outcome. The implementation passed 91
+relevant tests, lint and the two-module type check; synthetic checks establish
+software behavior, not provider completeness.
+
 Primary technical references:
 
 - https://newsapi.ai/plans
