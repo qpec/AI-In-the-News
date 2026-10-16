@@ -163,6 +163,10 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         from .newsapi_materialize import materialize
 
         return materialize(engine, session, context)
+    if data.get("action") == "missingness":
+        from .newsapi_missingness import run as missingness
+
+        return missingness(engine, session, context, data)
     if engine.config.offline or data.get("execute") is not True:
         raise ResearchError("Explicit online execution required")
     if data.get("action") == "collect":

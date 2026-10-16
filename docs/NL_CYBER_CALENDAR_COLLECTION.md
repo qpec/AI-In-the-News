@@ -103,3 +103,19 @@ The earlier full-suite checkpoint passed716 tests; later collection extensions
 receive focused tests, lint and type checks. Tests prove software behavior, not
 archive completeness or semantic article relevance. No sources, working data,
 cost receipts, credentials or audit logs are committed to Git.
+
+## Offline fetch missingness audit
+
+`scripts/check_nl_cyber_missingness.py` registers the separate exploratory
+`nl-cyber-fetch-missingness-v1` retrieval profile before invoking the audited
+`newsapi_collection` action `missingness`. It binds the original materialization
+and exact receipt IDs, performs no network/model calls, and preserves detailed
+counts and an exact presentation in protected storage. It compares actual page
+number sets and row counts with provider pages/totals, distinguishes quarantine
+from other missing text and metadata, inventories unavailable original response
+bytes and matched successful retries, and flags nonblank bodies of at most200
+characters solely as a length diagnostic. Neither nonblank nor short text proves
+publisher-text completeness. Query-page completeness cannot establish recall of
+all Netherlands incidents or all Dutch news. Missing fields not returned by the
+provider are distinguished from local retention exclusions; the original matched
+credential-like strings and non-locator trigger fields remain unobserved.
