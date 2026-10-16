@@ -120,6 +120,13 @@ an extreme-probability claim. This component was **not** implemented or executed
 by the metadata-anchored diagnostic; no new paid/model judging is authorized by
 this result. Do not relax the frozen first-tier criteria silently.
 
+The subsequent [complete-source cross-window review tier](CROSS_WINDOW_EVENT_REVIEW.md)
+is implemented separately. Its offline execution prepared ten unjudged proposals
+and 30 full-source pair packets from 709 cosine-qualified group pairs. It does
+not require provider anchors, change working memberships or establish event
+identity. The separately implemented Codex executor still requires fresh concrete
+authorization for this exact queue; implementing it did not run model judgments.
+
 Software checks: four focused synthetic tests passed in 1.74 seconds; after the
 presentation addition the affected integration scenario passed in 1.73 seconds.
 Ruff and mypy passed, as did `git diff --check`. Tests establish software behavior

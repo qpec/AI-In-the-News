@@ -70,6 +70,28 @@ budget, configuration, code and evidence bindings before dispatch. Reserve every
 attempt durably and account for retries and unknowns. No execution is performed
 by this preparation operation.
 
+The separate implemented executor is `judge_cross_window_event_review`, launched
+by `scripts/judge_cross_window_event_review.py --request <private-request.json>`.
+The private JSON binds `prepared_result`, a stable `study_key`, `reuse_cache:true`
+and one to four `workers`, plus either an exact `run_approval` or an explicit
+`human_authorization` attestation. The attestation retains authorization key,
+approving actor, exact human instruction, timezone-aware expiry, three explicit
+authorization flags, `approval_source:human_reply_in_current_codex_chat`, and
+null `observed_chat_timestamp` when unobserved. The runtime binds it to the exact
+immutable queue, packets, configuration and versions before dispatch; it does not
+infer approval from preparation. Global configuration remains unchanged.
+
+The executor reuses the original audited paired-article dispatcher and cumulative
+study counter, persists the mapping between planning and execution task IDs, and
+revalidates exact full-source requests before dispatch. Execution regenerates and
+records its own worker invocations; it does not claim the planning worker
+directories are identical. Complete selected-union pair coverage is checked
+before any model intent. Unknown outcomes stop automatic resume; stored partial
+results remain available but resolving an unknown requires an audited operator
+decision. A changed authorization or study key cannot reset the queue lineage or
+budget. The prepared run has not been authorized or executed by implementing
+this executor.
+
 The unchanged contract distinguishes same focal event, different event and
 uncertain, with source-backed actors, action, event date and location. It keeps
 publication dates separate from event dates, and different developments separate
@@ -87,3 +109,86 @@ cases include singleton support, every-pair coverage, nontransitivity, distinct
 missing/failure states, sealed-fold exclusion, atomic budgets, durable failure
 before references/after packet freeze, exact resume and no acceptance. These
 synthetic checks establish software behavior only.
+
+## Executed offline preparation — 2026-10-16
+
+Result `82de65407011f06e0a523aed16f738d8ab78208ddd92113ca3ab2012c9b7a123`;
+manifest `d275f632d8e2d3e0e96a65af1b75d6b4df5e26cc6139adea20b312e458e64d8d`;
+frozen queue `32fdf13b43dbabcaa3d69bcb123e2f5a3331af52e8b8fa4ea9cb6c38ae3421a3`.
+Exact prepared presentation artifact
+`b0994e43af6f0ec4a4dfa0c61ba1bf1ba5b7ed8e872f80bd4e35ae3d65ec8f0a`.
+Preparation does not establish verified UI delivery or human reading.
+
+Scope: the original 20,000-article pilot and 17,116 current groups, including
+15,537 singletons. The working 1,579 multi-article groups/4,012 grouped articles
+remain unchanged. Vectors missing for 424 articles; 27 vector-bearing articles
+lack usable dates. Six saved feature rows have endpoints outside this dated
+group population. No new embeddings, collection or model judgments occurred.
+
+| Candidate disposition | Group pairs |
+| --- | ---: |
+| All nominated group pairs | 5,941 |
+| Same-window union, excluded from cross-window stage | 2,624 |
+| Cross-window frame, union publication span over seven days | 3,317 |
+| Incomplete or below-gate cross-pair evidence | 2,608 |
+| All cross-pairs pass the five unchanged cosine gates | 709 |
+| Original held-out body fold or unmapped fold excluded | 427 |
+| Diversity screen excluded after fold screen | 107 |
+| Remaining eligible for bounded review | 175 |
+| Selected for review | 10 |
+| Candidate-count bound excluded | 156 |
+| Old group already selected | 9 |
+
+Dispositions are sequential/exclusive where indicated; the all-pass count
+includes candidates subsequently excluded by fold/diversity/selection screens.
+None of these statuses is a semantic different-event finding. The entire frame,
+cross-pair processing reasons, weakest features and exclusions are retained
+privately. No provider-ID gate is imposed in this separate tier.
+
+All ten selected proposals connect one existing two-article group and one
+singleton: 30 distinct articles, 30 complete union-pair requests, including the
+ten internal old-group pairs. Publication spans: six in 8–30 days, three in
+31–90 days, one beyond 90 days. The original validation body fold was not
+inspected. This size/type/score-selected development queue is not representative.
+
+The original `gpt-6.1-sol` configuration and executable hash were verified; all
+30 exact CLI input manifests fit the existing 500,000-byte limit. Source and
+transport preparation failures zero. Pending judgments 30; actual model calls,
+merges and accepted event dossiers zero. There is no estimated same-event
+probability or independently validated quality improvement from this preparation.
+
+All 54 original model references were revalidated after queue freeze, with zero
+unprocessed references. There is no overlap with the 30 queued pairs and no
+known-reference conflict among the selected proposals. Zero overlap does not
+constitute successful validation. Specific source examples and links are retained
+in the exact private presentation; no source passages or titles enter Git here.
+
+Original cumulative spend remains 55 attempts/110 article exposures: 54 primary
+plus one retry. The remaining immutable allocation is 36 primary/nine retries.
+This queue proposes 30 first attempts plus at most nine known-invalid retries:
+at most 39 new attempts/78 exposures, for a cumulative maximum of 94 attempts/
+188 exposures. The unused six primary slots are not silently filled. No budget
+was reset, and the old expired approval was not reused for new inference.
+
+After seeing the concrete scope, the user explicitly answered **Run this bounded
+Codex review** to the request for 30 pair judgments, up to nine known-invalid
+retries, at most 78 new article exposures and cumulative188/200, with memberships
+unchanged. The new execution must record that instruction as a fresh policy,
+bound to this exact prepared result, original cumulative study counter and a
+new immutable execution key. The authorization does not extend to other queues
+or new spending limits; observed chat time and human identity remain unavailable.
+
+Four focused preparation/helper scenarios passed; the affected transport/resume
+integration passed after its changes. The unchanged full-source pair-contract
+tests passed separately. Three new future-judging scenarios passed after runtime
+integration in 2.89 seconds; they use source-free constructed articles and a fake
+provider through the original audited dispatcher. Ruff and mypy passed on the
+new modules/scripts. These software checks are not real event judgments; the
+full suite was not rerun for additive dispatch and presentation registration.
+
+A supplementary hook rejected a tool call during development. Research was
+paused; a direct lifecycle-audit write and a repeat of the exact hook path both
+succeeded before research resumed. The failure did not reproduce; its original
+cause is unconfirmed. No audit history or global settings were changed or
+bypassed. The production preparation subsequently completed its mandatory full
+preflight and durable result/presentation writes.

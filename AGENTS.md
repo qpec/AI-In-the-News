@@ -40,6 +40,25 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
   Broader linking requires source-backed event-coreference review, with uncertain
   outcomes and whole-group consistency retained. That semantic component remains
   unfinished; no new paid/model run is implied. Similarity is not probability.
+- The separate [complete-source cross-window review tier](docs/CROSS_WINDOW_EVENT_REVIEW.md)
+  now has an executed offline preparation: 709 cosine-qualified pairs, ten
+  selected proposals (each a two-article group plus singleton), 30 full-source
+  article-pair packets/30 distinct articles, zero preparation failures. These
+  are unjudged, development-only candidates; the sealed body holdout and current
+  memberships remain unchanged. The exact prepared result is recorded in that
+  method document. A separately implemented Codex executor requires fresh
+  concrete authorization for this queue; the original model-run approval
+  expired. Preserve the original cumulative spend of 54 primary plus one retry
+  (110 article exposures), leaving 36 primary/nine retries. This queue uses at
+  most 30 primary plus nine retries (78 additional exposures, cumulative188/200).
+  Reconcile live counts before dispatch. All-same model references would still
+  require cluster review, with no automatic merges or accepted dossiers.
+- After seeing this exact queue and its 30-primary/nine-retry limits, the user
+  explicitly authorized **Run this bounded Codex review** in this chat. Use one
+  fresh immutable execution lineage bound to the prepared result above and the
+  original cumulative study counter; preserve exact resume rather than launching
+  duplicate runs. This authorization covers no other queues, expanded budgets
+  or membership adoption. Record it in the protected audit before model dispatch.
 
 ## Commit practice
 

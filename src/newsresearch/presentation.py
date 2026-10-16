@@ -39,6 +39,7 @@ RESULT_KINDS = {
     "event_window_result",
     "event_group_link_result",
     "event_group_evidence_result",
+    "event_group_evidence_judgment_result",
 }
 
 
