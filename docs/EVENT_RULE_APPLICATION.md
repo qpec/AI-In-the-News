@@ -60,4 +60,35 @@ establish software behavior only. The additive runtime dispatch and presentation
 allowlist are exercised by that scenario; shared preflight/gateway behavior is
 unchanged. See [proportionate checks](TESTING.md).
 
-Actual application results will be appended after execution.
+## Completed application — 2026-10-16
+
+Immutable result:
+`3fb0d5c5f4b05c9dec7f2270c36ef5a2fa4daeefbabbc5c3809a74ef35a1594e`.
+Manifest:
+`edf1daa593dbe814e7943a09cdc4b103709422dc92c6d02551ccaf86a0c8d276`.
+The exact overview was captured as a prepared chat presentation; UI visibility
+and reading are unobserved.
+
+All 20,000 pilot articles received a disposition. There were 19,576 articles with
+saved vectors, 424 missing vectors and 27 vector-bearing articles without usable
+publication dates. The application checked 40,285,936 date-eligible pairs and
+scored 88,088 pooled-threshold candidates. All candidate feature computations
+completed: failed zero, pending zero. Missing-vector/date articles remain
+unprocessed, separately from review cases.
+
+The complete rule selected 11,668 provisional links. Complete-link partitioning
+proposed 1,596 multi-article groups containing 4,017 articles, plus 15,532 review
+singletons. Another 7,569 passing cross-group bridges were retained for review.
+These are algorithmic proposals, not validated event counts. Accepted dossiers
+remain zero. The failed development status and full-precision thresholds remain
+unchanged; no held-out labels, model calls or new embeddings were used.
+
+Protected exports contain all per-article dispositions, group memberships and
+bridges. SQLite audit records reference those artifacts and the complete score
+table/batch lineage. No article metadata, source text, score payloads, databases
+or logs are committed here.
+
+Focused software verification: four numerical fixtures passed; the integrated
+audit/coverage/resume scenario passed after correcting its synthetic expectations.
+Ruff passed for the changed Python paths, mypy passed for the two new modules and
+launcher, CLI help and `git diff --check` passed. The full suite was not repeated.
