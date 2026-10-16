@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import uuid
 
 from .common import Context, Json, ResearchError, canonical, require_active, utc
-from .newsapi_collection import PERIODS
+from .newsapi_collection import PERIODS, consistent_pages
 
 if TYPE_CHECKING:
     from .runtime import Research
@@ -23,7 +23,7 @@ def inspect_receipts(receipts: list[Json], periods: list[tuple[str, str]] | None
     examples: list[Json] = []
     for start, end in PERIODS if periods is None else periods:
         selected = [r for r in receipts if r["parameters"]["dateStart"] == start]
-        good = [r for r in selected if r["http_status"] == 200 and isinstance(r["response"].get("articles", {}).get("results"), list)]
+        good, _ = consistent_pages(selected)
         indices = sorted({r["parameters"]["articlesPage"] for r in good})
         counts: Counter[str] = Counter()
         for receipt in good:

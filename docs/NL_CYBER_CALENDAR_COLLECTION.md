@@ -169,3 +169,25 @@ reservation records its ceiling, unknown outcomes still block, and no spending
 is added after query exhaustion. Separate `backfill_materialize` and
 `backfill_missingness` actions preserve older year bundles and their diagnostics
 without overwriting original files; they use the same audited deterministic methods.
+
+`scripts/package_nl_cyber_backfill.py` registers the separate private bundle,
+missingness and copy policies, then prepares the completed extension under
+`topics/cybercrime-nl/extensions/2020-2023/` in the named private data repository.
+This continues the user's dataset-push request with the subsequently requested
+older periods, preserving the original snapshot and its checksums. A new exact
+copy-policy version binds only the added periods, safe bundles and method/
+missingness summaries; audit logs and working stores remain protected. Extension
+documentation and counters are generated from the actual immutable results.
+
+An actual backfill response for 2022 page44 returned empty results/total0 after
+earlier responses reported9,547matches. The first implementation mistakenly
+treated this as exhaustion; its actual progress/presentation records remain
+historical, not erased. The revised consistency rule excludes empty zero-total
+responses within previously positive expected pages from successful pagination,
+retains the original response and billed charge, restores the contiguous next
+page, and stops dispatch on an unresolved anomaly. An offline immutable diagnostic
+and a receipt-bound policy amendment permit one explicit retry within the same
+allowance. A further inconsistent response lacks retry permission and stops.
+Missingness uses the same valid-page rule and counts anomalies as failed/invalid
+attempts; successful matching retries are separately identified. Provider/index
+recall remains unknown even after consistency is restored.

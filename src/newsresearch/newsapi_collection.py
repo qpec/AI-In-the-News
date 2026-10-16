@@ -154,7 +154,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
     policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
-    backfill = data.get("action") in {"backfill", "backfill_materialize", "backfill_missingness"}
+    backfill = data.get("action") in {"backfill", "backfill_consistency", "backfill_materialize", "backfill_missingness", "backfill_topic_export"}
     periods = BACKFILL_PERIODS if backfill else PERIODS
     if (policy.get("method") != METHOD
             or policy.get("total_account_target") != 4000 or policy.get("monthly_allowance") != 5000
@@ -177,10 +177,17 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         from .newsapi_missingness import run as missingness
 
         return missingness(engine, session, context, data)
-    if data.get("action") == "topic_export":
+    if data.get("action") in {"topic_export", "backfill_topic_export"}:
         from .newsapi_topic_export import run as topic_export
 
         return topic_export(engine, session, context, data)
+    if data.get("action") == "backfill_consistency":
+        if policy.get("consistency_rule") != "empty-zero-total-within-prior-positive-pages-v1":
+            raise ResearchError("Register provider consistency inspection rule first")
+        result = {**collection_state(engine, BACKFILL_PERIODS), "versions": context.versions,
+                  "network_calls": 0, "model_calls": 0, "generated_at": utc()}
+        identifier = engine.ledger.record(session, "newsapi_collection_consistency", str(uuid.uuid4()), result)
+        return {"id": identifier, **result}
     if engine.config.offline or data.get("execute") is not True:
         raise ResearchError("Explicit online execution required")
     if backfill:
@@ -248,10 +255,14 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
     if not isinstance(limit, int) or not 1 <= limit <= 40:
         raise ResearchError("Collect 1 through40 pages per checkpoint")
     baseline = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_collection_batch", account_ceiling)
-    if baseline["http_status"] != 200 or number(baseline["response"].get("usedTokens")) is None:
+    if (baseline["http_status"] != 200 or number(baseline["response"].get("usedTokens")) is None
+            or number(baseline["response"].get("availableTokens")) != 5000):
         raise ResearchError("Live account usage unavailable")
     stop = "checkpoint"
     state = collection_state(engine, periods)
+    permitted = policy.get("inconsistent_response_retry_receipts", [])
+    if any(r["receipt_id"] not in permitted for r in state["unresolved_inconsistent_responses"]):
+        raise ResearchError("Inconsistent provider response requires a versioned explicit retry decision")
     for _ in range(limit):
         candidates = [row for row in state["years"] if not row["exhausted"]]
         if not candidates:
@@ -274,6 +285,9 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
         if receipt["http_status"] != 200 or not isinstance(articles, list):
             stop = "failed_page"
             break
+        if not articles and section.get("totalResults") == 0 and (year.get("provider_total") or 0) > 0:
+            stop = "inconsistent_provider_response"
+            break
         if any(not isinstance(a, dict) or not period[0] <= str(a.get("date", "")) <= period[1]
                or a.get("lang") != "nld" for a in articles):
             stop = "scope_validation_failed"
@@ -285,6 +299,7 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
             stop = "charge_exceeded_bound"
             break
         year["pages"] = page
+        year["provider_total"] = section.get("totalResults")
         year["exhausted"] = len(articles) < 100 or (isinstance(section.get("pages"), int) and section["pages"] <= page)
         print(json.dumps({"year": year["year"], "page": page, "returned": len(articles),
                           "cost": receipt["billed_tokens"], "provider_total": section.get("totalResults")}), flush=True)
@@ -308,20 +323,28 @@ def collection_state(engine: Research, periods: list[tuple[str, str]] | None = N
     periods = PERIODS if periods is None else periods
     receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["purpose"].startswith("collect_")
                 and (r["parameters"].get("dateStart"), r["parameters"].get("dateEnd")) in periods]
-    years, unique, examples = [], set(), []
+    years, unique, examples, anomalies = [], set(), [], []
+    unresolved: list[Json] = []
     for period in periods:
         selected = [r for r in receipts if r["parameters"]["dateStart"] == period[0]]
-        good = [r for r in selected if r["http_status"] == 200 and isinstance(r["response"].get("articles", {}).get("results"), list)]
+        good, bad = consistent_pages(selected)
+        anomalies.extend(bad)
+        unresolved.extend(r for r in bad if not r["successful_retry"])
         articles = [a for r in good for a in r["response"]["articles"]["results"]]
         valid = [a for a in articles if isinstance(a, dict) and period[0] <= str(a.get("date", "")) <= period[1] and a.get("lang") == "nld"]
         for article in valid:
             identity = article.get("uri") or article.get("url") or article.get("source_hash")
             if identity:
                 unique.add(identity)
+        good.sort(key=lambda r: r["parameters"]["articlesPage"])
         last = good[-1]["response"]["articles"] if good else {}
         exhausted = bool(good) and (len(last["results"]) < 100 or
             (isinstance(last.get("pages"), int) and last["pages"] <= good[-1]["parameters"]["articlesPage"]))
-        years.append({"year": period[0][:4], "pages": len(good), "failed_pages": len(selected)-len(good),
+        indices = {r["parameters"]["articlesPage"] for r in good}
+        contiguous = 0
+        while contiguous + 1 in indices:
+            contiguous += 1
+        years.append({"year": period[0][:4], "pages": contiguous, "failed_pages": len(selected)-len(good),
                       "returned": len(valid), "scope_invalid": len(articles)-len(valid),
                       "provider_total": last.get("totalResults"), "exhausted": exhausted,
                       "missing_body": sum(not isinstance(a.get("body"), str) or not a["body"].strip() for a in valid),
@@ -335,7 +358,23 @@ def collection_state(engine: Research, periods: list[tuple[str, str]] | None = N
             "scope_invalid": sum(y["scope_invalid"] for y in years),
             "reported_collection_cost": sum(y["reported_cost"] for y in years),
             "unavailable_costs": sum(y["unavailable_costs"] for y in years), "examples": examples,
-            "receipt_ids": [r["id"] for r in receipts]}
+            "receipt_ids": [r["id"] for r in receipts],
+            "inconsistent_responses": anomalies, "unresolved_inconsistent_responses": unresolved}
+
+
+def consistent_pages(receipts: list[Json]) -> tuple[list[Json], list[Json]]:
+    shaped = [r for r in receipts if r["http_status"] == 200
+              and isinstance(r["response"].get("articles", {}).get("results"), list)]
+    maximum = max((r["response"]["articles"].get("totalResults", 0) or 0 for r in shaped), default=0)
+    bad = [r for r in shaped if maximum > 0 and not r["response"]["articles"]["results"]
+           and r["response"]["articles"].get("totalResults") == 0
+           and r["parameters"]["articlesPage"] <= (maximum + 99) // 100]
+    good = [r for r in shaped if r not in bad]
+    anomalies = [{"receipt_id": r["id"], "year": r["parameters"]["dateStart"][:4],
+        "page": r["parameters"]["articlesPage"], "observed_positive_total": maximum,
+        "reason": "Empty page reports zero total despite earlier positive matches within expected pages",
+        "successful_retry": any(canonical(r["parameters"]) == canonical(ok["parameters"]) for ok in good)} for r in bad]
+    return good, anomalies
 
 
 def recover(engine: Research, session: str, context: Context, policy: Json) -> Json:

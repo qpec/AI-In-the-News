@@ -12,7 +12,7 @@ import uuid
 import zipfile
 
 from .common import Context, Json, ResearchError, canonical, require_active, require_no_credentials, utc
-from .newsapi_collection import PERIODS, WORDS, collection_request
+from .newsapi_collection import BACKFILL_PERIODS, PERIODS, WORDS, collection_request
 
 if TYPE_CHECKING:
     from .runtime import Research
@@ -72,17 +72,24 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, {"export_policy"})
     policy = engine.ledger.get(context.versions["export_policy"], "export_policy")["content"]
+    backfill = data.get("action") == "backfill_topic_export"
+    topic = TOPIC + "/extensions/2020-2023" if backfill else TOPIC
+    periods = BACKFILL_PERIODS if backfill else PERIODS
     if (policy.get("method") != METHOD or policy.get("repository") != REPOSITORY
             or policy.get("user_authorized_private_dataset_copy") is not True):
         raise ResearchError("Explicit topic-bound private dataset export authorization required")
+    if backfill and policy.get("topic") != topic:
+        raise ResearchError("Explicit extension-topic copy instruction required")
     original = engine.ledger.get(policy["materialization_result"], "newsapi_collection_materialization")
     missing = engine.ledger.get(policy["missingness_result"], "newsapi_collection_missingness")
     if missing["source_result"] != policy["materialization_result"]:
         raise ResearchError("Missingness and materialization lineage mismatch")
+    if original.get("periods", [list(p) for p in PERIODS]) != [list(p) for p in periods]:
+        raise ResearchError("Export collection period mismatch")
     if {k: v for k, v in context.versions.items() if k != "export_policy"} != missing["versions"]:
         raise ResearchError("Bind exact original missingness versions")
     repo = Path(data["repository_path"]).resolve(strict=True)
-    destination = repo / TOPIC
+    destination = repo / topic
     if destination.exists():
         raise ResearchError("Topic already exists; preserve existing work")
     remote = subprocess.run(["git", "-C", str(repo), "remote", "get-url", "--push", "origin"], check=True, capture_output=True, text=True).stdout.strip()
@@ -113,6 +120,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         "costs": {key: original[key] for key in ["reported_collection_cost", "final_observed_used", "allowance", "target_used", "stop_reason"]},
         "provenance": {"materialization_result": policy["materialization_result"], "missingness_result": policy["missingness_result"],
             "method_versions": context.versions}, "exported_at": utc(), "new_newsapi_requests": 0, "new_model_calls": 0})
+    summary["costs"]["account_ceiling"] = original.get("account_ceiling", 4000)
     contents["missingness.json"] = (json.dumps(summary, ensure_ascii=False, indent=2) + "\n").encode()
     year_fields = ["year", "date_start", "date_end", "returned", "body_present", "quarantined", "missing_body_quarantined",
         "missing_body_other", "successful_pages", "provider_pages", "provider_total", "count_gap", "missing_page_indices",
@@ -121,17 +129,17 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     contents["records-with-missing-fields.csv"] = csv_bytes(inventory, ["year", "uri", "date", "url", "missing_fields", "quarantined", "body_missing_reason", "receipt_id", "item_index", "source_hash"])
     method = {"provider": "NewsAPI.ai / Event Registry", "retrieval_date": "2026-10-16",
         "families": {"hacks": WORDS[:3], "ransomware": WORDS[3:4], "data_breaches": WORDS[4:6], "cyberattacks": WORDS[6:]},
-        "requests": [collection_request(p, 1) for p in PERIODS],
+        "requests": [collection_request(p, 1) for p in periods],
         "pagination": "articlesPage increments from 1; articlesCount=100; round-robin across years, ascending publication date; stop at provider exhaustion or account budget",
         "archive_gate": "Historical Dutch positive control returned 100 articles for 2024-01-01 through 2024-01-02 after user enabled archive access",
         "representation": "Unchanged private working bundles, not original raw API response bytes; exact duplicate record versions removed within year, changed versions retained",
-        "retention": "141 local pattern quarantines retain safe locators and hashes without article text/title/source metadata. Pattern matches may be false positives; non-locator trigger fields were not logged",
+        "retention": f"{missing['missing_body']} records lack body text; local pattern quarantines retain safe locators and hashes without article text/title/source metadata. Pattern matches may be false positives; non-locator trigger fields were not logged",
         "scope": "Dutch-language keyword candidates; not reviewed Netherlands events or incident counts",
         "score_or_relevance_cutoff": None, "provider_index_recall": None,
         "private_repository_exception": policy["user_instruction"],
         "not_in_repository": "Credentials, working database, audit logs, raw response artifacts and per-request billing log"}
     contents["retrieval-method.json"] = (json.dumps(method, ensure_ascii=False, indent=2) + "\n").encode()
-    contents["README.md"] = README.encode()
+    contents["README.md"] = (backfill_readme(original, missing, len(inventory)) if backfill else README).encode()
     checksums = {name: hashlib.sha256(raw).hexdigest() for name, raw in contents.items()}
     contents["SHA256SUMS.txt"] = "".join(f"{value}  {name}\n" for name, value in sorted(checksums.items())).encode()
     for name in contents:
@@ -159,6 +167,78 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         "git_push_status": "not_performed_by_export_operation", "generated_at": utc()}
     identifier = engine.ledger.record(session, "newsapi_topic_export", str(uuid.uuid4()), result)
     return {"id": identifier, **result}
+
+
+def backfill_readme(original: Json, missing: Json, affected: int) -> str:
+    text = ("# Cybercrime NL — extension to 2020\n\n"
+        "Publication dates: **1 January 2020 through 14 October 2023**, inclusive.\n"
+        "Retrieved on 16 October 2026. This extends the original snapshot without overlapping its dates.\n\n"
+        "| Year | Articles / provider matches | Pages / expected | Missing text |\n"
+        "|---|---:|---:|---:|\n")
+    for y in missing["years"]:
+        text += (f"| {y['year']} | {y['returned']:,} / {y['provider_total']:,} | "
+                 f"{y['successful_pages']} / {y['provider_pages']} | "
+                 f"{y.get('missing_body_quarantined', 0) + y.get('missing_body_other', 0)} |\n")
+    pages = sum(len(y["missing_page_indices"]) for y in missing["years"])
+    gap = sum(y["count_gap"] for y in missing["years"])
+    text += (f"\n**{missing['total_records']:,} article records**, {missing['body_present']:,} with nonblank text, "
+        f"**{missing['missing_body']} missing bodies ({missing['missing_body_percent']:.2f}%)**. "
+        f"Missing expected pages: **{pages}**; unretrieved provider-reported matches: **{gap}**. "
+        f"Final collection stop: `{original['stop_reason']}`.\n\n"
+        "## Retrieval method\n\n"
+        "Same four families as the original snapshot: hacks (`hack`, `gehackt`, `hackers`), "
+        "ransomware (`ransomware`), data breaches (`datalek`, `datalekken`), cyberattacks "
+        "(`cyberaanval`, `cyberaanvallen`). All eight are OR phrases in title/body, "
+        "`lang=nld`, `dataType=news`, `keepAll`, no Cyber Crime category or geography gate. "
+        "Full body requested (`includeArticleBody=true`, `articlesArticleBodyLen=-1`). "
+        "Calendar-year pages in ascending publication date; first-page coverage then "
+        "round-robin continuation. 100 is the page size, not the collection cap. "
+        "Existing successful historical archive control was reused. Returned article "
+        "dates and preserved request receipts establish observed year coverage.\n\n"
+        "## Files and missingness\n\n"
+        "`articles/` contains four unchanged ZIP working bundles with `artikelen.jsonl` "
+        "and `manifest.json`. Rows retain safe article data, receipt/item references, "
+        "canonical article hash and original response hash. These are not raw API response snapshots. "
+        "`retrieval-method.json` contains credential-free request templates: increment "
+        "`articlesPage` beyond the illustrative page 1. `SHA256SUMS.txt` inventories this "
+        "extension's other files.\n\n"
+        "`coverage-by-year.csv` and `missingness.json` distinguish missing pages, provider "
+        "count gaps, missing bodies, quarantines, unavailable raw snapshots and failures/retries. "
+        f"`records-with-missing-fields.csv` identifies {affected} records with at least one "
+        "missing inspected field. Missing bodies are not discarded from the denominator. "
+        "Pattern quarantine is local screening, can produce false positives and does not "
+        "establish actual credentials. Unrecorded original non-locator triggers remain unknown.\n\n"
+        f"Missing fields: `{json.dumps(missing['missing_fields'], sort_keys=True)}`. "
+        f"Outside quarantine: `{json.dumps(missing['missing_fields_other'], sort_keys=True)}`. "
+        f"Original response bytes are unavailable for {missing['raw_response_bytes_unavailable_pages']} "
+        f"of {missing['successful_pages']} successful pages containing screened rows; safe "
+        "records and response hashes remain, so this is not loss of every article on those pages. "
+        f"There are {missing['nonblank_body_at_most_200_chars']} nonblank bodies of at most "
+        "200 characters; short text alone is not evidence of truncation.\n\n"
+        "## Actual costs and limits\n\n"
+        f"Backfill search requests explicitly reported **{original['reported_collection_cost']:g} tokens**. "
+        f"Latest observed account usage: **{original['final_observed_used']:g}/5,000** "
+        f"({100*original['final_observed_used']/5000:.2f}%). "
+        "The original 80% or more goal has a 4,000 soft utilization target; the explicit "
+        "extension uses remaining quota to complete the requested history within a "
+        "5,000 hard account ceiling. Collection stops at query exhaustion, not padded "
+        "spending. Quota observations are historical, not a live balance.\n\n"
+        "Counts describe keyword candidate article records, not reviewed Netherlands "
+        "events or incidents. No relevance scoring/cutoff, model article judgement, "
+        "event grouping or accepted findings were produced. Complete pagination cannot "
+        "establish provider-index recall, all Dutch-news coverage or publisher-text fidelity.\n\n"
+        "## Private-copy instruction and audit\n\n"
+        "The user requested the dataset in the private data repo and then extended the "
+        "same collection back to 2020. This child topic preserves the original snapshot. "
+        "The registered copy policy is specific to these safe bundles and method/missingness "
+        "summaries in `qpec/AI-In-the-News-Data`. It does not permit public redistribution "
+        "or other exports. Credentials, working databases, raw response artifacts, audit "
+        "logs and per-request billing logs remain protected outside Git. Retrieval, "
+        "materialization, deterministic missingness and copying use `Research.execute()` "
+        "with registered methods and immutable source/result/version references. "
+        "Copy validation verifies bundle/row hashes, scope, credentials and counts; "
+        "version/receipt IDs are references, not copies of audit logs.\n")
+    return text
 
 
 README = """# Cybercrime NL — Dutch-language keyword collection

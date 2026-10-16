@@ -16,6 +16,7 @@ RESULT_KINDS = {
     "newsapi_collection_progress",
     "newsapi_collection_materialization",
     "newsapi_collection_missingness",
+    "newsapi_collection_consistency",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",

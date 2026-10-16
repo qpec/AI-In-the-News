@@ -83,6 +83,7 @@ def materialize(engine: Research, session: str, context: Context,
               "cost_csv_artifact": csv_artifact, "collection_result": current["id"],
               "stop_reason": current["stop_reason"], "final_observed_used": current["final_observed_used"],
               "allowance": 5000, "target_used": 4000, "model_calls": 0, "network_calls": 0, "generated_at": utc(),
+              "account_ceiling": current.get("account_ceiling", 4000),
               "representation": "Materialized private working copies; permitted original responses remain separately preserved by hash"}
     identifier = engine.ledger.record(session, "newsapi_collection_materialization", str(uuid.uuid4()), result)
     return {"id": identifier, **result}

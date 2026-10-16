@@ -13,6 +13,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--pages", type=int, default=20)
+    parser.add_argument("--repair-inconsistent", action="store_true")
     args = parser.parse_args()
     root = default_workspace().parent / "research-nl-cyber-collection-20261016"
     engine = Research(root, config=Config(offline=not args.execute))
@@ -48,8 +49,36 @@ def main() -> None:
                 "supersedes": versions["policy"], "reason": "Complete the user's requested history within5000allowance; original80percent or more goal is not a4000hardcap"})["id"]
             path.write_text(json.dumps(versions), encoding="utf-8")
         progress_path = root / "backfill-progress.json"
+        if args.repair_inconsistent:
+            for kind in ["protocol", "policy"]:
+                previous = engine.ledger.get(versions[kind], kind)["content"]
+                versions[kind] = run("version", {"kind": kind, "key": "nl-cyber-zero-total-consistency-v1", "content": {
+                    **previous, "consistency_rule": "empty-zero-total-within-prior-positive-pages-v1",
+                    "consistency_amendment": "2022page44 unexpectedly returned empty total0 after9547matches. Preserve original response and five-token charge, exclude contradictory empty pages from successful pagination and recompute contiguous coverage; stop rather than treating empty as exhaustion. Require an immutable offline diagnostic and receipt-bound retry permission before one retry; unknown-outcome guard remains"},
+                    "supersedes": versions[kind], "reason": "Correct false exhaustion caused by provider total collapsing below already retrieved articles"})["id"]
+            inspected = run("newsapi_collection", {"action": "backfill_consistency"}, versions)
+            (root / "backfill-consistency.json").write_text(json.dumps(inspected, ensure_ascii=False, indent=2), encoding="utf-8")
+            unresolved = inspected["unresolved_inconsistent_responses"]
+            if len(unresolved) != 1:
+                raise RuntimeError("Expected exactly one unresolved inconsistent response; do not silently authorize additional retries")
+            detail = unresolved[0]
+            overview = (f"Offline consistency check: **1 inconsistent response**, year{detail['year']}, page{detail['page']}. "
+                f"The empty response reports total0 despite {detail['observed_positive_total']} positive matches in other responses. "
+                f"It is excluded from successful pagination, not treated as exhaustion. {inspected['returned_articles']:,} older records are currently retained; "
+                "unexhausted years remain pending. Original response and charge are preserved; no searches or model judgements were made by this check.\n\n"
+                f"[Consistency results](<{root / 'backfill-consistency.json'}>).")
+            run("record_presentation", {"results": [{"kind": "newsapi_collection_consistency", "id": inspected["id"]}], "markdown": overview, "destination": "codex_chat"}, versions)
+            print(json.dumps({"consistency_presentation": overview}, ensure_ascii=True), flush=True)
+            previous = engine.ledger.get(versions["policy"], "policy")["content"]
+            versions["policy"] = run("version", {"kind": "policy", "key": "nl-cyber-page44-explicit-retry-v1", "content": {
+                **previous, "inconsistent_response_retry_receipts": [unresolved[0]["receipt_id"]],
+                "consistency_result": inspected["id"], "retry_reason": "One explicit retry of known empty-zero-total response, within original5000allowance. Both original and retry charges remain counted. A second inconsistent response has no permission and stops further calls"},
+                "supersedes": versions["policy"], "reason": "Recover requested missing page after deterministic offline consistency check, preserving source and billing history"})["id"]
+            path.write_text(json.dumps(versions), encoding="utf-8")
         if progress_path.exists():
             prior = json.loads(progress_path.read_text(encoding="utf-8"))
+            if not args.repair_inconsistent and any(isinstance(y.get("provider_total"), (int, float)) and y["provider_total"] < y["returned"] for y in prior["years"]):
+                raise RuntimeError("Provider total collapsed below already returned rows; pause for an audited consistency check, do not dispatch more searches")
             if prior["stop_reason"] != "checkpoint":
                 raise RuntimeError("Backfill has already stopped; preserve it rather than dispatching more calls")
         result = run("newsapi_collection", {"action": "backfill", "execute": args.execute, "pages": args.pages}, versions)

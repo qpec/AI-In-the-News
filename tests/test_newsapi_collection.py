@@ -153,6 +153,21 @@ def test_2020_backfill_requires_authorization_and_keeps_original_scope_separate(
     assert nc.collection_state(engine)["returned_articles"] == 4
     assert nc.collection_state(engine, nc.BACKFILL_PERIODS)["returned_articles"] == 4
     assert len(set(original["receipt_ids"]) & set(extended["receipt_ids"])) == 0
+    from newsresearch.newsapi_materialize import METHOD as bundle_method
+    from newsresearch.newsapi_missingness import METHOD as missing_method
+    versions["retrieval_profile"] = engine.execute("version", {"kind": "retrieval_profile", "key": "backfill-bundles-test", "content": {"method": bundle_method}},
+        objective="Synthetic extension packaging check", actor="test")["id"]
+    packed = engine.execute("newsapi_collection", {"action": "backfill_materialize"},
+        objective="Synthetic extension packaging check", actor="test", versions=versions)
+    assert packed["returned_articles"] == 4 and packed["receipt_ids"] == extended["receipt_ids"]
+    assert all("backfill-articles-" in row["path"] for row in packed["bundles"])
+    versions["retrieval_profile"] = engine.execute("version", {"kind": "retrieval_profile", "key": "backfill-missing-test", "content": {"method": missing_method}},
+        objective="Synthetic extension missingness check", actor="test")["id"]
+    checked = engine.execute("newsapi_collection", {"action": "backfill_missingness", "result": packed["id"]},
+        objective="Synthetic extension missingness check", actor="test", versions=versions)
+    assert checked["total_records"] == 4 and checked["missing_body"] == 0
+    assert checked["years"][0]["date_start"] == "2020-01-01"
+    assert checked["years"][-1]["date_end"] == "2023-10-14"
 
 
 @pytest.mark.parametrize("used,expected,stop", [(3998, 4, "query_exhausted"), (4998, 0, "budget_target")])
@@ -171,6 +186,47 @@ def test_backfill_completes_above_soft_target_but_respects_allowance(engine, mon
     assert result["account_ceiling"] == 5000
     if expected == 0:
         assert all(p == {"endpointVariant": "usage"} for p in calls)
+
+
+def test_zero_total_collapse_stops_and_requires_explicit_receipt_bound_retry(engine, monkeypatch):
+    run, _, base_transport = collection_setup(engine, monkeypatch)
+    original = run()
+    versions = dict(original["versions"])
+    content = engine.ledger.get(versions["policy"], "policy")["content"]
+    content.update(periods=nc.BACKFILL_PERIODS, templates=[nc.collection_request(p, 1) for p in nc.BACKFILL_PERIODS], user_authorized_backfill_2020=True)
+    def register(value):
+        return engine.execute("version", {"kind": "policy", "key": "inconsistent-page-test", "content": value}, objective="Synthetic false-exhaustion recovery", actor="test")["id"]
+    versions["policy"] = register(content)
+    attempts = 0
+    def transport(p):
+        nonlocal attempts
+        status, headers, raw = base_transport(p)
+        if p.get("dateStart") != "2022-01-01":
+            return status, headers, raw
+        page = p["articlesPage"]
+        if page == 2:
+            attempts += 1
+        if page == 2 and attempts == 1:
+            return status, headers, json.dumps({"articles": {"results": [], "totalResults": 0, "pages": 0}}).encode()
+        template = json.loads(raw)["articles"]["results"][0]
+        rows = [{**template, "uri": f"2022-{page}-{i}"} for i in range(1 if page == 3 else 100)]
+        return status, headers, json.dumps({"articles": {"results": rows, "totalResults": 201, "pages": 3}}).encode()
+    monkeypatch.setattr(nc, "transport", transport)
+    def collect():
+        return engine.execute("newsapi_collection", {"action": "backfill", "execute": True}, objective="Synthetic false-exhaustion recovery", actor="test", versions=versions)
+    partial = collect()
+    assert partial["stop_reason"] == "inconsistent_provider_response"
+    y = partial["years"][2]
+    assert y["pages"] == 1 and y["provider_total"] == 201 and not y["exhausted"]
+    with pytest.raises(ResearchError, match="explicit retry"):
+        collect()
+    assert attempts == 1
+    versions["policy"] = register({**content, "inconsistent_response_retry_receipts": [partial["unresolved_inconsistent_responses"][0]["receipt_id"]]})
+    complete = collect()
+    assert complete["returned_articles"] == 204 and complete["reported_collection_cost"] == 35
+    assert complete["stop_reason"] == "query_exhausted" and complete["failed_pages"] == 1
+    assert complete["unresolved_inconsistent_responses"] == []
+    assert complete["inconsistent_responses"][0]["successful_retry"] is True
 
 
 def test_credential_pattern_quarantine_preserves_membership_without_secret(engine, monkeypatch):
