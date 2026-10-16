@@ -33,7 +33,7 @@ def main():
         for key, label in labels.items():
             text += f"| {label} | {percent(p[key]['all'])} | {percent(p[key]['heldout'])} |\n"
         text += "\nGeteste acht woordvormen: `hack OR gehackt OR hackers OR ransomware OR datalek OR datalekken OR cyberaanval OR cyberaanvallen`.\n\n"
-        text += "| Woord | Aantal unieke titels met dit letterlijke woord* |\n|---|---:|\n"
+        text += "| Woord | RSS-records met dit letterlijke woord in de titel* |\n|---|---:|\n"
         for term, count in sorted(result["title_counts"].items(), key=lambda x: (-x[1], x[0])):
             text += f"| {term} | {count} |\n"
         text += (f"\n*Binnen {result['title_denominator']} gevonden RSS-records; dit is een door zoektermen geselecteerde verzameling, "
@@ -61,7 +61,30 @@ def main():
         captured = engine.execute("record_presentation", {"results": [{"kind": "keyword_study", "id": result["id"]}],
                                   "markdown": text, "destination": "codex_chat"}, objective=OBJECTIVE, actor=ACTOR, versions=versions)
         (workspace / "final-report.md").write_text(text, encoding="utf-8")
-        print(json.dumps({"presentation_id": captured["id"], "overview": text}, ensure_ascii=False), flush=True)
+        summary = (f"Ik heb **550 echte Google News RSS-zoekopdrachten** uitgevoerd: 500 vergelijkingen en 50 OR-controles, "
+                   f"verdeeld over tien Nederlandse nieuwsbronnen en 15 oktober 2023 t/m 15 oktober 2026. "
+                   f"Alle zoekacties slaagden; **{original['unique_records']} unieke RSS-records** gevonden. Er ontbreken geen zoekacties.\n\n"
+                   "Mijn **voorlopige werkset** bestaat uit vier families met acht gewone woordvormen:\n\n"
+                   "`hack OR gehackt OR hackers OR ransomware OR datalek OR datalekken OR cyberaanval OR cyberaanvallen`\n\n"
+                   "| Woordenlijst | Dekking gezamenlijke vondsten | Dekking apart gehouden laatste periode |\n|---|---:|---:|\n")
+        for key, label in labels.items():
+            summary += f"| {label} | {100*p[key]['all']['fraction']:.1f}% | {100*p[key]['heldout']['fraction']:.1f}% |\n"
+        if candidate:
+            summary += (f"\nDe op eerdere perioden gekozen kortere lijst van {candidate['size']} termen haalt in de laatste periode "
+                        f"{100*candidate['heldout']['fraction']:.1f}%. De geteste grens van 95% is een werkcriterium voor vindbaarheid, geen relevantiecutoff.\n\n")
+        uncapped_heldout = result["subsets"][0]["uncapped_heldout"]["strata"]
+        summary += (f"**Dit is geen bewezen volledigheid van Nederlandse incidenten.** {original['possibly_capped']} antwoorden raken de limiet van 100; "
+                    f"{result['uncapped_strata']}/50 bron-periodecombinaties blijven in alle zoekacties onder die limiet, "
+                    f"waarvan {uncapped_heldout} in de laatste periode. Relevantie, incidentlocatie en overdraagbaarheid naar NewsAPI.ai zijn niet gevalideerd. "
+                    "Er zijn geen relevantiescores of incidenttellingen gemaakt. **0 nieuwe NewsAPI.ai-tokens verbruikt door deze zoekreeks.**\n\n"
+                    "Google Keyword Planner meet zoekgedrag van gebruikers, inclusief verwante varianten. Daarmee meet je geen woordgebruik van journalisten. "
+                    "[Google-documentatie](https://support.google.com/google-ads/answer/3022575?hl=en-2).\n\n"
+                    f"[Volledige analyse met woordfrequenties, voorbeelden en beperkingen](<{workspace / 'final-report.md'}>) · "
+                    f"[Alle 550 zoekopdrachten en uitkomsten](<{workspace / 'latest-result.json'}>).")
+        short_capture = engine.execute("record_presentation", {"results": [{"kind": "keyword_study", "id": result["id"]}],
+                                  "markdown": summary, "destination": "codex_chat"}, objective=OBJECTIVE, actor=ACTOR, versions=versions)
+        (workspace / "final-summary.md").write_text(summary, encoding="utf-8")
+        print(json.dumps({"full_presentation_id": captured["id"], "presentation_id": short_capture["id"], "overview": summary}, ensure_ascii=False), flush=True)
     finally:
         engine.close()
 
