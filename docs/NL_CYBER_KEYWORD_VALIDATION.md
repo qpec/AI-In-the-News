@@ -90,3 +90,17 @@ not a relevance threshold, calibrated article label, or verified real-world reca
 Empty denominators remain null. Run `scripts/analyze_keyword_study.py` only after
 collection has no pending or unknown outcomes. This is a documented exploratory
 extension motivated during collection, not a claim of independent preregistration.
+
+## Software validation
+
+Eight dedicated synthetic tests cover the 500+50 distinct request frame,
+publication boundaries, missing dates, invalid RSS versus zero results, unknown
+outcome reservation, audit failures before dispatch/after response, cap flags,
+deduplication and frozen training choices with cap-free missing denominators.
+The combined focused run, including existing paid-pilot boundary tests and the
+affected embedding test, passed 16 tests. Ruff and mypy passed (58 source files
+at that checkpoint). A full suite run recorded 707 passes and one setup error:
+the embedding implementation-digest guard detected source changes during the
+concurrent development run. That affected test passed on isolated rerun. This
+is not a claim that the original full run was entirely green. Synthetic tests
+validate software behavior, never the relevance or completeness of live news.

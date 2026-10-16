@@ -1,5 +1,12 @@
 # Minimale zoekwoorden: huidige richting, 2026-10-16
 
+Kwantitatieve vervolgtoets: [de geregistreerde 550-zoekopdrachtenstudie](NL_CYBER_KEYWORD_VALIDATION.md)
+vergelijkt dit vijfwoordenvoorstel met gewone woordvormen en aanvullende controles.
+De oorspronkelijke onderbouwing hieronder is kwalitatief en vormt geen bewijs
+dat vijf invoertermen voldoende zijn. Resultaten en exacte zoekacties blijven in
+de beschermde onderzoeksopslag; Google-vindbaarheid is niet zonder verdere toets
+overdraagbaar op de index en woordmatching van NewsAPI.ai.
+
 De gebruiker wil een minimale lijst met gangbare woorden. Dit vervangt de brede
 lexicon- en drietakkenstrategie als standaard voor toekomstig zoekontwerp. Eerdere
 methoden, aanvragen en resultaten blijven als verkennende geschiedenis behouden.
