@@ -20,9 +20,13 @@ def main() -> int:
     parser.add_argument("--continue-untouched", action="store_true")
     parser.add_argument("--authorization-instruction", required=True)
     parser.add_argument("--actor", default="codex:luna-group-validation")
+    parser.add_argument("--quarantine-local-timeouts", action="store_true")
+    parser.add_argument("--supersedes-control")
     args = parser.parse_args()
     if not args.continue_untouched:
         parser.error("Explicit --continue-untouched is required; failed calls are never retried")
+    if args.supersedes_control and not args.quarantine_local_timeouts:
+        parser.error("--supersedes-control requires explicit --quarantine-local-timeouts")
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
@@ -49,9 +53,14 @@ def main() -> int:
     setattr(engine, "_record_presentation", display)
     try:
         print(json.dumps({"stage": "full_audit_preflight", "phase": "continue_untouched"}), flush=True)
-        result = engine.execute("luna_group_validation_continue", {
+        payload = {
             "result": args.result, "study_key": args.study_key, "continue_untouched": True,
-            "authorization_instruction": args.authorization_instruction, "reuse_cache": True, "workers": 4},
+            "authorization_instruction": args.authorization_instruction, "reuse_cache": True, "workers": 4}
+        if args.quarantine_local_timeouts:
+            payload["quarantine_local_timeouts"] = True
+            if args.supersedes_control:
+                payload["supersedes_control"] = args.supersedes_control
+        result = engine.execute("luna_group_validation_continue", payload,
             objective="Diagnose failed Luna responses and evaluate untouched frozen group and anchor tasks in parallel within the original cumulative budget; no retries",
             actor=args.actor)
         print(json.dumps({"result": result["id"], "status": result["status"],

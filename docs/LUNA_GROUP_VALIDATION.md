@@ -234,3 +234,49 @@ no model calls or article judgments and did not resolve remote generation or
 billing. The full exact diagnostic was presented. `scripts/diagnose_luna_transport.py`
 registers that metadata inspection before execution through the audited runtime.
 The timeout stays spent and null; it has not been retried.
+
+## Opt-in execution control v2: local-timeout quarantine
+
+The opt-in `--quarantine-local-timeouts` path permits untouched requests to
+continue after a positively identified, retained 180-second local Codex timeout.
+It requires the exact `codex_timeout_unknown_outcome` metadata, unknown outcome,
+no process exit or answer, retained permitted response and unchanged frozen
+timeout configuration. Missing or unrecognized transport evidence still stops
+dispatch. The default v1 path continues to stop on every unknown outcome.
+
+V2 registers a new execution-control version before reading prior results or
+source evidence. The control retains the exact UTF-8 source artifacts and
+SHA-256 digests of both the continuation module and quarantine helper. Explicit
+lineage can be supplied with `--supersedes-control`; the original v1 control is
+`ab174e00067facf431db9c73bdd10279a69ac696a5955bfd9fd5ac4e3f4496d5`.
+The six original implementation bindings, model, prompts, criteria, packets,
+sampling frame, approval and cumulative limits remain unchanged.
+
+Every timed-out attempt remains **unknown, spent and unjudged**. Its source
+versions enter a quarantine union. Before any future dispatch, all untouched
+original tasks overlapping that union receive explicit execution exclusions.
+They are not replaced and remain null/pending in the original precision/recall
+denominators; an exclusion is never a negative judgment. Completed and already
+in-flight authorized requests retain their outcomes and full spend, including
+overlapping siblings that were dispatched before a timeout was observed.
+
+Execution retains four workers and the existing group/fold/logical order, with
+no retries, replacements or budget reset: **400 requests, 6,000 article
+exposures, zero retries** across native and imported history. Quarantine is
+rechecked after each timeout before another block is dispatched. At **three
+observed cumulative local timeouts**, a provider-health stop prevents new
+dispatch; already in-flight responses can raise the final count above three.
+
+Reports retain unknown attempts, excluded task/source IDs, eligible pending
+counts and the original denominators. Runtime-dependent missingness and source
+overlap may bias the model-reference estimates. This method description does
+not claim v2 execution, additional judgments, resolved remote generation or
+billing, improved accuracy or a new performance result.
+
+Before execution, all 34 selected source-free checks passed across the helper,
+continuation and transfer suites after fixture repairs. The initial new
+execution fixtures failed on an anchor-ID mismatch; the next pass exposed one
+test-only missing variable. The corrected execution file passed five tests in
+0.25 s; its other 29 selected checks passed on the preceding runs. Ruff and
+mypy passed for the changed production modules. No original bound module,
+research packet or answer validator was changed to make these checks pass.

@@ -78,9 +78,13 @@ def main() -> int:
     parser.add_argument("--transfer-nonce", help="Exact nonce returned by the completed export")
     parser.add_argument("--continue-only", action="store_true", help="Continue an already imported child; skip export and import")
     parser.add_argument("--resume-transfer", action="store_true", help="Explicitly resume the exact parent-sealed incomplete export")
+    parser.add_argument("--quarantine-local-timeouts", action="store_true")
+    parser.add_argument("--supersedes-control")
     args = parser.parse_args()
     if not args.continue_untouched or not args.authorization_instruction.strip():
         parser.error("Explicit --continue-untouched and a nonempty --authorization-instruction are required")
+    if args.supersedes_control and not args.quarantine_local_timeouts:
+        parser.error("--supersedes-control requires explicit --quarantine-local-timeouts")
     if bool(args.import_manifest) != bool(args.transfer_nonce):
         parser.error("Exact export resume requires both --import-manifest and --transfer-nonce")
     if args.continue_only and (args.import_manifest or args.transfer_nonce):
@@ -130,9 +134,14 @@ def main() -> int:
     child = Research(child_path, config=replace(offline, offline=False))
     observe(child)
     try:
-        result = execute(child, "luna_group_validation_continue", {"result": args.result,
+        continuation_input: dict[str, Any] = {"result": args.result,
             "study_key": args.study_key, "continue_untouched": True,
-            "authorization_instruction": args.authorization_instruction, "reuse_cache": True, "workers": 4},
+            "authorization_instruction": args.authorization_instruction, "reuse_cache": True, "workers": 4}
+        if args.quarantine_local_timeouts:
+            continuation_input["quarantine_local_timeouts"] = True
+            if args.supersedes_control:
+                continuation_input["supersedes_control"] = args.supersedes_control
+        result = execute(child, "luna_group_validation_continue", continuation_input,
             args.actor, "Evaluate untouched frozen Luna group and anchor tasks in parallel within the original cumulative budget; preserve failures and never retry")
         print(json.dumps({"result": result["id"], "status": result["status"],
             "presentation": result["presentation"]["content_path"], "automatic_retry": False}), flush=True)

@@ -18,6 +18,7 @@ from . import luna_validation_gateway as original
 
 
 METHOD = "luna-untouched-primary-continuation-v1"
+QUARANTINE_METHOD = "luna-untouched-primary-local-timeout-quarantine-v2"
 OUTPUT_CAP_ERROR = "codex_output_acceptance_limit_exceeded"
 REPARSE_BYTE_CAP = 2 * 1024 * 1024
 CONTENT_VALIDATION_ERRORS = frozenset({
@@ -184,6 +185,12 @@ def render_diagnostic(value: Json) -> str:
                  for row in value["outcome_codes"])
     lines.append(f"Retained byte-cap responses revalidated without new model calls: {len(value['revalidations'])}. "
         "Original invalid attempt projections and responses remain unchanged; recovered outcomes link separate revalidation records.")
+    quarantine = value.get("timeout_quarantine")
+    if quarantine is not None:
+        lines.append(f"Opt-in local-timeout quarantine: {quarantine['observed_timeout_count']} observed timeouts; "
+            f"{len(quarantine['source_versions'])} source versions quarantined; {len(value['execution_excluded_tasks'])} "
+            f"untouched tasks excluded from dispatch; health stop {quarantine['health_stop']}. "
+            "Unknown attempts remain unknown; excluded judgments remain null/pending in the original denominators.")
     lines.append(f"Dispatch guard: {value['obstacle'] or 'only previously untouched primary tasks may continue'}. "
         "No rejected attempt is retried, no packet or inclusion criterion changes, and missing judgments remain missing.")
     return "\n\n".join(lines)
@@ -191,7 +198,8 @@ def render_diagnostic(value: Json) -> str:
 
 def run(engine: Any, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
-    allowed = {"result", "study_key", "continue_untouched", "authorization_instruction", "workers", "reuse_cache"}
+    allowed = {"result", "study_key", "continue_untouched", "authorization_instruction", "workers", "reuse_cache",
+               "quarantine_local_timeouts", "supersedes_control"}
     if (set(data) - allowed or data.get("continue_untouched") is not True
             or data.get("reuse_cache", True) is not True
             or any(not isinstance(data.get(key), str) or not data[key].strip()
@@ -202,12 +210,16 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("luna_workers_outside_1_4")
     if engine.config.offline:
         raise ResearchError("luna_codex_execution_requires_explicit_online_mode")
+    quarantine_enabled = data.get("quarantine_local_timeouts", False)
+    if type(quarantine_enabled) is not bool or (data.get("supersedes_control") and not quarantine_enabled):
+        raise ResearchError("luna_timeout_quarantine_requires_explicit_opt_in")
+    method = QUARANTINE_METHOD if quarantine_enabled else METHOD
     source_bytes = Path(__file__).read_bytes()
     implementation = hashlib.sha256(source_bytes).hexdigest()
     implementation_artifact = original._artifact(engine, session, {
         "module": Path(__file__).name, "sha256": implementation, "source_utf8": source_bytes.decode("utf-8")},
         "Exact continuation implementation source bytes before control registration or prior-result reads")
-    control = {"method": METHOD, "original_result": data["result"], "study_key": data["study_key"],
+    control = {"method": method, "original_result": data["result"], "study_key": data["study_key"],
         "authorization_instruction": data["authorization_instruction"], "implementation_sha256": implementation,
         "implementation_artifact": implementation_artifact,
         "untouched_primary_tasks_only": True, "answer_validation_unchanged": True,
@@ -223,9 +235,36 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "old_response_payloads_and_attempt_projections_unchanged": True},
         "imported_history": "Exact parent intents remain historical reservations; no imported dispatch event or budget reset",
         "criteria_or_membership_changes": False}
+    timeout_control: Any = None
+    if quarantine_enabled:
+        from . import luna_timeout_quarantine
+
+        timeout_control = luna_timeout_quarantine
+
+        helper_bytes = Path(timeout_control.__file__).read_bytes()
+        helper_hash = hashlib.sha256(helper_bytes).hexdigest()
+        helper_artifact = original._artifact(engine, session, {"module": Path(timeout_control.__file__).name,
+            "sha256": helper_hash, "source_utf8": helper_bytes.decode("utf-8")},
+            "Exact opt-in timeout-quarantine helper bytes before control registration or result reads")
+        control["local_timeout_quarantine"] = {"opt_in": True, "helper_sha256": helper_hash,
+            "helper_artifact": helper_artifact, "only_failure": "codex_timeout_unknown_outcome",
+            "timeout_seconds": 180, "unknown_outcomes_remain_unknown": True,
+            "prospective_source_overlap_exclusions": True, "excluded_answers": None,
+            "original_denominators_retained": True, "retry_or_replacement": False,
+            "health_stop_observed_timeouts": 3, "already_inflight_responses_and_spend_retained": True,
+            "four_worker_order_unchanged": True,
+            "limitations": "Runtime-dependent missingness and source-overlap exclusions may bias model-reference metrics"}
+        control["stop_on"] = ["unrecognized transport failure", "unknown without strict retained local-timeout metadata",
+            "at least three observed cumulative local timeouts", "unrecognized validation error", "audit failure"]
     # Register the control change before reading prior research results or packets.
-    amendment = engine._version(session, context, {"kind": "protocol",
-        "key": data["study_key"] + "-untouched-continuation-control", "content": control})["id"]
+    registration: Json = {"kind": "protocol", "key": data["study_key"] + "-untouched-continuation-control", "content": control}
+    if quarantine_enabled:
+        registration["reason"] = "Explicit opt-in execution-only quarantine of retained exact local timeouts; no retries, replacements, model/packet changes or budget reset"
+        if data.get("supersedes_control"):
+            registration["supersedes"] = data["supersedes_control"]
+        else:
+            registration["amend_latest"] = True
+    amendment = engine._version(session, context, registration)["id"]
     old = engine.ledger.get(data["result"], "luna_group_validation_result")
     plan_id, study = old["plan"], data["study_key"]
     plan = engine.ledger.get(plan_id, "luna_group_validation_plan")
@@ -327,13 +366,34 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         outcomes[task["logical_id"]] = outcome
         classification = _classification(engine, outcome)
         codes[(task["mode"], outcome["status"], outcome.get("error"), classification)] += 1
-        if classification in {"unknown", "transport_or_unrecognized_failure"}:
+        if classification == "transport_or_unrecognized_failure" or (classification == "unknown" and not quarantine_enabled):
             blocked = "Prior unknown, transport or unrecognized failure; no new dispatch allowed"
     if any(item["task_key"] not in known_keys for item in history):
         raise ResearchError("luna_dispatch_history_outside_frozen_plan")
-    diagnostic = {"method": METHOD, "versions": bound.versions, "original_result": data["result"],
+    quarantine_info: Json | None = None
+    execution_excluded: dict[str, Json] = {}
+    quarantine_exclusion_records: set[str] = set()
+
+    def refresh_quarantine(future_tasks: list[Json], in_flight: set[str] | None = None) -> None:
+        nonlocal quarantine_info, blocked
+        if timeout_control is None:
+            return
+        quarantine_info = timeout_control.apply_quarantine(engine, session, bound, control_id=amendment,
+            study_key=study, plan_id=plan_id, config=config, history=history, outcomes=outcomes,
+            tasks=future_tasks, in_flight_attempt_ids=in_flight)
+        for excluded in quarantine_info["excluded_tasks"]:
+            execution_excluded[excluded["logical_id"]] = excluded
+        quarantine_exclusion_records.update(quarantine_info["exclusions"])
+        if not quarantine_info["safe"]:
+            blocked = quarantine_info["obstacle"] or "Unrecognized unknown outcome; no new dispatch allowed"
+        elif quarantine_info["health_stop"]:
+            blocked = "Observed cumulative local-timeout health threshold reached; already in-flight responses retained"
+
+    refresh_quarantine(pending)
+    diagnostic = {"method": method, "versions": bound.versions, "original_result": data["result"],
         "plan": plan_id, "study_key": study, "control_amendment": amendment,
         "parent_transfer": transfer, "imported_prior_attempts": len(imported),
+        "timeout_quarantine": quarantine_info, "execution_excluded_tasks": list(execution_excluded.values()),
         "workflow_model_attempts": spent, "workflow_article_exposures": exposures,
         "untouched_tasks": len(pending), "new_model_calls": 0, "automatic_retries": 0,
         "outcome_codes": [{"mode": key[0], "status": key[1], "error": key[2],
@@ -348,9 +408,11 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         "results": [{"kind": "luna_group_validation_diagnostic", "id": diagnostic_id}],
         "markdown": render_diagnostic(diagnostic), "destination": "codex_chat", "status": "prepared_for_delivery"})
     manifest = original._artifact(engine, session, {"binding": binding, "control_amendment": amendment,
+        "execution_control": control,
         "continuation_implementation_sha256": implementation, "original_result": data["result"],
         "continuation_implementation_artifact": implementation_artifact,
         "parent_transfer": transfer,
+        "timeout_quarantine": quarantine_info, "execution_excluded_tasks": list(execution_excluded.values()),
         "untouched_tasks": pending, "existing_attempts": [item["attempt"] for item in history],
         "diagnostic": diagnostic_id, "scope": {"max_requests": 400, "max_article_exposures": 6000, "automatic_retries": 0}},
         "Continuation control, original bindings, existing spend and untouched request manifest before dispatch")
@@ -366,9 +428,9 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         result = {"versions": bound.versions, "plan": plan_id, "study_key": study,
             "group_result": plan["group_result"], "manifest": manifest, "batch": batch,
             "status": "complete" if counts["valid"] == len(tasks) else "partial",
-            "obstacle": ("Group screen finished; anchor screening remains pending" if interim else blocked)
+            "obstacle": ("Eligible group screen finished; anchor screening and execution-excluded judgments remain pending" if interim else blocked)
                 or ("Rejected or unavailable frozen tasks remain unjudged; no retries"
-                    if counts["invalid"] + counts["failed"] else None),
+                    if counts["invalid"] + counts["failed"] or execution_excluded else None),
             "expected_tasks": len(tasks), "task_counts": {**counts, "pending": len(tasks) - len(outcomes)},
             "preparation_missing_counts": {status: sum(task["status"] == status for task in tasks)
                                            for status in ("source_unavailable", "oversize")},
@@ -379,8 +441,12 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "holdout_scope": "Frozen group audit then held-out tasks before anchors; no label tuning; anchor overlap retained",
             "historical_study_budget_changed": False,
             "model_metadata": "Observed identity and usage retained per attempt; unavailable stays null",
-            "continuation_method": METHOD, "control_amendment": amendment, "original_result": data["result"],
+            "continuation_method": method, "control_amendment": amendment, "original_result": data["result"],
             "parent_transfer": transfer, "imported_prior_attempts": len(imported),
+            "native_model_attempts": spent - len(imported), "timeout_quarantine": quarantine_info,
+            "execution_excluded_tasks": list(execution_excluded.values()), "execution_excluded_count": len(execution_excluded),
+            "eligible_pending_tasks": sum(task["logical_id"] not in outcomes and task["logical_id"] not in execution_excluded for task in tasks),
+            "quarantine_exclusion_records": sorted(quarantine_exclusion_records),
             "new_model_attempts": spent - initial_spent, "interim_group_result": interim,
             "retained_output_revalidation_counts": {
                 "attempted": sum(bool(item.get("revalidation")) for item in outcomes.values()),
@@ -394,7 +460,15 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             "markdown": original.render_result(result) + f"\n\nContinuation control {amendment}: "
                 f"{spent - initial_spent} previously untouched primary attempts; rejected attempts retained without retry. "
                 f"Retained byte-cap revalidation counts: {result['retained_output_revalidation_counts']}. "
-                + ("Interim whole-group result, saved before the anchor phase." if interim else "Frozen group-first execution; no label tuning."),
+                + ("Interim whole-group result, saved before the anchor phase." if interim else "Frozen group-first execution; no label tuning.")
+                + (f"\n\nLocal-timeout quarantine: {quarantine_info['observed_timeout_count']} observed timeouts, "
+                    f"{len(quarantine_info['source_versions'])} source versions, {len(execution_excluded)} execution exclusions; "
+                    f"eligible tasks still pending {result['eligible_pending_tasks']}. "
+                    "Timed-out attempts remain unknown; excluded per-article judgments remain null/pending, never negative. "
+                    "Original denominators, all historical/in-flight spend and the 400/6,000 limits remain unchanged. "
+                    "Three observed timeouts stop new dispatch; already in-flight responses can raise that count further. "
+                    "Runtime-dependent missingness and source overlap can bias these model-reference metrics."
+                    if quarantine_info is not None else ""),
             "destination": "codex_chat", "status": "prepared_for_delivery"})
         return {"id": identifier, **result, "presentation": presentation}
 
@@ -402,9 +476,14 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
     phase = None
     cursor = 0
     while cursor < len(pending) and not blocked:
+        while cursor < len(pending) and pending[cursor]["logical_id"] in execution_excluded:
+            cursor += 1
+        if cursor == len(pending):
+            break
         mode, fold = pending[cursor]["mode"], pending[cursor]["fold"]
         if mode == "anchor" and not group_capture:
-            if not all(task["logical_id"] in outcomes for task in tasks if task["mode"] == "group"):
+            if not all(task["logical_id"] in outcomes or task["logical_id"] in execution_excluded
+                       for task in tasks if task["mode"] == "group"):
                 raise ResearchError("luna_group_first_barrier_incomplete")
             capture_result(interim=True)
             group_capture = True
@@ -418,6 +497,9 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
         while (cursor < len(pending) and len(prepared) < workers
                and (pending[cursor]["mode"], pending[cursor]["fold"]) == (mode, fold)):
             task = pending[cursor]
+            if task["logical_id"] in execution_excluded:
+                cursor += 1
+                continue
             if spent + 1 > 400 or exposures + len(task["source_versions"]) > 6000:
                 blocked = "Workflow-wide request/article-exposure cap reached"
                 break
@@ -448,16 +530,21 @@ def run(engine: Any, session: str, context: Context, data: Json) -> Json:
             prepared.append((invocation, intended["attempt"]))
             dispatched.append((task, intended))
             cursor += 1
+        in_flight_attempts = {intended["attempt"] for _, intended in dispatched}
         for index, response in engine.gateway.codex_dispatch(session, provider, prepared, workers):
             task, intended = dispatched[index]
             outcome = original._complete(engine, session, task, intended, response)
             outcome = _recover_output_cap(engine, session, bound, task, outcome, amendment)
             outcomes[task["logical_id"]] = outcome
+            in_flight_attempts.remove(intended["attempt"])
             engine.ledger.append(session, "luna.continuation.task.completed", {"mode": task["mode"],
                 "status": outcome["status"], "error": outcome.get("error"),
                 "logical_id": task["logical_id"], "attempt": intended["attempt"],
                 "original_status": outcome.get("original_status"), "original_error": outcome.get("original_error"),
                 "revalidation": outcome.get("revalidation")})
-            if _classification(engine, outcome) in {"unknown", "transport_or_unrecognized_failure"}:
+            classification = _classification(engine, outcome)
+            if classification == "unknown" and quarantine_enabled:
+                refresh_quarantine(pending[cursor:], in_flight_attempts)
+            elif classification in {"unknown", "transport_or_unrecognized_failure"}:
                 blocked = "New unknown, transport or unrecognized failure; further dispatch stopped"
     return capture_result()

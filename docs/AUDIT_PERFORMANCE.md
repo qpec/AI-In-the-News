@@ -162,3 +162,30 @@ there is no automatic retry or new budget.
 
 Full-parent operations remain expensive. This change scopes the Luna study;
 it is not a completed generic partitioning service for all research operations.
+
+## Opt-in continuation after a retained local timeout
+
+The bounded workspace reduces audit scope; it does not prevent Codex transport
+timeouts. The separate opt-in v2 execution control is described in
+[Luna grouping validation](LUNA_GROUP_VALIDATION.md#opt-in-execution-control-v2-local-timeout-quarantine).
+It recognizes only the retained exact 180-second local timeout and leaves that
+attempt unknown and spent. All untouched frozen requests sharing any of its
+source versions are prospectively excluded before future model intents, with
+explicit exclusion records. Their judgments remain null/pending in the original
+denominators; there are no replacements or retries.
+
+Before prior result/source reads, the amended control registers both the exact
+continuation and quarantine-helper source artifacts and their SHA-256 digests,
+with version lineage to the earlier control. Original request manifests,
+criteria, model/configuration, approval and native/imported spend remain bound.
+The same four-worker order and cumulative **400-request/6,000-exposure/zero-retry**
+limits apply. All already in-flight responses and their spend are retained.
+Three observed cumulative timeouts stop new dispatch; in-flight responses may
+raise the final observed count above that threshold. Other unknown or transport
+failures still stop execution.
+
+This is an execution-only missingness policy, not an audit-verification shortcut
+or a claim of additional completed research. Runtime-dependent exclusions may
+bias quality estimates. No v2 timing, new judgment, accuracy improvement or
+resolution of unknown remote activity is claimed here; actual outcomes and
+validation must be reported separately from the protected results.
