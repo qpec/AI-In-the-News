@@ -57,7 +57,8 @@ def saved(engine: Research, kind: str, versions: dict[str, str] | None) -> list[
     return [row for row in values if versions is None or row["versions"] == versions]
 
 
-def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str) -> Json:
+def dispatch(engine: Research, session: str, context: Context, parameters: Json, purpose: str,
+             account_ceiling: int = 4000) -> Json:
     require_active(engine, session)
     # Billing projection references immutable receipts, avoiding repeated full-text reads.
     missing = engine.ledger.db.execute("SELECT id FROM records WHERE kind='newsapi_collection_receipt' AND id NOT IN (SELECT json_extract(payload,'$.receipt_id') FROM records WHERE kind='newsapi_collection_cost')").fetchall()
@@ -76,15 +77,16 @@ def dispatch(engine: Research, session: str, context: Context, parameters: Json,
         unreflected = [r for r in receipts[receipts.index(usage[-1])+1:] if not r["purpose"].startswith("usage")]
         if any(r["billed_tokens"] is None for r in unreflected):
             raise ResearchError("Unavailable billing requires account reconciliation before another search")
-        if used + sum(r["billed_tokens"] for r in unreflected) + 5 > 4000:
-            raise ResearchError("4000 total account usage target reached; next request blocked")
+        if used + sum(r["billed_tokens"] for r in unreflected) + 5 > account_ceiling:
+            raise ResearchError(f"{account_ceiling} total account usage target reached; next request blocked")
         if any(r["billed_tokens"] is not None and r["billed_tokens"] > 5 for r in unreflected):
             raise ResearchError("Single-year charge exceeded five-token bound")
     attempt = str(uuid.uuid4())
     engine.ledger.record(session, "newsapi_collection_intent", attempt,
         {"attempt": attempt, "versions": context.versions, "parameters": parameters,
          "purpose": purpose, "started_at": utc(), "reserved_tokens": 5,
-         "total_account_target": 4000, "authentication_omitted": True, "automatic_retries": 0})
+         "total_account_target": 4000, "account_ceiling": account_ceiling,
+         "authentication_omitted": True, "automatic_retries": 0})
     status, headers, raw = transport(parameters)
     key = os.environ.get("EVENTREGISTRY_API_KEY", "")
     if key and (key.encode() in raw or key in canonical(headers)):
@@ -152,7 +154,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
     engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
     policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
-    backfill = data.get("action") == "backfill"
+    backfill = data.get("action") in {"backfill", "backfill_materialize", "backfill_missingness"}
     periods = BACKFILL_PERIODS if backfill else PERIODS
     if (policy.get("method") != METHOD
             or policy.get("total_account_target") != 4000 or policy.get("monthly_allowance") != 5000
@@ -167,7 +169,11 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         from .newsapi_materialize import materialize
 
         return materialize(engine, session, context)
-    if data.get("action") == "missingness":
+    if data.get("action") == "backfill_materialize":
+        from .newsapi_materialize import materialize
+
+        return materialize(engine, session, context, BACKFILL_PERIODS, "backfill-")
+    if data.get("action") in {"missingness", "backfill_missingness"}:
         from .newsapi_missingness import run as missingness
 
         return missingness(engine, session, context, data)
@@ -232,6 +238,7 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
 def collect(engine: Research, session: str, context: Context, data: Json, policy: Json,
             periods: list[tuple[str, str]] | None = None) -> Json:
     periods = PERIODS if periods is None else periods
+    account_ceiling = (5000 if periods == BACKFILL_PERIODS and policy.get("complete_requested_history_within_allowance") is True else 4000)
     proof = engine.ledger.get(policy.get("archive_check", ""), "newsapi_collection_check")
     if (policy.get("collection_enabled") is not True
             or proof["archive_access"] != "verified_by_historical_articles"
@@ -240,7 +247,7 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
     limit = data.get("pages", 20)
     if not isinstance(limit, int) or not 1 <= limit <= 40:
         raise ResearchError("Collect 1 through40 pages per checkpoint")
-    baseline = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_collection_batch")
+    baseline = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_before_collection_batch", account_ceiling)
     if baseline["http_status"] != 200 or number(baseline["response"].get("usedTokens")) is None:
         raise ResearchError("Live account usage unavailable")
     stop = "checkpoint"
@@ -256,9 +263,9 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
         page = year["pages"] + 1
         try:
             receipt = dispatch(engine, session, context, collection_request(period, page),
-                               f"collect_{year['year']}_page_{page}")
+                               f"collect_{year['year']}_page_{page}", account_ceiling)
         except ResearchError as error:
-            if str(error).startswith("4000 total account usage"):
+            if str(error).startswith(f"{account_ceiling} total account usage"):
                 stop = "budget_target"
                 break
             raise
@@ -282,12 +289,13 @@ def collect(engine: Research, session: str, context: Context, data: Json, policy
         print(json.dumps({"year": year["year"], "page": page, "returned": len(articles),
                           "cost": receipt["billed_tokens"], "provider_total": section.get("totalResults")}), flush=True)
         time.sleep(.6)
-    after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_collection_batch")
+    after = dispatch(engine, session, context, {"endpointVariant": "usage"}, "usage_after_collection_batch", account_ceiling)
     result = {**collection_state(engine, periods), "versions": context.versions, "stop_reason": stop,
               "periods": periods,
               "baseline_used": number(baseline["response"].get("usedTokens")),
               "final_observed_used": number(after["response"].get("usedTokens")),
               "target_used": 4000, "allowance": 5000, "model_calls": 0, "scored": 0,
+              "account_ceiling": account_ceiling,
               "archive_check": policy["archive_check"], "completed_at": utc(),
               "usage_receipts": [baseline["id"], after["id"]]}
     if result["final_observed_used"] is not None:

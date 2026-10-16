@@ -16,21 +16,25 @@ if TYPE_CHECKING:
 METHOD = "nl-cyber-private-working-bundles-v1"
 
 
-def materialize(engine: Research, session: str, context: Context) -> Json:
+def materialize(engine: Research, session: str, context: Context,
+                periods: list[tuple[str, str]] | None = None, prefix: str = "") -> Json:
     require_active(engine, session)
     engine._require(context, {"retrieval_profile"})
     profile = engine.ledger.get(context.versions["retrieval_profile"], "retrieval_profile")["content"]
     if profile.get("method") != METHOD:
         raise ResearchError("Register the private working-copy method first")
-    state = collection_state(engine)
+    periods = PERIODS if periods is None else periods
+    state = collection_state(engine, periods)
     progress = saved(engine, "newsapi_collection_progress", None)
     if not progress or progress[-1]["stop_reason"] not in {"query_exhausted", "budget_target"}:
         raise ResearchError("Finish collection at exhaustion or budget before materializing working copies")
     current = progress[-1]
-    receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["purpose"].startswith("collect_")]
+    if current.get("periods", [list(p) for p in PERIODS]) != [list(p) for p in periods]:
+        raise ResearchError("Materialize only the matching period-bound final progress")
+    receipts = [r for r in saved(engine, "newsapi_collection_receipt", None) if r["id"] in state["receipt_ids"]]
     root = engine.ledger.artifacts.root.parent
     outputs = []
-    for period in PERIODS:
+    for period in periods:
         rows, seen, lineage = [], set(), []
         for receipt in receipts:
             if receipt["parameters"]["dateStart"] != period[0] or receipt["http_status"] != 200:
@@ -58,7 +62,7 @@ def materialize(engine: Research, session: str, context: Context) -> Json:
         raw = buffer.getvalue()
         artifact = engine.ledger.artifacts.put_bytes(raw)
         engine.ledger.append(session, "newsapi.private_bundle.saved", {"artifact": artifact, "year": period[0][:4]})
-        path = root / f"articles-{period[0][:4]}.zip"
+        path = root / f"{prefix}articles-{period[0][:4]}.zip"
         path.write_bytes(raw)
         outputs.append({"year": period[0][:4], "records": len(rows), "artifact": artifact, "path": str(path),
                         "bytes": len(raw), "source_receipts": lineage})
@@ -73,9 +77,9 @@ def materialize(engine: Research, session: str, context: Context) -> Json:
     csv_bytes = buffer_csv.getvalue().encode("utf-8-sig")
     csv_artifact = engine.ledger.artifacts.put_bytes(csv_bytes)
     engine.ledger.append(session, "newsapi.private_costs.saved", {"artifact": csv_artifact})
-    csv_path = root / "request-costs.csv"
+    csv_path = root / f"{prefix}request-costs.csv"
     csv_path.write_bytes(csv_bytes)
-    result = {**state, "versions": context.versions, "bundles": outputs, "cost_csv": str(csv_path),
+    result = {**state, "versions": context.versions, "periods": periods, "bundles": outputs, "cost_csv": str(csv_path),
               "cost_csv_artifact": csv_artifact, "collection_result": current["id"],
               "stop_reason": current["stop_reason"], "final_observed_used": current["final_observed_used"],
               "allowance": 5000, "target_used": 4000, "model_calls": 0, "network_calls": 0, "generated_at": utc(),

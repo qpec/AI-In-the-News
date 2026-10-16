@@ -39,6 +39,14 @@ def main() -> None:
             versions = {kind: run("version", {"kind": kind, "key": "nl-cyber-backfill-2020-v1", "content": value,
                 "supersedes": original[kind], "reason": "User extends collection to2020 without changing query or account-wide budget"})["id"] for kind, value in content.items()}
             path.write_text(json.dumps(versions), encoding="utf-8")
+        policy = engine.ledger.get(versions["policy"], "policy")["content"]
+        if not policy.get("complete_requested_history_within_allowance"):
+            amended = {**policy, "complete_requested_history_within_allowance": True,
+                "account_ceiling": 5000, "total_account_target": 4000,
+                "budget_interpretation": "User originally requested80percent or more of5000tokens and now explicitly extends to2020 using remaining tokens.4000is a soft utilization target;5000is the hard account ceiling. Observed33737oldermatches across four years imply340pages,1700searchtokens and about4407total, within allowance. Stop at query exhaustion, never pad spending"}
+            versions["policy"] = run("version", {"kind": "policy", "key": "nl-cyber-backfill-complete-within-5000-v1", "content": amended,
+                "supersedes": versions["policy"], "reason": "Complete the user's requested history within5000allowance; original80percent or more goal is not a4000hardcap"})["id"]
+            path.write_text(json.dumps(versions), encoding="utf-8")
         progress_path = root / "backfill-progress.json"
         if progress_path.exists():
             prior = json.loads(progress_path.read_text(encoding="utf-8"))
@@ -52,7 +60,7 @@ def main() -> None:
         for y in result["years"]:
             text += f"| {y['year']} | {y['pages']} | {y['returned']:,} | {y['provider_total']} | {y['reported_cost']:g} | {y['exhausted']} |\n"
         text += (f"\n**{result['unique_articles']:,} unique candidate articles**, {result['missing_body']} missing texts, {result['failed_pages']} failed/interrupted attempts and {result['scope_invalid']} invalid-scope rows. "
-                 f"Account usage: **{result['baseline_used']:g} to {result['final_observed_used']:g}/5,000**, shared target4,000. "
+                 f"Account usage: **{result['baseline_used']:g} to {result['final_observed_used']:g}/5,000**, soft target4,000; hard ceiling{result.get('account_ceiling', 4000)}. "
                  f"Backfill requests explicitly report {result['reported_collection_cost']:g} tokens. Stop: `{result['stop_reason']}`. "
                  "Unexhausted years remain incomplete; article counts are not event/incident counts. No relevance scoring, cutoff or model judgement.\n\n")
         for a in result["examples"]:

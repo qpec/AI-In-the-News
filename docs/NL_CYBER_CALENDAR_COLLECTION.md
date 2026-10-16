@@ -158,3 +158,14 @@ Original receipts/materializations remain immutable. New progress and receipt-ID
 selections are period-bound, distinguishing the two 2023 windows. Every checkpoint
 captures exact coverage, cost, missingness and examples through the audited runtime.
 If the budget stops collection, unexhausted years remain explicitly incomplete.
+
+First pages reported 33,737 older matches, implying 340 single-year pages and
+1,700 search tokens at the observed five-token rate. Completing these fits the
+user's original "80% or more" goal within the 5,000-token allowance (approximately
+4,407 total). A separate policy amendment permits the explicitly requested history
+to complete above the 4,000 soft utilization target, with 5,000 as the hard shared
+account ceiling. Original three-year calls retain their 4,000 ceiling. Every
+reservation records its ceiling, unknown outcomes still block, and no spending
+is added after query exhaustion. Separate `backfill_materialize` and
+`backfill_missingness` actions preserve older year bundles and their diagnostics
+without overwriting original files; they use the same audited deterministic methods.

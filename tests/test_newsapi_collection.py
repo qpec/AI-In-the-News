@@ -155,6 +155,24 @@ def test_2020_backfill_requires_authorization_and_keeps_original_scope_separate(
     assert len(set(original["receipt_ids"]) & set(extended["receipt_ids"])) == 0
 
 
+@pytest.mark.parametrize("used,expected,stop", [(3998, 4, "query_exhausted"), (4998, 0, "budget_target")])
+def test_backfill_completes_above_soft_target_but_respects_allowance(engine, monkeypatch, used, expected, stop):
+    run, calls, _ = collection_setup(engine, monkeypatch, used=used)
+    original = run()
+    versions = dict(original["versions"])
+    content = engine.ledger.get(versions["policy"], "policy")["content"]
+    versions["policy"] = engine.execute("version", {"kind": "policy", "key": "backfill-budget-test", "content": {
+        **content, "periods": nc.BACKFILL_PERIODS, "templates": [nc.collection_request(p, 1) for p in nc.BACKFILL_PERIODS],
+        "user_authorized_backfill_2020": True, "complete_requested_history_within_allowance": True}},
+        objective="Synthetic shared account ceiling check", actor="test")["id"]
+    result = engine.execute("newsapi_collection", {"action": "backfill", "execute": True},
+        objective="Synthetic shared account ceiling check", actor="test", versions=versions)
+    assert result["returned_articles"] == expected and result["stop_reason"] == stop
+    assert result["account_ceiling"] == 5000
+    if expected == 0:
+        assert all(p == {"endpointVariant": "usage"} for p in calls)
+
+
 def test_credential_pattern_quarantine_preserves_membership_without_secret(engine, monkeypatch):
     run, _, original = collection_setup(engine, monkeypatch)
     matched = "sk-" + "x"*30

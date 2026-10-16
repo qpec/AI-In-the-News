@@ -14,14 +14,14 @@ if TYPE_CHECKING:
 METHOD = "nl-cyber-fetch-missingness-v1"
 
 
-def inspect_receipts(receipts: list[Json]) -> Json:
+def inspect_receipts(receipts: list[Json], periods: list[tuple[str, str]] | None = None) -> Json:
     years = []
     fields: Counter[str] = Counter()
     quarantine_fields: Counter[str] = Counter()
     other_fields: Counter[str] = Counter()
     withheld_locators: Counter[str] = Counter()
     examples: list[Json] = []
-    for start, end in PERIODS:
+    for start, end in PERIODS if periods is None else periods:
         selected = [r for r in receipts if r["parameters"]["dateStart"] == start]
         good = [r for r in selected if r["http_status"] == 200 and isinstance(r["response"].get("articles", {}).get("results"), list)]
         indices = sorted({r["parameters"]["articlesPage"] for r in good})
@@ -88,7 +88,8 @@ def run(engine: Research, session: str, context: Context, data: Json) -> Json:
         raise ResearchError("Bind the exact original collection methods")
     receipts = [{"id": identifier, **engine.ledger.get(identifier, "newsapi_collection_receipt")}
                 for identifier in original["receipt_ids"]]
-    result = {**inspect_receipts(receipts), "versions": context.versions,
+    periods = [tuple(p) for p in original.get("periods", PERIODS)]
+    result = {**inspect_receipts(receipts, periods), "versions": context.versions,
         "source_result": data["result"], "receipt_ids": original["receipt_ids"], "network_calls": 0,
         "model_calls": 0, "generated_at": utc(), "classification": "Retrieval and retention diagnostics only"}
     identifier = engine.ledger.record(session, "newsapi_collection_missingness", str(uuid.uuid4()), result)
