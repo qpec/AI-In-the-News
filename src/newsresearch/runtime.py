@@ -193,6 +193,7 @@ class Research:
             "prepare_cross_window_event_review": self._prepare_cross_window_event_review,
             "judge_cross_window_event_review": self._judge_cross_window_event_review,
             "test_collective_group_vectors": self._test_collective_group_vectors,
+            "scale_event_vector_store": self._scale_event_vector_store,
             "plan_tags": self._plan_tags,
             "tag": self._tag,
             "tag_inspect": self._tag_inspect,
@@ -977,6 +978,12 @@ class Research:
     @audited_handler
     def _test_collective_group_vectors(self, session: str, context: Context, data: Json) -> Json:
         from .event_group_centroid_study import execute
+        return execute(self, session, context, data)
+
+    @audited_handler
+    def _scale_event_vector_store(self, session: str, context: Context, data: Json) -> Json:
+        from .event_vector_scale import execute
+
         return execute(self, session, context, data)
 
     @audited_handler

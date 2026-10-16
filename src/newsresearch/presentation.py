@@ -49,6 +49,7 @@ RESULT_KINDS = {
     "event_group_evidence_result",
     "event_group_evidence_judgment_result",
     "event_group_centroid_result",
+    "event_vector_store_result", "event_vector_store_query",
 }
 
 
