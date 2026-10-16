@@ -17,7 +17,7 @@ GROUP_RESULT = "1e803a0c84fe80ef441005687209364dd3302a3b0ab1f3e8169ea76f0e55600d
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=["prepare", "execute"])
+    parser.add_argument("phase", choices=["prepare", "execute", "run"])
     parser.add_argument("--workspace", type=Path, default=default_workspace())
     parser.add_argument("--study-key", required=True)
     parser.add_argument("--actor", default="codex:luna-group-validation")
@@ -26,13 +26,22 @@ def main() -> int:
     parser.add_argument("--plan")
     parser.add_argument("--approval-file", type=Path)
     parser.add_argument("--allow-codex-execution", action="store_true")
+    parser.add_argument("--approved-by")
+    parser.add_argument("--approval-instruction")
+    parser.add_argument("--approval-expires-at")
     args = parser.parse_args()
-    if args.phase == "prepare":
+    if args.phase in {"prepare", "run"}:
         if not args.codex_executable:
             parser.error("Preparation requires an explicit absolute Codex executable")
-        payload: dict[str, Any] = {"phase": "prepare", "group_result": GROUP_RESULT,
+        payload: dict[str, Any] = {"phase": args.phase, "group_result": GROUP_RESULT,
             "study_key": args.study_key, "codex_executable": args.codex_executable,
             "instruction": TASK_INSTRUCTION, "seed": args.seed}
+        if args.phase == "run":
+            if (not args.allow_codex_execution or not args.approved_by
+                    or not args.approval_instruction or not args.approval_expires_at):
+                parser.error("Composed run requires --allow-codex-execution, --approved-by, --approval-instruction and --approval-expires-at")
+            payload.update(allow_codex_execution=True, approved_by=args.approved_by,
+                approval_instruction=args.approval_instruction, approval_expires_at=args.approval_expires_at)
     else:
         if not args.plan or not args.approval_file or not args.allow_codex_execution:
             parser.error("Execution requires the exact plan, a fresh concrete approval file and --allow-codex-execution")
@@ -44,7 +53,7 @@ def main() -> int:
             stream.reconfigure(encoding="utf-8")
     project = Path(__file__).resolve().parents[1]
     config = Config.load(project / "research.toml")
-    if args.phase == "execute":
+    if args.phase in {"execute", "run"}:
         config = replace(config, offline=False)
     engine = Research(args.workspace, config=config)
     original = engine.ledger.append
@@ -56,6 +65,18 @@ def main() -> int:
         return event
 
     setattr(engine.ledger, "append", progress)
+    if args.phase == "run":
+        original_presentation = engine._record_presentation
+
+        def present_preparation(session: str, context: Any, data: dict[str, Any]) -> dict[str, Any]:
+            saved = original_presentation(session, context, data)
+            if any(result.get("kind") == "luna_group_validation_plan" for result in data.get("results", [])):
+                print(saved["markdown"], flush=True)
+                print(json.dumps({"stage": "preparation_saved_before_model_dispatch",
+                    "result": data["results"][0]["id"], "presentation": saved["content_path"]}), flush=True)
+            return saved
+
+        setattr(engine, "_record_presentation", present_preparation)
     try:
         print(json.dumps({"stage": "full_audit_preflight", "phase": args.phase}), flush=True)
         value = engine.execute("luna_group_validation", payload,

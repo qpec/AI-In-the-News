@@ -407,6 +407,26 @@ class Gateway:
         if session not in self.engine._active:
             raise AuditError("Luna screening requires an active audited gateway operation")
         phase = data.get("phase")
+        if phase == "run":
+            permitted = {"phase", "group_result", "study_key", "codex_executable", "instruction", "seed",
+                         "allow_codex_execution", "approved_by", "approval_instruction", "approval_expires_at"}
+            if set(data) - permitted or data.get("allow_codex_execution") is not True:
+                raise ResearchError("Composed Luna execution requires explicit bounded Codex authorization")
+            if any(not isinstance(data.get(key), str) or not data[key].strip()
+                   for key in ("study_key", "approved_by", "approval_instruction", "approval_expires_at")):
+                raise ResearchError("Composed Luna execution requires explicit human approval metadata")
+            prepared = self.luna_group_validation(session, context, {
+                **{key: data[key] for key in ("group_result", "study_key", "codex_executable", "instruction", "seed")
+                   if key in data}, "phase": "prepare"})
+            approval = {"method": "luna-validation-run-approval-v1", "plan": prepared["id"],
+                "study_key": data["study_key"], "approved_by": data["approved_by"],
+                "instruction": data["approval_instruction"], "expires_at": data["approval_expires_at"],
+                "allow_codex_account_execution": True, "allow_external_processing": True,
+                "max_requests": 400, "max_article_exposures": 6000, "max_retries": 0}
+            result = self.luna_group_validation(session, context, {
+                "phase": "execute", "plan": prepared["id"], "study_key": data["study_key"],
+                "run_approval": approval, "reuse_cache": True, "workers": 4})
+            return {**result, "preparation": prepared}
         if phase == "prepare":
             from .luna_validation_study import prepare
 
@@ -428,7 +448,7 @@ class Gateway:
                     {"kind": "policy", "key": content["study_key"] + "-Codex-approval",
                      "content": content["run_approval"]})["id"]
             return execute(self.engine, session, bound, content)
-        raise ResearchError("Choose Luna prepare or execute; neither silently performs the other")
+        raise ResearchError("Choose Luna prepare, execute or explicitly authorized composed run")
 
     def event_pair_experiment(self, session: str, context: Context, data: Json) -> Json:
         from .event_pair_experiment import _records, execute

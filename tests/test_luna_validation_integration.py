@@ -66,8 +66,18 @@ def test_audited_prepare_model_policy_capture_and_exact_resume(tmp_path, monkeyp
         calls = []
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.delenv("CODEX_API_KEY", raising=False)
+        presentation_order = []
+        original_presentation = engine._record_presentation
+
+        def capture(session, context, data):
+            saved = original_presentation(session, context, data)
+            presentation_order.append(data["results"][0]["kind"])
+            return saved
+
+        monkeypatch.setattr(engine, "_record_presentation", capture)
 
         def complete(self, invocation):
+            assert presentation_order[0] == "luna_group_validation_plan"
             calls.append(invocation)
             assert invocation.configured_model == "gpt-6-luna"
             assert 'model_reasoning_effort="low"' in invocation.command
@@ -88,7 +98,13 @@ def test_audited_prepare_model_policy_capture_and_exact_resume(tmp_path, monkeyp
         engine.config = replace(engine.config, offline=False)
         data = {"phase": "execute", "plan": prepared["id"], "study_key": prepared["study_key"],
             "run_approval": approval, "reuse_cache": True, "workers": 4}
-        result = engine.execute("luna_group_validation", data, objective="Exercise the real ledger/gateway with a synthetic provider", actor="test")
+        result = engine.execute("luna_group_validation", {"phase": "run", "group_result": state["group"],
+            "study_key": prepared["study_key"], "seed": "constructed-seed", "codex_executable": sys.executable,
+            "allow_codex_execution": True, "approved_by": approval["approved_by"],
+            "approval_instruction": approval["instruction"], "approval_expires_at": approval["expires_at"]},
+            objective="Exercise one composed audited preparation and synthetic provider execution", actor="test")
+        assert result["preparation"]["id"] == prepared["id"]
+        assert result["preparation"]["presentation"]["markdown"] == prepared["presentation"]["markdown"]
         assert result["status"] == "complete" and len(calls) == 4
         assert result["workflow_article_exposures"] == 11
         assert result["presentation"]["markdown"] == runner.render_result(result)

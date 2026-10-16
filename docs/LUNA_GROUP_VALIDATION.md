@@ -85,6 +85,14 @@ selections are not silently replaced. Execution requires a fresh concrete
 plan-bound Codex-account approval. Policy IDs/expiry changes cannot reset spend.
 At most four provider workers share the original single SQLite writer.
 
+An explicitly authorized `run` phase composes those same preparation and execution
+paths inside one `Research.execute()` operation. It retains the complete preflight,
+freezes the plan and saves its exact overview before dispatch, then registers the
+plan-bound policy using supplied human approval metadata. It performs no implicit
+authorization, extra retry or second preparation. This avoids verifying the
+unchanged store again between the two dependent phases. The separate commands
+remain available when preparation and execution require distinct operator steps.
+
 Requests, exact invocations, schemas and permissions are durable before dispatch;
 visible responses are saved before validation. Failed/unknown outcomes stop new
 model blocks. Exact-version cache reuse is explicit. Audit errors stop research.
@@ -95,6 +103,7 @@ the supported plan/result capture contracts and show their returned text.
 ```powershell
 uv run --offline --frozen python scripts/luna_group_validation.py prepare --study-key luna-seven-day-validation-20261016-v1 --codex-executable C:/Users/ynhan/AppData/Local/OpenAI/Codex/bin/9614f1d9b40d9c4f/codex.exe
 uv run --offline --frozen python scripts/luna_group_validation.py execute --study-key luna-seven-day-validation-20261016-v1 --plan PLAN_ID --approval-file PROTECTED_APPROVAL_JSON --allow-codex-execution
+uv run --offline --frozen python scripts/luna_group_validation.py run --study-key luna-seven-day-validation-20261016-v1 --codex-executable C:/Users/ynhan/AppData/Local/OpenAI/Codex/bin/9614f1d9b40d9c4f/codex.exe --allow-codex-execution --approved-by APPROVER --approval-instruction AUTHORIZING_INSTRUCTION --approval-expires-at AWARE_FUTURE_ISO_TIMESTAMP
 ```
 
 The existing embedding process currently owns the primary protected workspace.
@@ -126,3 +135,11 @@ writer lock. No Luna corpus approval, extra API call or membership change has
 been made by this implementation checkpoint. Preparation must first freeze the
 actual available frame and workload; execution then needs the concrete
 plan-bound Codex approval described above.
+
+On the user's subsequent **Do it** instruction, the composed route was added to
+carry this bounded evaluation through without a repeated full-store preflight.
+The one affected real-runtime integration test passed in 1.25 seconds with a
+mocked provider; Ruff and mypy on the changed code passed. A preparation-only
+process was interrupted during preflight before it returned a plan or dispatched
+a model. These are engineering checks, not new corpus results. Actual preparation,
+coverage and judgments must be appended from the resulting protected records.
