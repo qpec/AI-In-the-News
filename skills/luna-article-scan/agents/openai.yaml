@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Article Scan"
+  short_description: "Fast article leads and event-group screening"
+  default_prompt: "Use $luna-article-scan to read article leads quickly and audit a frozen sample of event groups."

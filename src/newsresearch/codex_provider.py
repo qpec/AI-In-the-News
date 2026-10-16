@@ -175,6 +175,18 @@ def build_prompt(request: Json) -> str:
         packet["history"] = request.get("history", [])
         packet["evidence"] = [{"id": item["id"], "source_version": item["source_id"],
                                "text": item["text"]} for item in request["evidence"]]
+    elif request.get("task_kind") == "luna_article_lead_screen":
+        from .luna_lead_answers import TASK_INSTRUCTION as lead_instruction, validate_request
+
+        validate_request(request)
+        packet["task"] = lead_instruction
+        packet["mode"] = request["mode"]
+        packet["anchor_source"] = request["anchor_source"]
+        packet["articles"] = [{"source_version": article["source_version"], "title": article["title"],
+            "published_at": article["published_at"], "coverage": article["coverage"]}
+            for article in request["articles"]]
+        packet["evidence"] = [{"id": item["id"], "source_id": item["source_id"], "text": item["text"]}
+            for item in request["evidence"]]
     elif request.get("task_kind") == "event_pair_identity":
         from .event_pair_answers import TASK_INSTRUCTION as pair_instruction, validate_request
 
@@ -189,6 +201,10 @@ def build_prompt(request: Json) -> str:
 
 
 def _worker_rules(request: Json) -> str:
+    if request.get("task_kind") == "luna_article_lead_screen":
+        from .luna_lead_answers import WORKER_RULES as lead_rules
+
+        return lead_rules
     if request.get("task_kind") == "event_pair_identity":
         from .event_pair_answers import WORKER_RULES as pair_rules
 
