@@ -26,6 +26,7 @@ RESULT_KINDS = {
     "event_pair_conjunction_experiment",
     "event_pair_monotone_result",
     "event_rule_application_result",
+    "event_group_refinement_result",
 }
 
 

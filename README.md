@@ -71,6 +71,7 @@ Verified against installed **Codex CLI 0.162.1**. Codex must trust the project a
 - [Registered two-feature conjunction amendment after the failed comparison](docs/EVENT_PAIR_CONJUNCTION_AMENDMENT.md)
 - [Final finite five-feature threshold-family screen](docs/EVENT_PAIR_MONOTONE_FINAL.md)
 - [Offline provisional application to every pilot article](docs/EVENT_RULE_APPLICATION.md)
+- [Offline complete-link group refinement and comparison](docs/EVENT_GROUP_REFINEMENT.md)
 - [Complete-preflight performance and reproducible synthetic benchmarks](docs/PREFLIGHT_PERFORMANCE.md)
 
 Use [proportionate software checks](docs/TESTING.md): run the tests for the
