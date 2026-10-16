@@ -87,3 +87,29 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 ## Commit practice
 
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
+
+
+## Full-corpus vector-store checkpoint — 2026-10-16
+
+- The offline [full-corpus catalog](docs/FULL_CORPUS_VECTOR_STORE.md) completed as
+  result 50973537fd76b094a15dcc37e846fdf2028b62098aa27ed2add5c267d2b0fdea:
+  209,114 saved rows from 19 bundles, including 61,089 Cybercrime NL rows;
+  208,399 distinct provider/body article versions. This is a separately audited
+  source registry, not a core dataset/import exceeding the 20,000 limit.
+- 205,105 versions have retained text; 3,294 lack text, including 2,859 quarantines.
+  Only 19,576 versions have migrated compatible vectors; 17,116 current group
+  vectors are persisted and the 409,110-vector passage index is retained.
+  Full vector coverage and new event grouping remain unfinished. Catalog IDs
+  are not core source/passage IDs. Current seven-day memberships remain unchanged.
+- The pending protected queue covers 185,529 text-bearing versions, 3,186,920
+  windows and 172,475,624 tokens: estimated standard input cost USD22.42183112
+  before retries. No new paid embedding/model/collection run was authorized or
+  dispatched. Catalog-to-gateway planning integration (or explicit bounded core
+  imports) and concrete plan-bound paid approval are required before execution.
+  Do not bypass the shared gateway or silently raise global limits.
+- Exact presentation artifact
+  fdfa6db58a522a34bbb3971e84d1a093447d84d363918c01d63681bc87001409
+  contains coverage, missingness, numerical checks and two keyword overviews.
+  100% numerical recall@8 on 16 queries/index is not event accuracy. Warm retrieval
+  medians 6.83ms/article and 7.22ms/group exclude startup and durable audit; full
+  operation took 27.5 minutes, including 13.6-minute preflight/registration.

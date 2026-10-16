@@ -102,3 +102,84 @@ Official engineering references:
 [Faiss persistence and integrity responsibilities](https://github.com/facebookresearch/faiss/wiki/Index-IO,-cloning-and-hyper-parameter-tuning),
 [SQLite FTS5/BM25](https://www.sqlite.org/fts5.html),
 [OpenAI embedding model/pricing](https://developers.openai.com/api/docs/models/text-embedding-3-large).
+
+
+## Executed checkpoint — 2026-10-16
+
+The offline operation completed under key
+full-corpus-event-store-20261016-v1, result
+50973537fd76b094a15dcc37e846fdf2028b62098aa27ed2add5c267d2b0fdea.
+Manifest a8c51c4e2f2af5812e5ebeb545db40ae1d45e141a7b5cb28f6d48b1d06dbd1e1
+was durable before source verification/ingestion. Exact result presentation
+artifact fdfa6db58a522a34bbb3971e84d1a093447d84d363918c01d63681bc87001409
+was prepared for this chat; UI visibility and human reading are unobserved.
+The closed SQL artifact is
+2a6f387ea74abc9e3355b5ad2f57fc58d76485f581863cb0169618f74494c9e6.
+Artifacts, source rows, indexes, payloads and logs remain protected outside Git.
+
+| Coverage | Observed result |
+| --- | ---: |
+| Saved input rows / bundles | 209,114 / 19 |
+| Legacy rows | 148,025 |
+| Cybercrime NL rows, original and 2020–2023 extension | 61,089 |
+| Distinct provider/body article versions | 208,399 |
+| Distinct provider IDs | 208,397 |
+| Versions with retained nonblank text | 205,105 |
+| Versions without text | 3,294 |
+| Quarantined versions (part of missing text) | 2,859 |
+| Compatible saved article vectors migrated | 19,576 |
+| Current group vectors persisted | 17,116 |
+| Existing passage vectors retained by reference | 409,110 |
+| Catalog rows failed / pending | 0 / 0 |
+| New embeddings / model calls / collection / group merges | 0 / 0 / 0 / 0 |
+
+Source occurrences were preserved rather than replacing revised metadata or
+collapsing reports into events. The compatible vectors come from the original
+pilot. The full catalog is keyword searchable; full-corpus vector coverage and
+event grouping have NOT been completed. Core sources/passages were not replaced
+by catalog identifiers. Original seven-day memberships, review budgets and
+sealed labels remain unchanged.
+
+| Restored index | Queries | Numerical recall@8 | Tie-aware recall@8 | Median / p95 retrieval | Restore |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Article | 16 | 100% | 100% | 6.83 / 10.32 ms | 1.87 s |
+| Group | 16 | 100% | 100% | 7.22 / 9.92 ms | 1.38 s |
+
+The complete run took 1,651.0 seconds (27.5 minutes); preflight plus method
+registration took 815.8 seconds (13.6 minutes). Ingestion, complete catalog
+validation, token counting, protected snapshot publication and checks account
+for the remainder. The millisecond measurements exclude startup, restoration
+and durable query audit. They are not end-to-end service latency or event recall.
+There is no claim of a speed improvement over the prior warm-centroid prototype.
+
+Full-catalog keyword checks completed with zero failures/pending items:
+ransomware matched 12,647 article versions / 12,710 metadata records; exact phrase
+artificial intelligence matched 59,691 versions / 59,710 records. Three ranked
+source-linked records per query and their actual BM25 scores are in the protected
+exact presentation. No relevance cutoff, yes/no tags or semantic acceptance apply.
+
+### Remaining work and concrete embedding estimate
+
+185,529 retained text-bearing article versions lack compatible embeddings:
+3,186,920 original-method windows and 172,475,624 exact tokenizer input tokens.
+The retained standard input rate gives USD22.42183112 before retries/query
+embeddings. This is a conservative total without eliminating repeated bodies
+under different provider IDs. Canonical float32 output for these windows alone
+would occupy 39,160,872,960 bytes, before provider responses, index copies,
+payloads, safety margin and other retained artifacts.
+
+This is a registered workload estimate and protected per-article pending queue,
+not paid-run approval or a dispatchable gateway embedding plan. The existing
+paid planner expects core source/passages and per-dataset preparation. A bounded
+catalog-to-gateway planning integration or explicit bounded core imports still
+needs implementation/validation before this queue can be dispatched. A concrete
+plan-bound paid authorization must then cover the requested run. No direct SDK
+shortcut, key logging, global limit change, semantic model run or automatic
+membership adoption is permitted by this checkpoint.
+
+The focused helper tests passed (three); the full-catalog integration and
+canonical/index disagreement regression passed (two). Ruff and mypy passed on
+the new implementation. The final integration run was two tests in 1.60 seconds;
+the initial three helper checks passed in the prior combined run. Only affected
+checks were repeated after failures. These are synthetic software checks,
+not independent scientific validation.
