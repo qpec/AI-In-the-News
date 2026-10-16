@@ -152,6 +152,10 @@ def save_cost(engine: Research, session: str, identifier: str, receipt: Json) ->
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
+    if data.get("action") == "retrieval_audit":
+        from .newsapi_retrieval_audit import run as retrieval_audit
+
+        return retrieval_audit(engine, session, context, data)
     engine._require(context, {"protocol", "question", "selection", "profile", "policy"})
     policy = engine.ledger.get(context.versions["policy"], "policy")["content"]
     backfill = data.get("action") in {"backfill", "backfill_consistency", "backfill_materialize", "backfill_missingness", "backfill_topic_export"}

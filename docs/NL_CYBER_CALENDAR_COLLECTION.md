@@ -198,3 +198,40 @@ intervals do not overlap, then adds record, body, page and provider-gap counters
 and aggregates calendar-year rows (including the two disjoint 2023 partitions).
 This is a deterministic retrieval diagnostic, not a dossier measurement or a
 claim of combined provider-ID uniqueness, event counts or real-world recall.
+
+## Offline method audit and yearly percentages
+
+`scripts/audit_nl_cyber_retrieval.py --workspace <protected-study-root>
+--data-repository <private-data-repo>` registers `nl-cyber-retrieval-method-audit-v1`
+protocol, question, selection, exploratory profile and retrieval profile before
+the audited `newsapi_collection` action `retrieval_audit`. It binds both immutable
+materializations and their exact receipt selections. It makes no network or model
+calls and never accepts article relevance or incident findings.
+
+Unlike the earlier occurrence-count diagnostic, this independent scan checks
+distinct provider IDs, repeated valid requests, cross-page and cross-partition
+overlaps, missing IDs, exact page sets/sizes, in-scope language/dates, positive
+provider-total drift, every actual request field, and observable date ordering.
+The only dynamic request fields excluded from the invariance fingerprint are
+`dateStart`, `dateEnd` and `articlesPage`. Failed and contradictory empty-zero
+responses remain in attempt/cost history, with exact-parameter retries identified.
+If multiple valid receipts exist for one page, the last is selected for coverage
+and the repeated attempts are reported separately rather than inflating coverage.
+
+The audit verifies protected and repository ZIP byte hashes, canonical row hashes,
+and exact record-version sets against the selected receipts. Protected identity
+manifests preserve every included URI/record hash/receipt/item reference and overlap
+details; these are not committed. Year percentages divide distinct retrieved IDs
+by final API query-match totals, summing the two nonoverlapping 2023 partitions.
+Nonblank-body retention is separate from article retrieval and does not establish
+publisher-text fidelity. The 2026 window remains partial (through 15 October).
+
+These are technical retrieval diagnostics, not dossier measurements or estimates
+of all relevant news. Matching distinct counts and provider totals does not prove
+an independently enumerated provider universe, fixed index snapshot, tie stability,
+keyword recall, Netherlands-event relevance, or consistent historical publisher
+coverage. The detailed report explicitly distinguishes the original checks, checks
+newly performed by this audit, observed exceptions and unexecuted improvements.
+It captures the exact report through `record_presentation` and saves JSON/CSV/Markdown
+in protected storage. The proposed ID-manifest, stricter stop, temporal coverage and
+human benchmark methods are recommendations; no new paid validation is implied.
