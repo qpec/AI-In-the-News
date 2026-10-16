@@ -209,7 +209,62 @@ checkout can invalidate ordinary embedding plans because the existing gateway
 binds all source files. A frozen committed checkout avoids that race while keeping
 unrelated work intact. No audit/code-binding enforcement is weakened.
 
-The expanded synthetic integration exercises two actual bounded core imports/
-gateway paths with constructed source bodies, exact token/chunk reconciliation,
+The expanded synthetic integration exercises two articles through an actual
+bounded core import/gateway path, with exact token/chunk reconciliation,
 profile preservation, resume and a transport sentinel that rejects paid calls.
 Production execution and its actual coverage are recorded separately below.
+
+
+### Executed bounded planning checkpoint — 2026-10-16
+
+The later offline gateway preparation completed as result
+be949c88e4be39394612b7677e8c3e0b2396b341649969a7835b5d1c28332abc,
+under key full-catalog-embedding-plans-20261016-v1. Its pre-source intent manifest
+is 68131c6f2d18f7d07398da11bc66ee5796a95cdb82e587536928492f9cd09198.
+Exact presentation artifact
+51d262ff8d730f4369b2250fe4c6155921fec019f7fa9b4d42c3a4467e72bc19
+was prepared and its exact content was presented in the same chat. UI visibility,
+reading and a verified chat-delivery timestamp remain unobserved.
+
+| Actual prepared scope | Result |
+| --- | ---: |
+| Previously unembedded text-bearing article versions | 185,529 / 185,529 |
+| Bounded core datasets / ordinary gateway embedding plans | 10 / 10 |
+| Maximum articles per core dataset | 20,000 |
+| Exact passage-window inputs | 3,186,920 |
+| Planned API requests | 24,902 |
+| Input tokens | 172,475,624 |
+| Estimated standard successful-input cost | USD22.42183112 |
+| Preparation failures / pending articles | 0 / 0 |
+| Paid/model/network calls | 0 / 0 / 0 |
+| Newly embedded articles | 0 |
+
+All pending text was imported through the original core source/passages handler
+in bounded batches; no global cap or gateway contract was changed. Exact catalog
+to core-source mappings, dataset versions, preparations, request payloads, context
+artifacts and plan IDs remain protected. The last dataset contains 5,529 sources;
+the preceding nine contain 20,000 each. The original profile was preserved exactly,
+and gateway token/chunk totals match the first audited full-corpus estimate.
+
+The implementation gap described at the first catalog checkpoint is now closed.
+Only a concrete paid execution authorization is missing before using these
+ordinary gateway plans. No approval was registered and no credential was read.
+The plans' source code is frozen at commit
+dea6f82466191959f3b23d574333146c6e4c2fd6 in the task's managed execution checkout.
+Run from that code, or an exact code-equivalent restored checkout. Unrelated
+source edits in the main checkout do not alter it; changed executable source
+requires refreshed plans rather than bypassing the gateway identity check.
+The frozen checkout remains attached for the next execution step.
+
+A separate engineering capacity check at 2026-10-16T13:41:04.4601948Z observed
+155,297,710,080 available bytes on C:. This was a hardware-capacity observation,
+not a corpus measurement or provider receipt. New canonical float32 vectors
+alone require 39,160,872,960 bytes; their raw base64 vector fields require
+52,214,497,280 bytes before JSON overhead, indexes, mappings and staging. Capacity
+must be checked again before a paid run; the budget is not a storage guarantee.
+
+The final expanded synthetic integration passed two tests in 2.76 seconds; Ruff
+and mypy passed. This validates the bridge's software behavior only. The actual
+185,529-source preparation above supplies the observed production coverage.
+Existing 19,576 embedded article versions, seven-day memberships, held-out labels
+and all model-reference study exposure budgets are unchanged.

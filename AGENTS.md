@@ -104,8 +104,16 @@ Commit each major completed work step to the appropriate `AI-In-the-News` or `AI
 - The pending protected queue covers 185,529 text-bearing versions, 3,186,920
   windows and 172,475,624 tokens: estimated standard input cost USD22.42183112
   before retries. No new paid embedding/model/collection run was authorized or
-  dispatched. Catalog-to-gateway planning integration (or explicit bounded core
-  imports) and concrete plan-bound paid approval are required before execution.
+  dispatched. The subsequent bounded gateway preparation is now completed as
+  be949c88e4be39394612b7677e8c3e0b2396b341649969a7835b5d1c28332abc:
+  all 185,529 pending text-bearing versions in 10 standard gateway plans and core
+  datasets of at most 20,000; 24,902 requests; 3,186,920 chunks; 172,475,624 tokens;
+  zero preparation failures/pending and zero paid/model/network calls.
+  Exact presentation: 51d262ff8d730f4369b2250fe4c6155921fec019f7fa9b4d42c3a4467e72bc19.
+  Use frozen execution commit dea6f82466191959f3b23d574333146c6e4c2fd6 in the
+  attached managed checkout (or exact code-equivalent restore). Main-checkout
+  source edits can invalidate plans; preserve the gateway identity check.
+  Concrete plan-bound paid approval is still required; no policy was created.
   Do not bypass the shared gateway or silently raise global limits.
 - Exact presentation artifact
   fdfa6db58a522a34bbb3971e84d1a093447d84d363918c01d63681bc87001409
