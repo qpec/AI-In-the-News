@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Speed Test"
+  short_description: "Benchmark audited full-text extraction in Codex"
+  default_prompt: "Use $luna-speed-test to run one bounded ten-minute Luna Codex throughput test with the current full-text prompt."
