@@ -27,6 +27,39 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Separate corpora and full-article dossier audit — 2026-10-17
+
+The user requires **cybercrime separate from incident reports**, explicitly in
+the data repository. `AI-In-the-News-Data/corpora/registry.json` and separate
+`corpora/incident-reports/manifest.json` / `corpora/cybercrime/manifest.json`
+are committed at `6d922810a89faf74526df789fb4c52183b13548c`. They partition all
+19 known archives by collection provenance (11 legacy / eight cybercrime),
+preserving original archive paths/checksums and historical mixed catalogs.
+Future selections, retrieval, caches, model queues, observation memberships,
+dossiers and evaluations must bind one corpus ID plus manifest hash and enforce
+isolation before ranking/grouping. Do not implicitly combine the corpora or
+infer incident eligibility from the collection label. Existing runtime adapters
+still need explicit partition enforcement; manifests alone do not retrofit them.
+
+The user's pasted two-stage method was [audited and costed](docs/DOSSIER_METHOD_AUDIT.md),
+not executed. Protected source-free note
+`d81dcf1e6c6d9e8e85e897398429c5154612610d97d77bdb558c6085f94e282c`
+calculated 12 scenarios with no failures/pending and no model calls or embeddings.
+For the documented 205,105 text-bearing versions, assumed Standard costs are
+$289.20 / $602.50 / $1,394.71; Batch $144.60 / $301.25 / $697.36. These are token
+scenarios, not measured workloads, caps, invoices or paid approval. Per-corpus
+saved-row estimates and limitations are in the audit. Exact report is a protected
+note/artifact; `record_presentation` does not support this budget-note kind.
+
+Required before scaling: repair exact surface-span versus normalized-value
+grounding in a new extraction contract/pilot; add observation-level many-to-many
+article contributions; implement partitioned hybrid retrieval, bulk gateway
+matching and controlled reconciliation; independently evaluate quality. Keep
+the stopped 12-article lineage stopped. Last published completed vector coverage
+is 19,576; later $25 embedding authorization is documented, but this audit did
+not verify execution/index completion. Reconcile the existing owner before any
+new embedding work; do not assume the stale unapproved summary is current.
+
 ## Singleton expanded-context Luna follow-up — 2026-10-17
 
 The explicitly requested [expanded-context follow-up](docs/SINGLETON_CONTEXT_FOLLOWUP.md)
