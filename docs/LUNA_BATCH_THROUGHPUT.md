@@ -2,6 +2,16 @@
 
 ## Current recovery checkpoint — 2026-10-18
 
+Recovery commit `c0e03dc` was launched exactly once at 2026-10-17 23:16 UTC
+through `scripts/run_luna_budget_recovery_with_key.ps1` into
+`scripts/run_luna_budget_recovery.py`, exec session `74034`. The current Python
+worker is PID `120012`, with launcher PID `126604`. It is performing the full
+audit integrity preflight, so this launch is not yet proof of new dispatch.
+Check this process/output before any action; never launch an old entry point or
+competing writer. The wrapper owns a temporary idle-sleep guard until exit.
+The active 15-minute heartbeat now tracks this recovery; sessions `58044` and
+`43653`, and separate guards `7061`/`42898`, are historical and exited.
+
 The original fast controller has stopped; the historical launch below is not
 evidence of current execution. All 6,516 submitted requests are now reconciled.
 Offline diagnosis `63be5eefc104b8135722e492d1e81e5f4af7bb1c57b89e5181fb044409e3e01c`

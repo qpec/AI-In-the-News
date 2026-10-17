@@ -29,6 +29,16 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 ## Current Batch recovery checkpoint — 2026-10-18
 
+**Current sole controller:** recovery commit `c0e03dc`, launched once through
+`scripts/run_luna_budget_recovery_with_key.ps1` into
+`scripts/run_luna_budget_recovery.py`, exec session `74034`, at 2026-10-17
+23:16 UTC. Its Python worker is PID `120012` (launcher PID `126604`). The
+mandatory integrity preflight is running; launch alone confirms no new paid
+dispatch. Check this process/output first and never launch an old controller
+or a competing owner writer. The recovery wrapper holds its own temporary
+idle-sleep guard. Sessions `58044`/`43653` and guards `7061`/`42898` are
+historical and exited. The active 15-minute heartbeat now tracks the recovery.
+
 Fast controller `58044` stopped with result
 `4b4892cc01214dadca9ba3058a00b750d98faa7e2dca9e72b9f7b003e1bc83f3`.
 All **6,516 submitted requests are now reconciled**, zero pending/reserved;
@@ -57,7 +67,7 @@ stop; the same owner, plan, shared USD120/USD150 cap and original deadline apply
 See [the recovery checkpoint](docs/LUNA_BATCH_THROUGHPUT.md) and inspect live
 state before launching anything. Preparation is not proof of a successful restart.
 
-## Parallel Batch controller and supervision — 2026-10-18
+## Historical parallel Batch controller and supervision — 2026-10-18
 
 The user's "all processed asap" / "Parallel?" instruction is implemented in
 `scripts/run_luna_budget_fast.py`, committed as `8c7e89e`; see
