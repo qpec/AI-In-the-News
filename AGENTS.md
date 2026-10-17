@@ -606,3 +606,12 @@ recovery remain unfinished. Do not imply the entire archive is production-ready
 or treat this method choice as paid authorization. Preserve the stopped original
 12-article extraction. Preparation code is frozen at `958a2b6`; lifecycle
 prototype at `a4ca927`. Do not rerun preparations solely to display results.
+For lower startup latency, the later method proposes a new bounded synchronous
+canary before bulk Batch submission, followed by provider validation of the
+first Batch file. This startup sequence is unimplemented/unapproved; its
+Standard-priced canary is not included in the bulk Batch cost scenarios.
+Final verification: full collected suite 1,609 passed in 865.23 seconds, including
+unrelated preserved work; Ruff across src/tests/scripts and mypy for 127 source
+modules plus the two preparation helpers passed. These are software checks only.
+Exact final overview/assumption note in the dedicated design owner:
+`5bef55fe80d7e9a3d2f066f66486deee9fbe56f05a882299485a08a0e648faee`.

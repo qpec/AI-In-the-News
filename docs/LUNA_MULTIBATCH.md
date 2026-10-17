@@ -60,10 +60,21 @@ Sources: [Batch guide](https://developers.openai.com/api/docs/guides/batch),
 [rate limits](https://developers.openai.com/api/docs/guides/rate-limits).
 
 Concurrent submission does not guarantee an earlier finish. Queue saturation
-is a throughput strategy within Batch, not a latency benchmark. A small
-separately approved canary batch must pass completion/schema/literal checks
-before scaling; it cannot establish semantic accuracy. Requests already in
-flight can still complete and incur cost after a later failure stops new work.
+is a throughput strategy within Batch, not a latency benchmark. To avoid
+waiting for a separate Batch processing window before the main run, the proposed
+startup path is a small, separately approved **synchronous Responses canary**
+with the exact full-text contract and model settings, followed by bulk Batch
+jobs. This inference about startup latency follows from Batch's 24-hour window;
+it is not a measured speedup. The canary uses Standard pricing and needs its
+own bounded budget; it is not included in the bulk cost scenarios below.
+
+The canary must pass completion/schema/literal checks before scaling; it does
+not establish semantic accuracy or verify the Batch transport itself. The
+first submitted Batch file must also pass provider input validation before
+refilling the queue. If Batch-only execution is required, a small canary Batch
+is the alternative, potentially adding a processing window. Neither startup
+option has been implemented or executed here. Requests already in flight can
+still complete and incur cost after a later failure stops new work.
 
 ## Audited preparation and dispatch boundary
 
@@ -93,8 +104,9 @@ flowchart TD
   C --> D[Protected descriptors, costs and shard plan]
   D --> E[Selection and holdout checks; materialize exact requests]
   E --> F[Concrete run budget and account queue allowance]
-  F --> G[New canary batch through shared gateway]
-  G -->|Pass| H[Rolling parallel Batch jobs within shared capacity]
+  F --> G[New synchronous canary through shared gateway]
+  G -->|Pass| V[First Batch file passes provider input validation]
+  V --> H[Rolling parallel Batch jobs within shared capacity]
   G -->|Fail or unknown| U[Stop new dispatch; preserve unresolved work]
   H --> I[Retain receipts; reconcile by custom_id]
   I --> J[Completion, schema and literal checks]
@@ -143,6 +155,9 @@ The dedicated preparation/input/contract suites passed 162 synthetic checks;
 the gateway prototype passed 22. Ruff passed across source, tests and scripts;
 mypy passed for 127 source modules and the two new preparation helpers. These
 are software checks, not model-quality or event-count findings.
+The complete collected repository suite subsequently passed **1,609 tests in
+865.23 seconds**, including unrelated preserved working-tree code. No production
+model or network execution is established by this synthetic verification.
 
 Cybercrime preparation completed in its dedicated owner:
 
@@ -198,3 +213,8 @@ The final full-input decision did not create another model approval. Preserve
 the per-corpus owners and exact preparation results; do not rescan merely to
 redisplay them. The note kind is unsupported by `record_presentation`; exact
 per-corpus overviews are protected, with no claim of verified chat delivery.
+The exact final chat overview, source-result bindings, startup proposal and
+verification were prepared in protected note
+`5bef55fe80d7e9a3d2f066f66486deee9fbe56f05a882299485a08a0e648faee`
+under `luna-fulltext-multibatch-design-20261017-v1`. This is unsupported-kind
+note capture, not a `record_presentation` result or verified UI delivery.
