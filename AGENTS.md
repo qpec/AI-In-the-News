@@ -615,3 +615,68 @@ unrelated preserved work; Ruff across src/tests/scripts and mypy for 127 source
 modules plus the two preparation helpers passed. These are software checks only.
 Exact final overview/assumption note in the dedicated design owner:
 `5bef55fe80d7e9a3d2f066f66486deee9fbe56f05a882299485a08a0e648faee`.
+
+## Completed Luna Codex full-text speed benchmark — 2026-10-17
+
+The requested [ten-minute parallel benchmark](docs/LUNA_SPEED_TEST.md) is
+fulfilled. Both execution lineages are closed; default to audited report
+replay. Keep the original protected owner
+`luna-seven-day-validation-20261016-v1`, corpus isolation, sealed-body exclusions
+and the unrelated stopped twelve-article pilot unchanged. No API-key route,
+new embeddings, automatic article removal or dossier adoption was used.
+
+The first speed run, `luna-fulltext-codex-speed-20261017-v1`, stopped after two
+calls in 12.022 seconds: one valid `none`, one invalid, no parallel stage.
+Result `e8743129284355d3dcd163546d12137dd46d2149b32ea88cf6f310af031f8057`
+and its first-failure stop remain. The corrected v2 plan excluded both attempted
+sources and retained the unchanged full-text event prompt/schema/validator.
+Its plan-bound policy cited the original still-active user request to complete
+the previously unfulfilled parallel test; no new approval reply was invented.
+
+V2 plan `50dcd30c2fb574ea9b2dd1d3de46151b88f2ee7c51f9aef67d3fb8fe225cf673`
+prepared 2,000 incident-report articles from 13,645 eligible development
+sources. Exclusions: 5,888 sealed bodies, 12 stopped-pilot sources, two prior
+speed sources and two unresolved earlier-attempt sources; zero preparation
+exclusions. Result
+`4e6c200667e85e6225d84a98222ec7ae29338e1ad618b2c704686a44677b17de`
+records **394 attempted articles: 208 valid / 182 invalid / 4 unknown**, with
+1,606 unattempted. There were 390 returns and **208 valid durable results within
+600 seconds**, four late returns, zero reserved-but-undispatched tasks, peak
+concurrency four and 600.113 seconds including settling. Unknown and late are
+separate aggregate counts; do not assert row overlap without the per-row replay.
+The stored stop reason is `first_invalid_response`, not `deadline`. Four occupied
+workers waited for a completion rather than a separate exact-deadline wakeup;
+local timeouts/cleanup do not prove remote cancellation. Preserve the frozen run.
+
+Primary throughput is **20.8 mechanically valid outputs/minute**, not semantic
+accuracy or validated full-corpus throughput. Valid focus totals: 87 single,
+11 multiple, 105 none, five uncertain. Unknown/invalid/unattempted is not a
+negative finding; no memberships changed. Zero retries and new embeddings.
+Observed usage from 390 responses: 7,860,330 input, 4,453,632 cached input,
+zero cache-write input, 113,616 output and 6,222 reasoning tokens. Four usage
+records and all 394 observed model identities are unavailable. Configured model
+was `gpt-6-luna` / low; usage is not an invoice or quota estimate.
+
+Original exact presentation:
+`cd2fdd14de7361713b89ec963c3f437a88739aeda07b78769f693acb7017a554`.
+Offline compact replay `a28bdabf69728803cb458b9b5b594764965163efa2911fe1bc7f99132569b04e`
+made zero new calls; exact Markdown
+`07f2e7f6f75de5cee7120a4e96f5babf30a1cf30906fc7acca9efef479ff802c`,
+JSON `b576ab4de9a4f104088c2542093814b571fbce1fd25c8e309eff0a790b041556`.
+These custom result kinds use protected exact artifacts because
+`record_presentation` has no adapter. Software checks: 173 focused plus 20
+reporter checks; Ruff and mypy passed. No human accuracy was established.
+
+The `luna-speed-test` skill now defaults to saved-result reporting. Neither
+`--benchmark-v2` nor the original request permits rerunning, filling unused
+slots, retrying unknowns or resetting counters. A future benchmark needs a new
+user request and separately registered study; preserve the current results.
+
+Appended offline timing replay
+`5d0828bb1fde0ff67b08aea56cdba1545f6ca88b951bcd1609d25d8f595ac66d`
+confirms two clean transport canaries, one content-valid canary, and exact
+identity overlap between the four unknown and four late outcomes. Returns
+occurred at 600.076–600.098 seconds; these timings do not prove their cause or
+remote cancellation. Zero new calls, repairs or changed statuses. Exact
+Markdown `ef533fee107d8bfcc526588a9293c5fea4db77562eb4dd36b765824621d259a9`;
+JSON `c84984bdb91fcfd8d48888e2becce0c1e66c53e63fda040b6913c257d335ba54`.

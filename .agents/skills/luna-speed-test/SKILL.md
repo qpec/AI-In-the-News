@@ -37,14 +37,37 @@ returned `--plan` and the user's `--authorization-text`; report binds the saved
 `--result`. Check `--help` for exact command ordering. Existing source-owner
 records and old counters remain.
 
-The original study `luna-fulltext-codex-speed-20261017-v1` is closed: two calls,
-one valid `none`, one content-invalid, 12.022 seconds, no parallel stage. Its
-single-run authorization is spent. Never restart it to obtain ten minutes.
-The separate candidate `luna-fulltext-codex-speed-20261017-v2` uses
-`--benchmark-v2` for preparation/execution and needs its own explicit bounded
-run authorization. Candidate preparation or the old request does not supply
-that authorization. If the user later authorizes the concrete v2 run, preserve
-that instruction and proceed without asking again.
+The requested benchmark is fulfilled and both execution lineages are closed.
+The original study `luna-fulltext-codex-speed-20261017-v1` stopped after two
+calls in 12.022 seconds, with no parallel stage. The corrected study
+`luna-fulltext-codex-speed-20261017-v2` attempted 394 articles: 208 valid, 182
+invalid, four unknown and 1,606 unattempted. All 208 valid results were durably
+recorded within 600 seconds: 20.8 per minute, with peak concurrency four.
+This is mechanical validity, not semantic accuracy.
+
+Default to replaying the saved execution result through the compact reporter.
+From the project root, run:
+
+```powershell
+uv run --frozen python scripts/present_luna_speed.py --workspace 'C:/Users/ynhan/AppData/Local/AI-In-the-News/luna-seven-day-validation-20261016-v1' --result 4e6c200667e85e6225d84a98222ec7ae29338e1ad618b2c704686a44677b17de
+```
+
+The prior compact report is
+`a28bdabf69728803cb458b9b5b594764965163efa2911fe1bc7f99132569b04e`;
+this is provenance, not an accepted `--result` input. Preserve literal stop
+reason `first_invalid_response`, four unknown outcomes, four late returns and
+600.113 seconds including settling. A later audited timing replay
+`5d0828bb1fde0ff67b08aea56cdba1545f6ca88b951bcd1609d25d8f595ac66d`
+confirmed that the four unknown and four late article identities coincide;
+both canaries returned cleanly and one passed content checks. This does not
+establish the unknown outcomes' cause. Do not relabel the stop as `deadline`.
+
+V2's plan-bound policy historically quoted the original user request because
+the censored v1 attempt had not fulfilled it. No new approval reply was
+invented. That remaining task is now complete. Never rerun either plan, refill
+unused slots or retry unknowns from this request. The `--benchmark-v2` flag
+selects the closed study; it does not create fresh permission or a new run.
+A later benchmark requires a new user request and separately registered study.
 
 The default remains incident-reports development articles only, using the
 Codex account, with no API Batch submission. Use separate manifest/source
@@ -101,7 +124,3 @@ unsupported by `record_presentation`, say so and retain exact Markdown instead.
 Describe the result as one throughput measurement, not human accuracy, an
 optimal worker count, a serial speedup, a free-cost claim or a guaranteed
 full-corpus duration. No new run occurred when only preparing or reporting.
-
-
-
-
