@@ -14,7 +14,11 @@ $batchExitCode = 1
 Push-Location (Split-Path $PSScriptRoot -Parent)
 try {
     [Environment]::SetEnvironmentVariable('OPENAI_API_KEY', [NewsKeyStore]::Load([NewsKeyStore]::Target), 'Process')
-    & .venv/Scripts/python.exe (Join-Path $PSScriptRoot 'execute_luna_budget_batch.py') $Phase --plan $Plan --allow-paid-execution
+    if ($Phase -eq 'poll') {
+        & .venv/Scripts/python.exe (Join-Path $PSScriptRoot 'poll_luna_budget_batch.py') --plan $Plan --allow-paid-execution
+    } else {
+        & .venv/Scripts/python.exe (Join-Path $PSScriptRoot 'execute_luna_budget_batch.py') $Phase --plan $Plan --allow-paid-execution
+    }
     $batchExitCode = $LASTEXITCODE
 } finally {
     [Environment]::SetEnvironmentVariable('OPENAI_API_KEY', $previousBatchKey, 'Process')
