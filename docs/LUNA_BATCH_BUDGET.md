@@ -177,3 +177,20 @@ distinguishes these phases. Any compatibility replay must preserve both original
 messages, select an unambiguous explicit final answer, rerun the unchanged
 extraction validator, and retain the original error and stopped controller.
 This checkpoint does not authorize clearing that stop or retrying the article.
+
+The separate offline phase replay completed as
+`13f4f2480b6aff860ec9682e5d966a54df57358f4d05dce94241a1c83ae190c5`.
+Selecting the sole explicit final answer after completed commentary passed the
+unchanged extraction validator (`focus: none`). There were zero new model calls,
+paid retries, status overwrites or membership changes. The original technical
+assessment remains an error, with both original messages retained. Replay
+presentation `330d6e1f37582a488eeb51c71c7dc8d3b304a01e890e58a4d5d434704a1e268a`
+is protected; this technical kind is unsupported by `record_presentation`.
+
+`scripts/luna_batch_phase_projection.py` implements the separate parser version:
+multiple final answers, missing/unknown phases, commentary after the final,
+refusals, tools, incomplete messages or unverified usage remain failures. The
+selected final JSON text is never concatenated or rewritten. Twenty-eight
+synthetic checks passed; the observed replay establishes this retained response's
+mechanical compatibility, not semantic accuracy. Continuation must explicitly
+bind this proof and preserve the original stop and shared accounting.
