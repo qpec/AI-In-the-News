@@ -13,6 +13,7 @@ dependencies = [
     { name = "numpy" },
     { name = "qrcode" },
     { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "tiktoken" },
 ]
 
@@ -32,6 +33,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2,<3" },
     { name = "qrcode", specifier = ">=8.2,<9" },
     { name = "scikit-learn", specifier = "==1.7.2" },
+    { name = "scipy", specifier = ">=1.15,<2" },
     { name = "tiktoken", specifier = ">=0.12,<1" },
 ]
 
