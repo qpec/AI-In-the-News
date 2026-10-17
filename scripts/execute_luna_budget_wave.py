@@ -23,6 +23,7 @@ from execute_luna_budget_batch import ExecutionResearch, JOB_KIND, PLAN_KIND, re
 from luna_batch_budget_run import OWNER, ROOT, STUDY, present, save
 import luna_multibatch as core
 from prepare_luna_budget_wave import ASSESSMENT_KIND, MANIFEST_KIND, MAX_PER_CORPUS, canary_gate
+from luna_budget_continuation import load_continuation
 
 METHOD = "luna-fulltext-budget-bulk-execution-v1"
 OWN_QUEUE_TOKEN_CAP = 2_000_000
@@ -199,13 +200,14 @@ class BulkExecutionResearch(ExecutionResearch):
         plan = self.ledger.get(plan_id, PLAN_KIND)
         if plan.get("authorization_id") != STUDY:
             raise AuditError("bulk_plan_authorization_changed")
+        continuation = load_continuation(self, session, plan_id, data.get("continuation_ref"), for_admission=True)
         self.execution_protocol = self._version(session, context, {"kind": "protocol", "key": STUDY + ":bulk-submit",
             "content": {"method": METHOD, "plan": plan_id, "preparation_versions": plan["versions"],
                 "implementation": {str(path.relative_to(ROOT)): sha256(path) for path in (
                     Path(__file__), ROOT / "scripts/execute_luna_budget_batch.py", ROOT / "scripts/prepare_luna_budget_wave.py",
                     ROOT / "src/newsresearch/event_batch_live_gateway.py", ROOT / "src/newsresearch/event_batch_budget.py",
                     ROOT / "src/newsresearch/event_batch_transport.py")},
-                "own_reserved_input_token_guard": OWN_QUEUE_TOKEN_CAP,
+                "own_reserved_input_token_guard": OWN_QUEUE_TOKEN_CAP, "continuation_ref": data.get("continuation_ref"),
                 "rules": "Use same original authorization and budget. Recheck completed/accounted canaries and no shared unknown or technical action. Dispatch only staged bulk manifests <=250 requests per corpus, immutable fulltext4096 contract. Obtain provider exact counts; reserve full output and persist before paid create. Keep all unknown and deferred reservations, no retries. Local2M guard does not establish account capacity."},
             "amend_latest": True, "reason": "Bind separate bulk execution implementation before provider actions"})["id"]
         if any(sha256(ROOT / file) != expected for file, expected in plan["implementation"].items()):
@@ -215,7 +217,7 @@ class BulkExecutionResearch(ExecutionResearch):
             raise AuditError("bulk_contract_changed")
         policy, book, state = self.authorization(session, context, plan_id, plan)
         assessments = self.rows(session, ASSESSMENT_KIND)
-        gate = canary_gate(plan_id, plan, assessments, book)
+        gate = canary_gate(plan_id, plan, assessments, book, continuation)
         obstacles = [row for kind in ("luna_budget_execution_obstacle", "luna_budget_bulk_obstacle")
                      for row in self.rows(session, kind) if row.get("plan") == plan_id]
         blockers = gate["blockers"] + action_blockers(self.rows(session, ACTION_KIND), self.rows(session, RECEIPT_KIND), obstacles)

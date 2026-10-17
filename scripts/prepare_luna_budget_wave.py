@@ -26,6 +26,7 @@ from luna_batch_budget_run import OWNER, ROOT, STUDY, present, save
 import luna_batch_materialize as materialize
 import luna_multibatch as core
 from prepare_luna_budget_execution import SEED, queued_row
+from luna_budget_continuation import acknowledged_assessment, load_continuation
 
 METHOD = "luna-fulltext-budget-next-wave-v1"
 MANIFEST_KIND = "luna_budget_dispatch_manifest"
@@ -34,7 +35,8 @@ MAX_PER_CORPUS = 250
 CORPORA = ("incident-reports", "cybercrime")
 
 
-def canary_gate(plan_id: str, plan: Json, assessments: list[Json], book: BudgetBook) -> Json:
+def canary_gate(plan_id: str, plan: Json, assessments: list[Json], book: BudgetBook,
+                continuation: Json | None = None) -> Json:
     """Mechanical completion/accounting gate, never a semantic quality test."""
     blockers: list[str] = []
     canaries = plan.get("canary_tasks", [])
@@ -56,7 +58,7 @@ def canary_gate(plan_id: str, plan: Json, assessments: list[Json], book: BudgetB
     for row in assessments:
         if row.get("plan") == plan_id:
             by_custom.setdefault(row.get("custom_id"), []).append(row)
-            if row.get("status") not in {"valid", "invalid"} or row.get("technical_failure") is True or row.get("unknown") is True:
+            if (row.get("status") not in {"valid", "invalid"} or row.get("technical_failure") is True or row.get("unknown") is True) and not acknowledged_assessment(row, continuation):
                 blockers.append("prior_technical_or_unknown_assessment")
     valid = {corpus: 0 for corpus in CORPORA}
     processed = 0
@@ -183,15 +185,16 @@ class WaveResearch(Research):
 
     @audited_handler
     def _status(self, session: str, context: Context, data: Json) -> Json:
-        if set(data) != {"plan", "max_per_corpus"} or not self.config.offline:
+        if set(data) not in ({"plan", "max_per_corpus"}, {"plan", "max_per_corpus", "continuation_ref"}) or not self.config.offline:
             raise ResearchError("budget_wave_invalid_request")
         limit = data["max_per_corpus"]
         if type(limit) is not int or not 1 <= limit <= MAX_PER_CORPUS:
             raise ResearchError("budget_wave_limit_must_be_one_to_250")
         plan_id = data["plan"]
+        continuation = load_continuation(self, session, plan_id, data.get("continuation_ref"), for_admission=True)
         protocol = self._version(session, context, {"kind": "protocol", "key": STUDY + ":wave-stage",
             "content": {"method": METHOD, "implementation_sha256": sha256(Path(__file__)),
-                "plan": plan_id, "max_per_corpus": limit, "rules": "Require all sixteen canary outputs with complete settled accounting and at least one contract-valid output per corpus; reject technical/unknown/frozen states. Select next unmanifested frozen-order requests, max250 per corpus. Reverify exact source archives before and after full-text materialization. Stage immutable separate-corpus files and attempt IDs, no provider calls or budget reset."},
+                "plan": plan_id, "max_per_corpus": limit, "continuation_ref": data.get("continuation_ref"), "rules": "Require all sixteen canary outputs with complete settled accounting and at least one contract-valid output per corpus; reject technical/unknown/frozen states except one explicitly proven historical phase error through an immutable continuation reference. Select next unmanifested frozen-order requests, max250 per corpus. Reverify exact source archives before and after full-text materialization. Stage immutable separate-corpus files and attempt IDs, no provider calls or budget reset."},
             "amend_latest": True, "reason": "Bind next bounded wave implementation and limit before inspected results"})["id"]
         self.ledger.append(session, "budget.wave.plan_inspection.intended", {"plan": plan_id, "protocol": protocol})
         plan = self.ledger.get(plan_id, "luna_budget_execution_plan")
@@ -214,7 +217,7 @@ class WaveResearch(Research):
             budget_ref = None
         else:
             book, budget_ref = saved
-            gate = canary_gate(plan_id, plan, assessments, book)
+            gate = canary_gate(plan_id, plan, assessments, book, continuation)
         if stops:
             gate["allowed"] = False
             gate["blockers"] = sorted(set(gate["blockers"]) | {"shared_gateway_stopped"})

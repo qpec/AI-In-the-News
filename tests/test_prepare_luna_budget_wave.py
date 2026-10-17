@@ -103,6 +103,18 @@ def test_unknown_other_charge_blocks_new_wave():
     assert "shared_budget_unknown_or_unresolved_charge" in result["blockers"]
 
 
+def test_only_explicit_exact_noncanary_phase_acknowledgment_changes_gate():
+    plan_id, plan, assessments, book = gate_fixture()
+    row = {"id": "exact-assessment", "plan": plan_id, "custom_id": "bulk-only",
+           "status": "error", "technical_failure": True, "errors": ["response:not_single_message"]}
+    assessments.append(row)
+    ack = {"plan": plan_id, "assessment": row["id"], "custom_id": row["custom_id"]}
+    assert not runner.canary_gate(plan_id, plan, assessments, book)["allowed"]
+    assert runner.canary_gate(plan_id, plan, assessments, book, ack)["allowed"]
+    assessments.append({**row, "id": "new-error", "custom_id": "another-bulk"})
+    assert not runner.canary_gate(plan_id, plan, assessments, book, ack)["allowed"]
+
+
 def test_price_or_accounting_binding_cannot_be_reset():
     plan_id, plan, assessments, book = gate_fixture()
     plan["ceiling_nanousd"] = 300_000_000_000

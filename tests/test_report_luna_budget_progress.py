@@ -68,6 +68,44 @@ def test_union_does_not_double_count_raw_valid_and_missing_projection_is_unresol
     assert sum(row["charged_nanousd"] for row in result.values()) == 4
 
 
+def test_phase_and_literal_recoveries_union_without_relabelling_raw_results():
+    plan, rows, entries = fixture()
+    current = next(row for row in rows["assessments"] if row["custom_id"] == "c")
+    current.update(raw_status="error", status="valid", phase_projection={"changed": True},
+                   output={"focus": "single", "event": {"summary": "phase-derived"}})
+    rows["projections"].append({"original_assessment": current["id"], "custom_id": "c",
+        "corpus_id": current["corpus_id"], "original_status": "valid", "derived_valid": True})
+    historical = next(row for row in rows["assessments"] if row["custom_id"] == "e")
+    proof = {"original_assessment": historical["id"], "custom_id": "e",
+             "manifest": historical["manifest"], "derived_status": "valid"}
+    rows["phase_replays"] = [proof, deepcopy(proof)]
+    for entry in entries:
+        if entry["request"]["request_id"] == "e":
+            entry.update(status="settled", reserved_nanousd=0, charged_nanousd=1)
+    result = aggregate(plan, rows, entries)
+    incident, cyber = result["incident-reports"], result["cybercrime"]
+    assert incident["raw_status_counts"] == {"valid": 1, "invalid": 1, "error": 1, "unknown": 0}
+    assert incident["current_parser_valid"] == 2
+    assert incident["raw_valid_focus_counts"]["single"] == 1
+    assert incident["phase_recovered"] == 1
+    assert incident["derived_only_recovered"] == 1
+    assert incident["mechanically_usable"] == 3
+    assert [row["custom_id"] for row in incident["examples"]] == ["a"]
+    assert cyber["phase_replay_covered"] == cyber["phase_historical_recovered"] == cyber["phase_recovered"] == 1
+    assert cyber["mechanically_usable"] == 2
+    assert cyber["raw_status_counts"]["error"] == 1
+    assert cyber["technical_or_unknown"] == 0
+    assert cyber["projection_covered"] == 0 and cyber["projection_uncovered"] == 2
+
+
+def test_phase_replay_foreign_identity_rejected():
+    plan, rows, entries = fixture()
+    rows["phase_replays"] = [{"original_assessment": "assessment-e", "custom_id": "foreign",
+        "manifest": "manifest-1", "derived_status": "valid"}]
+    with pytest.raises(AuditError, match="phase_replay_lineage"):
+        aggregate(plan, rows, entries)
+
+
 @pytest.mark.parametrize("fault", ["duplicate_task", "duplicate_assessment", "foreign_projection", "foreign_budget", "wrong_count"])
 def test_identity_errors_fail_closed(fault):
     plan, rows, entries = deepcopy(fixture())

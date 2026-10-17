@@ -16,7 +16,8 @@ from luna_event_contract_v2 import contract_digest
 
 KINDS = {"manifests": "luna_budget_dispatch_manifest", "jobs": "luna_budget_provider_job",
     "reconciled": "luna_budget_job_reconciled", "assessments": "luna_budget_assessment",
-    "projections": "luna_budget_literal_projection", "finishes": "luna_budget_controller_finish"}
+    "projections": "luna_budget_literal_projection", "phase_replays": "luna_budget_phase_replay",
+    "finishes": "luna_budget_controller_finish"}
 
 
 def aggregate(plan, rows, entries):
@@ -46,6 +47,15 @@ def aggregate(plan, rows, entries):
             if original["status"] not in {"valid", "invalid"}:
                 raise AuditError("progress_technical_projection_invalid")
             derived.add(original["id"])
+    phase_replayed = set()
+    phase_covered = set()
+    for proof in rows.get("phase_replays", []):
+        original = assessed.get(proof["original_assessment"])
+        if original is None or any(proof[key] != original[key] for key in ("custom_id", "manifest")):
+            raise AuditError("progress_phase_replay_lineage_mismatch")
+        phase_covered.add(original["id"])
+        if proof["derived_status"] == "valid":
+            phase_replayed.add(original["id"])
     submitted_ids = {key for key, (manifest, _) in tasks.items() if manifest in jobs}
     entry_ids = {entry["request"]["request_id"] for entry in entries}
     if len(entry_ids) != len(entries) or not submitted_ids <= entry_ids:
@@ -58,23 +68,32 @@ def aggregate(plan, rows, entries):
     for corpus, details in plan["corpora"].items():
         local = [row for row in assessed.values() if row["corpus_id"] == corpus]
         ids = {row["id"] for row in local}
-        raw = {row["id"] for row in local if row["status"] == "valid"}
+        raw = {row["id"] for row in local if row.get("raw_status", row["status"]) == "valid"}
+        current = {row["id"] for row in local if row["status"] == "valid"}
+        phase_current = {row["id"] for row in local if row["id"] in current - raw and (row.get("phase_projection") or {}).get("changed") is True}
+        phase = (phase_current | (ids & phase_replayed)) - raw
+        usable = current | (ids & phase_replayed) | (ids & derived)
         invalid = {row["id"] for row in local if row["status"] == "invalid"}
         money = [entry for entry in entries if entry["request"]["corpus_id"] == corpus]
         submitted = sum(job["request_count"] for job in jobs.values() if job["corpus_id"] == corpus)
         known_usage = [row["usage"] for row in local if isinstance(row.get("usage"), dict)
                        and all(type(row["usage"].get(key)) is int for key in ("input_tokens", "output_tokens"))]
         counts = Counter(row["status"] for row in local)
-        focus = Counter(row["output"]["focus"] for row in local if row["status"] == "valid")
+        raw_counts = Counter(row.get("raw_status", row["status"]) for row in local)
+        focus = Counter(row["output"]["focus"] for row in local if row["id"] in raw & current)
         result[corpus] = {"eligible": details["summary"]["eligible_requests"], "submitted": submitted,
             "assessed": len(local), "unassessed": submitted - len(local),
             "eligible_not_submitted": details["summary"]["eligible_requests"] - submitted,
             "status_counts": {key: counts[key] for key in ("valid", "invalid", "error", "unknown")},
+            "raw_status_counts": {key: raw_counts[key] for key in ("valid", "invalid", "error", "unknown")},
+            "current_parser_valid": len(current),
             "raw_valid_focus_counts": {key: focus[key] for key in ("single", "multiple", "none", "uncertain")},
             "projection_covered": len(ids & projected), "projection_uncovered": len(ids - projected),
-            "derived_valid": len(ids & derived), "derived_only_recovered": len((ids & derived) - raw),
-            "mechanically_usable": len(raw | (ids & derived)), "remaining_content_invalid": len(invalid - derived),
-            "technical_or_unknown": sum(row.get("technical_failure", False) or row["status"] not in {"valid", "invalid"} for row in local),
+            "phase_replay_covered": len(ids & phase_covered), "phase_current_recovered": len(phase_current),
+            "phase_historical_recovered": len((ids & phase_replayed) - raw), "phase_recovered": len(phase),
+            "derived_valid": len(ids & derived), "derived_only_recovered": len((ids & derived) - current - phase),
+            "mechanically_usable": len(usable), "remaining_content_invalid": len(invalid - usable),
+            "technical_or_unknown": sum((row.get("technical_failure", False) or row["status"] not in {"valid", "invalid"}) and row["id"] not in usable for row in local),
             "usage_available_rows": len(known_usage), "usage_unavailable_rows": len(local) - len(known_usage),
             "usage": {key: sum(usage[key] for usage in known_usage) for key in ("input_tokens", "output_tokens")},
             "charged_nanousd": sum(entry["charged_nanousd"] for entry in money),
@@ -83,7 +102,7 @@ def aggregate(plan, rows, entries):
             "budget_status_counts": dict(Counter(entry["status"] for entry in money)),
             "examples": [{key: row[key] for key in ("id", "custom_id", "title", "url", "output")}
                 for row in sorted(local, key=lambda row: row["custom_id"])
-                if row["status"] == "valid" and row["output"]["focus"] == "single"][:3]}
+                if row["id"] in raw & current and row["output"]["focus"] == "single"][:3]}
     return result
 
 
@@ -165,13 +184,14 @@ class ProgressResearch(Research):
             "technical_rows": technical, "controller_finishes": rows["finishes"],
             "pending_jobs": len({row["manifest"] for row in rows["jobs"]} - {row["manifest"] for row in rows["reconciled"]}),
             "projection_protocols": dict(Counter(row["protocol"] for row in rows["projections"])),
+            "phase_replay_protocols": dict(Counter(row["protocol"] for row in rows["phase_replays"])),
             "budget_state": state, "charged_estimate_usd": book.charged_nanousd / 1e9,
             "reserved_usd": book.reserved_nanousd / 1e9, "budget_frozen": book.frozen,
             "new_models": 0, "new_projections": 0, "accepted_events": 0, "human_validated": False}
         lines = [f"Retained offline Batch progress: conservative charge **${book.charged_nanousd / 1e9:.6f}**, reserved **${book.reserved_nanousd / 1e9:.6f}**. Budget frozen: {book.frozen}. Pending jobs: {value['pending_jobs']}.", ""]
         for corpus, summary in corpora.items():
-            lines.extend([f"**{corpus}:** {summary['submitted']:,}/{summary['eligible']:,} eligible submitted; {summary['assessed']} assessed; statuses {summary['status_counts']}; {summary['unassessed']} unassessed. Raw-valid focus: {summary['raw_valid_focus_counts']}.",
-                f"Existing projections cover {summary['projection_covered']}/{summary['assessed']}; {summary['projection_uncovered']} unprojected. {summary['derived_only_recovered']} derived-only recoveries; {summary['mechanically_usable']} combined mechanically usable; {summary['remaining_content_invalid']} content-invalid unresolved; {summary['technical_or_unknown']} technical/unknown.",
+            lines.extend([f"**{corpus}:** {summary['submitted']:,}/{summary['eligible']:,} eligible submitted; {summary['assessed']} assessed; {summary['unassessed']} unassessed. Raw envelope statuses {summary['raw_status_counts']}; current-parser statuses {summary['status_counts']}. Raw-valid focus: {summary['raw_valid_focus_counts']}.",
+                f"Existing literal projections cover {summary['projection_covered']}/{summary['assessed']}; {summary['projection_uncovered']} lack literal projection. Phase recovery: {summary['phase_recovered']} distinct ({summary['phase_current_recovered']} current-parser, {summary['phase_historical_recovered']} historical replay; overlap counted once). {summary['derived_only_recovered']} additional literal-only recoveries; {summary['mechanically_usable']} combined mechanically usable; {summary['remaining_content_invalid']} content-invalid unresolved; {summary['technical_or_unknown']} technical/unknown unresolved.",
                 f"Known usage {summary['usage']} across {summary['usage_available_rows']} rows; unavailable for {summary['usage_unavailable_rows']}. Charge ${summary['charged_nanousd']/1e9:.6f}; reserved submitted/unresolved ${summary['reserved_submitted_unresolved_nanousd']/1e9:.6f}; staged/unsubmitted ${summary['reserved_staged_unsubmitted_nanousd']/1e9:.6f}.", ""])
             for example in summary["examples"]:
                 event = example["output"]["event"]

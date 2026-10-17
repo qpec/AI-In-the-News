@@ -100,6 +100,41 @@ def prepared(tmp_path, mode="valid"):
     return engine, transport, plan, submitted
 
 
+def test_explicit_phase_parser_keeps_raw_error_provenance_and_reuses_checkpoint(tmp_path, monkeypatch):
+    engine, transport, plan, _ = prepared(tmp_path)
+    original_results = transport.result_bytes
+
+    def with_phases(job_id):
+        rows = [json.loads(line) for line in original_results(job_id).splitlines()]
+        if job_id == "batch_1":
+            output = rows[0]["response"]["body"]["output"]
+            output[0]["phase"] = "final_answer"
+            output.insert(0, {"type": "message", "role": "assistant", "status": "completed",
+                "phase": "commentary", "content": [{"type": "output_text", "text": "Reading the fictional input."}]})
+        return b"".join(canonical(row).encode() + b"\n" for row in rows)
+
+    monkeypatch.setattr(transport, "result_bytes", with_phases)
+    # Isolate the parser wiring from separately tested exact-proof authorization.
+    monkeypatch.setattr(poll, "load_continuation", lambda *args, **kwargs: {"id": "synthetic-verified"})
+    try:
+        result = submit_fixture.execute(engine, "poll", plan, continuation_ref="synthetic-verified")
+        assert result["status_counts"] == {"valid": 16, "invalid": 0, "error": 0, "unknown": 0}
+        assert result["raw_status_counts"] == {"valid": 15, "invalid": 0, "error": 1, "unknown": 0}
+        assert result["phase_derived_assessments"] == 1
+        rows = [engine.ledger.get(item["id"], poll.ASSESSMENT_KIND) for item in engine.ledger.db.execute(
+            "SELECT id FROM records WHERE kind=?", (poll.ASSESSMENT_KIND,))]
+        row = next(item for item in rows if item["raw_status"] == "error")
+        assert row["status"] == "valid" and row["raw_status"] == "error"
+        assert row["raw_errors"] == ["response:not_single_message"]
+        assert row["phase_projection"]["changed"] is True
+        calls = len(transport.calls)
+        again = submit_fixture.execute(engine, "poll", plan, continuation_ref="synthetic-verified")
+        assert again["budget_state"] == result["budget_state"]
+        assert len(transport.calls) == calls
+    finally:
+        engine.close()
+
+
 def reconcile(engine, plan):
     return submit_fixture.execute(engine, "poll", plan)
 

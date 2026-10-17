@@ -26,6 +26,7 @@ import luna_event_contract_v2 as contract
 from poll_luna_budget_batch import ReconciliationResearch
 from prepare_luna_budget_wave import MAX_PER_CORPUS, WaveResearch
 from project_luna_budget_results import ProjectionResearch
+from luna_budget_continuation import acknowledged_assessment, load_continuation
 
 METHOD = "luna-budget-bounded-controller-v1"
 RUN_KIND = "luna_budget_controller_run"
@@ -44,6 +45,7 @@ def implementation_hashes() -> dict[str, str]:
         "scripts/execute_luna_budget_batch.py", "scripts/poll_luna_budget_batch.py",
         "scripts/luna_batch_results.py", "scripts/prepare_luna_budget_wave.py",
         "scripts/project_luna_budget_results.py", "scripts/luna_batch_literal_projection.py",
+        "scripts/luna_budget_continuation.py", "scripts/luna_batch_phase_projection.py",
         "src/newsresearch/event_batch_budget.py", "src/newsresearch/event_batch_live_gateway.py",
         "src/newsresearch/event_batch_transport.py",
     )
@@ -69,6 +71,7 @@ class ControlResearch(ExecutionResearch):
         if plan.get("authorization_id") != STUDY or plan.get("contract_sha256") != contract.contract_digest():
             raise AuditError("budget_controller_plan_or_contract_changed")
         current_code = implementation_hashes()
+        continuation = load_continuation(self, session, plan_id, data.get("continuation_ref"))
         if any(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != value
                for name, value in plan["implementation"].items()):
             raise AuditError("budget_controller_frozen_preparation_changed")
@@ -78,12 +81,17 @@ class ControlResearch(ExecutionResearch):
             raise ResearchError("budget_controller_runtime_outside_bounds")
         if type(limit) is not int or not 1 <= limit <= MAX_PER_CORPUS:
             raise ResearchError("budget_controller_wave_outside_bounds")
-        protocol = self._version(session, context, {"kind": "protocol", "key": STUDY + ":controller",
+        if continuation and (runtime != continuation["max_runtime_seconds"] or limit != continuation["max_per_corpus"]):
+            raise AuditError("budget_controller_continuation_schedule_changed")
+        suffix = ":continuation:" + continuation["id"] if continuation else ""
+        run_key = plan_id + suffix
+        protocol = self._version(session, context, {"kind": "protocol", "key": STUDY + ":controller" + suffix,
             "content": {"method": METHOD, "plan": plan_id, "versions": plan["versions"],
                 "implementation": current_code, "max_runtime_seconds": runtime, "max_per_corpus": limit,
+                "continuation_ref": data.get("continuation_ref"),
                 "rules": "One sequential controller; same authorization, corpus-isolated fixed queue and budget. Poll and project retained outputs; stage only without an unsubmitted manifest. Stop admission at budget deferral but drain existing jobs. Local queue deferral waits for changed budget state. Stop technical/unknown/frozen failures. No retry, cancellation, reset, new embeddings or event acceptance. Fixed deadline survives restart; in-flight provider work survives deadline."},
             "amend_latest": True, "reason": "Bind bounded scheduler and all invoked implementations"})["id"]
-        previous = self.latest(RUN_KIND, plan_id)
+        previous = self.latest(RUN_KIND, run_key)
         if previous:
             run_id, run = previous
             if (run["protocol"] != protocol or run["max_runtime_seconds"] != runtime
@@ -92,9 +100,12 @@ class ControlResearch(ExecutionResearch):
         else:
             start = time.time()
             run = {"plan": plan_id, "protocol": protocol, "implementation": current_code,
-                   "started_at": utc(), "started_epoch": start, "deadline_epoch": start + runtime,
+                   "started_at": utc(), "started_epoch": start,
+                   "deadline_epoch": continuation["deadline_epoch"] if continuation else start + runtime,
+                   "continuation_ref": data.get("continuation_ref"),
+                   "original_run": continuation["original_run"] if continuation else None,
                    "max_runtime_seconds": runtime, "max_per_corpus": limit, "authorization_id": STUDY}
-            run_id = self.ledger.record(session, RUN_KIND, plan_id, run)
+            run_id = self.ledger.record(session, RUN_KIND, run_key, run)
         saved = self.gateway.load_book(session, STUDY)
         if saved is None:
             raise AuditError("budget_controller_existing_budget_required")
@@ -130,7 +141,8 @@ class ControlResearch(ExecutionResearch):
             blockers.append("shared_gateway_stopped")
         if book.frozen:
             blockers.append("shared_budget_frozen")
-        if any(row.get("technical_failure") or row["status"] not in {"valid", "invalid"} for row in assessments):
+        if any((row.get("technical_failure") or row["status"] not in {"valid", "invalid"})
+               and not acknowledged_assessment(row, continuation) for row in assessments):
             blockers.append("technical_or_unknown_assessment")
         for event in book.to_dict()["events"]:
             if event["action"] == "reserve" and book.entry(event["value"]["request_id"])["status"] in {"unknown", "frozen", "overrun"}:
@@ -142,6 +154,7 @@ class ControlResearch(ExecutionResearch):
             raise AuditError("budget_controller_coverage_exceeds_frozen_queue")
         finished = self.latest(FINISH_KIND, run_id)
         value = {"plan": plan_id, "protocol": protocol, "run": run_id,
+            "continuation_ref": data.get("continuation_ref"),
             "deadline_epoch": run["deadline_epoch"], "max_per_corpus": limit,
             "submitted": submitted, "assessments": len(assessments),
             "status_counts": dict(Counter(row["status"] for row in assessments)),
@@ -178,10 +191,10 @@ class ControlResearch(ExecutionResearch):
         return present(self, session, "luna_budget_controller_status", value, markdown)
 
 
-def step_failure(stage: str, result: Json) -> bool:
+def step_failure(stage: str, result: Json, *, continuation: bool = False) -> bool:
     if stage == "reconcile":
         return bool(result.get("obstacles") or result.get("budget_frozen")
-                    or any(result.get("status_counts", {}).get(key, 0) for key in ("error", "unknown")))
+                    or (not continuation and any(result.get("status_counts", {}).get(key, 0) for key in ("error", "unknown"))))
     if stage == "stage":
         return result.get("status") == "blocked"
     if stage == "submit":
@@ -192,10 +205,13 @@ def step_failure(stage: str, result: Json) -> bool:
 
 def run_loop(step: Callable[[str, Json], Json], *, plan: str,
              max_runtime_seconds: int = MAX_RUNTIME_SECONDS, max_per_corpus: int = MAX_PER_CORPUS,
+             continuation_ref: str | None = None,
              now: Callable[[], float] = time.time, sleep: Callable[[float], None] = time.sleep,
              emit: Callable[[str], None] = print) -> Json:
     """Pure scheduling boundary; injected steps own all audited effects."""
     common = {"plan": plan, "max_runtime_seconds": max_runtime_seconds, "max_per_corpus": max_per_corpus}
+    if continuation_ref:
+        common["continuation_ref"] = continuation_ref
     state = step("control", common)
     deadline = state["deadline_epoch"]
     next_poll = 0.0
@@ -228,6 +244,8 @@ def run_loop(step: Callable[[str, Json], Json], *, plan: str,
             "submitted", "assessments", "pending_jobs", "unmanifested", "admission_closed", "token_wait")}}, sort_keys=True))
         stage: str | None = None
         data: Json = {"plan": plan}
+        if continuation_ref:
+            data["continuation_ref"] = continuation_ref
         if state["pending_jobs"] and now() >= next_poll:
             stage = "reconcile"
         elif state["unprojected"]:
@@ -243,7 +261,7 @@ def run_loop(step: Callable[[str, Json], Json], *, plan: str,
             if stage == "stage":
                 data["max_per_corpus"] = max_per_corpus
             result = step(stage, data)
-            if step_failure(stage, result):
+            if step_failure(stage, result, continuation=continuation_ref is not None):
                 forced_stop = "technical_stop"
             elif stage == "stage" and not result.get("manifests") and state["unmanifested"]:
                 forced_stop = "stalled"
@@ -289,13 +307,15 @@ def main() -> int:
     parser.add_argument("--allow-paid-execution", action="store_true")
     parser.add_argument("--max-runtime-seconds", type=int, default=MAX_RUNTIME_SECONDS)
     parser.add_argument("--max-per-corpus", type=int, default=MAX_PER_CORPUS)
+    parser.add_argument("--continuation-ref")
     args = parser.parse_args()
     if not args.allow_paid_execution:
         parser.error("--allow-paid-execution is required for the existing authorized run")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     result = run_loop(execute_step, plan=args.plan, max_runtime_seconds=args.max_runtime_seconds,
-                      max_per_corpus=args.max_per_corpus, emit=lambda value: print(value, flush=True))
+                      max_per_corpus=args.max_per_corpus, continuation_ref=args.continuation_ref,
+                      emit=lambda value: print(value, flush=True))
     return 0 if result["finished_reason"] in {"complete", "budget_deferred", "deadline"} else 1
 
 

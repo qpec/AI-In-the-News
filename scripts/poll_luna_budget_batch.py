@@ -18,6 +18,8 @@ from execute_luna_budget_batch import ExecutionResearch, JOB_KIND, MANIFEST_KIND
 from luna_batch_budget_run import OWNER, STUDY, present, save
 from luna_batch_results import parse_batch_results
 import luna_event_contract_v2 as contract
+from luna_budget_continuation import load_continuation
+from luna_batch_phase_projection import parse_batch_results_phase_aware
 
 ASSESSMENT_KIND = "luna_budget_assessment"
 PARSE_KIND = "luna_budget_job_parsed"
@@ -71,11 +73,13 @@ class ReconciliationResearch(ExecutionResearch):
             tasks = {task["custom_id"]: {"packet": self.ledger.artifacts.read(task["packet_ref"]),
                 "body": self.ledger.artifacts.read(task["request_body_ref"])} for task in manifest["tasks"]}
             # The parser is pure; all provider bytes above have already been retained.
-            parsed = parse_batch_results(files["output_file_id"], files["error_file_id"], tasks)
+            parser = getattr(self, "result_parser", parse_batch_results)
+            parsed = parser(files["output_file_id"], files["error_file_id"], tasks)
             parsed_ref = save(self, session, parsed, "Batch output parsing before provisional result projection")
             self.ledger.record(session, PARSE_KIND, manifest_id, {"plan": plan_id, "job_id": job["job_id"],
                 "manifest": manifest_id, "status": status, "parsed_result": parsed_ref,
-                "execution_protocol": self.execution_protocol, "poll_receipt": receipt["id"],
+                "execution_protocol": self.execution_protocol, "parser_mode": getattr(self, "parser_mode", "original"),
+                "poll_receipt": receipt["id"],
                 "download_receipts": file_receipts, "parsed_at": utc()})
         saved = self.gateway.load_book(session, STUDY)
         if saved is None:
@@ -100,6 +104,9 @@ class ReconciliationResearch(ExecutionResearch):
                 "attempt": attempt, "manifest": manifest_id, "job_id": job["job_id"],
                 "request": task["request_body_ref"], "response": response_ref, "parsed_result": parsed_ref,
                 "status": row["status"], "technical_failure": row.get("technical_failure", False),
+                "parser_mode": getattr(self, "parser_mode", "original"),
+                "raw_status": row.get("raw_status", row["status"]), "raw_errors": row.get("raw_errors", row.get("errors", [])),
+                "phase_projection": row.get("phase_projection"),
                 "missing": row.get("missing", False),
                 "errors": row.get("errors", []), "output": row.get("result") if row["status"] == "valid" else None,
                 "model": row.get("observed_model"), "usage": row.get("usage"), "request_id": row.get("provider_request_id"),
@@ -150,6 +157,12 @@ class ReconciliationResearch(ExecutionResearch):
             raise AuditError("batch_plan_authorization_mismatch")
         if plan.get("contract_sha256") != contract.contract_digest():
             raise AuditError("batch_reconciliation_contract_changed")
+        continuation = load_continuation(self, session, plan_id, data.get("continuation_ref"))
+        self.result_parser = parse_batch_results
+        self.parser_mode = "original"
+        if continuation:
+            self.result_parser = parse_batch_results_phase_aware
+            self.parser_mode = "explicit-final-answer-phase-v1"
         policy, book, state = self.authorization(session, context, plan_id, plan)
         root = Path(__file__).resolve().parents[1]
         implementation = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest() for path in (
@@ -157,9 +170,15 @@ class ReconciliationResearch(ExecutionResearch):
             Path(__file__).with_name("execute_luna_budget_batch.py"),
             root / "src/newsresearch/event_batch_live_gateway.py", root / "src/newsresearch/event_batch_transport.py",
             root / "src/newsresearch/event_batch_budget.py")}
+        if continuation:
+            implementation.update({str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in (Path(__file__).with_name("luna_budget_continuation.py"),
+                             Path(__file__).with_name("luna_batch_phase_projection.py"))})
         protocol = self._version(session, context, {"kind": "protocol", "key": STUDY + ":reconcile",
             "content": {"method": "luna-budget-batch-reconciliation-v1", "implementation": implementation,
-                "plan": plan_id, "versions": plan["versions"], "rules": "Retain provider files before parsing. Join exact custom IDs. Settle known usage even if content invalid; unknowns stay reserved. No new inference or membership adoption."},
+                "plan": plan_id, "versions": plan["versions"], "continuation_ref": data.get("continuation_ref"),
+                "parser_mode": self.parser_mode,
+                "rules": "Retain provider files before parsing. Join exact custom IDs. Settle known usage even if content invalid; unknowns stay reserved. Explicit continuation uses phase-aware final-answer selection with retained original envelopes; old parsed checkpoints and assessments remain unchanged. No new inference or membership adoption."},
             "amend_latest": True, "reason": "Bind exact reconciliation implementation"})["id"]
         self.execution_protocol = protocol
         jobs = [self.ledger.get(row["id"], JOB_KIND) for row in self.ledger.db.execute("SELECT id FROM records WHERE kind=?", (JOB_KIND,))]
@@ -176,6 +195,9 @@ class ReconciliationResearch(ExecutionResearch):
         assessments = [row for row in assessments if row["plan"] == plan_id]
         counts = Counter({name: 0 for name in ("valid", "invalid", "error", "unknown")})
         counts.update(row["status"] for row in assessments)
+        raw_counts = Counter({name: 0 for name in ("valid", "invalid", "error", "unknown")})
+        raw_counts.update(row.get("raw_status", row["status"]) for row in assessments)
+        phase_derived = sum(bool((row.get("phase_projection") or {}).get("changed")) for row in assessments)
         submitted = sum(job["request_count"] for job in jobs)
         missing = sum(row.get("missing") is True for row in assessments)
         unassessed = submitted - len(assessments)
@@ -186,6 +208,7 @@ class ReconciliationResearch(ExecutionResearch):
         focuses = Counter(row["output"]["focus"] for row in assessments if row["status"] == "valid")
         value = {"plan": plan_id, "protocol": protocol, "policy": policy, "jobs": observations,
             "submitted": submitted, "assessments": len(assessments), "status_counts": dict(counts),
+            "raw_status_counts": dict(raw_counts), "phase_derived_assessments": phase_derived,
             "pending": pending, "unassessed": unassessed, "missing_response_rows": missing,
             "observed_response_rows": len(assessments) - missing,
             "focus_counts": dict(focuses), "obstacles": obstacles,
@@ -195,7 +218,9 @@ class ReconciliationResearch(ExecutionResearch):
             "human_validated": False, "accepted_events": 0, "new_embeddings": 0}
         lines = [f"Luna Batch reconciliation: **{submitted} submitted**, {len(assessments) - missing} provider response rows, "
                  f"{missing} missing response rows and {unassessed} unassessed requests; "
-                 f"statuses {dict(counts)}, {pending} pending. Valid focus labels: {dict(focuses)}.", "",
+                 f"version-bound parser statuses {dict(counts)}, {pending} pending. "
+                 f"Raw envelope-parser statuses {dict(raw_counts)}; {phase_derived} separately preserved final-phase derivations. "
+                 f"Valid focus labels: {dict(focuses)}.", "",
                  f"Conservative API usage estimate **${value['charged_estimate_usd']:.6f}**; "
                  f"**${value['reserved_usd']:.6f} reserved**. Budget frozen: {book.frozen}. "
                  f"{value['eligible_not_submitted']:,} eligible requests remain unsubmitted. "

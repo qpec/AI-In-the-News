@@ -156,6 +156,35 @@ def test_audit_failure_propagates_without_any_fallback_or_retry():
     assert sim.stages() == ["submit"]
 
 
+def test_continuation_keeps_raw_error_total_but_checks_current_audited_blockers():
+    sim = Simulation(pending_jobs=1, submitted=2, unmanifested=0)
+
+    def poll(_):
+        sim.state.update(pending_jobs=0, assessments=2)
+        return {"status_counts": {"error": 1, "valid": 1}}
+
+    sim.hooks["reconcile"] = poll
+    result = runner.run_loop(sim.step, plan="synthetic", continuation_ref="verified-proof",
+                             now=lambda: sim.clock, sleep=sim.sleep, emit=lambda _: None)
+    assert result["finished_reason"] == "complete"
+    assert sim.stages() == ["reconcile"]
+    assert all(data.get("continuation_ref") == "verified-proof" for _, data, _ in sim.calls)
+
+
+def test_new_technical_failure_stops_continuation_before_any_admission():
+    sim = Simulation(pending_jobs=1, submitted=2)
+
+    def poll(_):
+        sim.state.update(pending_jobs=0, assessments=2, blockers=["technical_or_unknown_assessment"])
+        return {"status_counts": {"error": 2}}
+
+    sim.hooks["reconcile"] = poll
+    result = runner.run_loop(sim.step, plan="synthetic", continuation_ref="verified-proof",
+                             now=lambda: sim.clock, sleep=sim.sleep, emit=lambda _: None)
+    assert result["finished_reason"] == "technical_stop"
+    assert sim.stages() == ["reconcile"]
+
+
 def fixture_module():
     spec = importlib.util.spec_from_file_location("controller_fixture", ROOT / "tests/test_execute_luna_budget_batch.py")
     assert spec and spec.loader
