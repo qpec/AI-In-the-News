@@ -36,6 +36,7 @@ RESULT_KINDS = {
     "newsapi_event_coverage",
     "newsapi_event_diagnosis",
     "newsapi_metadata_repair",
+    "newsapi_event_matching",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",
