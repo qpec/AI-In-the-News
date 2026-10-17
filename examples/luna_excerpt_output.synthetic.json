@@ -1,0 +1,130 @@
+{
+  "example_kind": "fictional_software_fixture_not_a_research_result",
+  "input": {
+    "title": "Fictional Aster launch",
+    "body_fully_covered": true,
+    "spans": [
+      {
+        "span_id": "body1",
+        "start": 0,
+        "end": 100,
+        "text": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12. The rollout covers 12 schools."
+      }
+    ]
+  },
+  "output": {
+    "schema_version": "luna-excerpt-v1",
+    "focus": "single",
+    "evidence_basis": "full_body",
+    "reason": "The supplied fictional article focuses on one system launch.",
+    "focus_evidence": [
+      {
+        "span_id": "body1",
+        "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+      }
+    ],
+    "event": {
+      "summary": "Acme Labs launched Aster in Delft.",
+      "type": "release",
+      "trigger": {
+        "surface": "launched",
+        "evidence": {
+          "span_id": "body1",
+          "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+        }
+      },
+      "claim_status": "reported",
+      "attribution_entity_id": null,
+      "participants": [
+        {
+          "entity_id": "e1",
+          "role": "agent",
+          "evidence": {
+            "span_id": "body1",
+            "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+          }
+        },
+        {
+          "entity_id": "e2",
+          "role": "product",
+          "evidence": {
+            "span_id": "body1",
+            "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+          }
+        },
+        {
+          "entity_id": "e3",
+          "role": "location",
+          "evidence": {
+            "span_id": "body1",
+            "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+          }
+        }
+      ],
+      "time_expression": {
+        "surface": "2026-01-12",
+        "evidence": {
+          "span_id": "body1",
+          "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+        }
+      }
+    },
+    "entities": [
+      {
+        "id": "e1",
+        "type": "organization",
+        "subtype": null,
+        "surface": "Acme Labs",
+        "normalized_name": null,
+        "relation": "focal",
+        "evidence": {
+          "span_id": "body1",
+          "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+        }
+      },
+      {
+        "id": "e2",
+        "type": "product_system",
+        "subtype": null,
+        "surface": "Aster",
+        "normalized_name": null,
+        "relation": "focal",
+        "evidence": {
+          "span_id": "body1",
+          "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+        }
+      },
+      {
+        "id": "e3",
+        "type": "place",
+        "subtype": null,
+        "surface": "Delft",
+        "normalized_name": null,
+        "relation": "focal",
+        "evidence": {
+          "span_id": "body1",
+          "quote": "Fictional Acme Labs launched the Aster system in Delft on 2026-01-12."
+        }
+      }
+    ],
+    "extra_facts": [
+      {
+        "name": "school_count",
+        "subject_entity_id": null,
+        "value_type": "quantity",
+        "value_text": "12 schools",
+        "value_number": 12,
+        "unit_text": "schools",
+        "normalized_date": null,
+        "claim_status": "reported",
+        "attribution_entity_id": null,
+        "evidence": {
+          "span_id": "body1",
+          "quote": "The rollout covers 12 schools."
+        }
+      }
+    ],
+    "entities_truncated": false,
+    "facts_truncated": false
+  }
+}

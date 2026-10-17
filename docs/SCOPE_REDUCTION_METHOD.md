@@ -413,3 +413,14 @@ findings; the undocumented genre/factuality-filter questions remain unresolved.
 No relevance labels or calibrated thresholds apply to this documentation search.
 Exact `record_presentation` capture is unsupported for this external lookup;
 the overview is preserved here without claiming gateway capture or UI attestation.
+
+## Proposed excerpt screen — 2026-10-17
+
+The user's subsequent [Luna API excerpt method](LUNA_EXCERPT_METHOD.md) compares
+title/metadata plus the first and last 300 words with capped first/last paragraphs.
+It supplies a concrete four-label focus prompt, entity/event/fact JSON contract
+and offline cost/coverage audit. It is a prospective alternative to full-text
+screening here, not a validated replacement. Excerpt-only `single` decisions do
+not certify the omitted middle. The two-publisher requirement, corpus isolation,
+missingness accounting, reversible set-asides and independent recall evaluation
+remain required. No paid batch or new exclusion policy is adopted by the design.

@@ -498,3 +498,32 @@ Commit each major completed work step to the appropriate `AI-In-the-News` or `AI
   100% numerical recall@8 on 16 queries/index is not event accuracy. Warm retrieval
   medians 6.83ms/article and 7.22ms/group exclude startup and durable audit; full
   operation took 27.5 minutes, including 13.6-minute preflight/registration.
+
+## Luna excerpt workload checkpoint — 2026-10-17
+
+The user's [Luna API excerpt proposal](docs/LUNA_EXCERPT_METHOD.md) now has an
+exact prompt, strict JSON schema, evidence validator, deterministic 300+300 and
+capped-paragraph builders, and an executed offline per-corpus workload audit.
+It is a new design, not permission to resume the stopped 12-article pilot.
+Incident result `2c4a74d8ffeaee8df85cde12fa7be4cdb77bf73798cca791a9dfc6544abb56d6`
+and cybercrime result `7ad0be5cf1fa5ddd14b7bf8b121b6132b8cc4df9ecefc3ce7d12cf2fc4e68f03`
+cover all 209,114 saved rows/19 archives: 205,820 usable, 3,294 unavailable,
+zero failed/pending archives, model calls, embeddings or semantic exclusions.
+Owners are `%LOCALAPPDATA%/AI-In-the-News/luna-excerpt-audit-20261017-v1` and
+`%LOCALAPPDATA%/AI-In-the-News/luna-excerpt-cybercrime/luna-excerpt-audit-20261017-v1`.
+Use actual protected paths, not sandbox-virtualized LOCALAPPDATA.
+
+At an assumed 800 output tokens/row, short-context Luna Batch scenarios total
+$67.40 capped paragraphs/$72.84 word windows/$75.90 full text. Inputs are local
+cl100k token proxies, outputs assumptions, not bills/caps/run approval. Full
+text's modeled input premium over 300+300 is only about $3.06 across both corpora;
+its output may grow. Paragraphs retain 10.6%/19.9% of incident/cyber body words;
+word windows 65.0%/76.6%. Prefer testing full retained text as the primary
+candidate, paired against 300+300; no input policy or exclusions were adopted.
+Single-focus, entity/event extraction quality and dossier recall remain unmeasured.
+The API Batch gateway lifecycle and independent held-out evaluation are still
+required before inference/exclusion. No paid batch was uploaded or authorized.
+111 synthetic checks passed; exact technical overviews and hash-only lineage
+are protected. `record_presentation` does not support this technical-note kind.
+Exact method/literature/result-discussion note:
+`75497929adb519bde154851a317558f9074a12fd5c0c5aee476626b5aafcbeba`.

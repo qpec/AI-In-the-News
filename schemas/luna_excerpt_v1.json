@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "focus", "evidence_basis", "reason", "focus_evidence", "event", "entities", "extra_facts", "entities_truncated", "facts_truncated"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["luna-excerpt-v1"]},
+    "focus": {"type": "string", "enum": ["single", "multiple", "no_event", "uncertain"]},
+    "evidence_basis": {"type": "string", "enum": ["full_body", "excerpts"]},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 300},
+    "focus_evidence": {"type": "array", "minItems": 1, "maxItems": 4, "items": {"$ref": "#/$defs/evidence"}},
+    "event": {"anyOf": [{"$ref": "#/$defs/event"}, {"type": "null"}]},
+    "entities": {"type": "array", "maxItems": 24, "items": {"$ref": "#/$defs/entity"}},
+    "extra_facts": {"type": "array", "maxItems": 16, "items": {"$ref": "#/$defs/fact"}},
+    "entities_truncated": {"type": "boolean"},
+    "facts_truncated": {"type": "boolean"}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["span_id", "quote"],
+      "properties": {
+        "span_id": {"type": "string", "minLength": 1, "maxLength": 80},
+        "quote": {"type": "string", "minLength": 1, "maxLength": 400}
+      }
+    },
+    "literal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["surface", "evidence"],
+      "properties": {
+        "surface": {"type": "string", "minLength": 1, "maxLength": 200},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "claim_status": {"type": "string", "enum": ["reported", "alleged", "denied", "planned", "hypothetical", "unclear"]},
+    "entity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "type", "subtype", "surface", "normalized_name", "relation", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^e[1-9][0-9]*$"},
+        "type": {"type": "string", "enum": ["organization", "person", "place", "product_system", "threat_actor", "malware", "legal_instrument_case", "identifier", "other_named"]},
+        "subtype": {"type": ["string", "null"], "minLength": 1, "maxLength": 60},
+        "surface": {"type": "string", "minLength": 1, "maxLength": 200},
+        "normalized_name": {"type": ["string", "null"], "minLength": 1, "maxLength": 200},
+        "relation": {"type": "string", "enum": ["focal", "background", "uncertain"]},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "participant": {
+      "type": "object", "additionalProperties": false,
+      "required": ["entity_id", "role", "evidence"],
+      "properties": {
+        "entity_id": {"type": "string", "pattern": "^e[1-9][0-9]*$"},
+        "role": {"type": "string", "enum": ["agent", "affected", "authority", "location", "product", "other"]},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["summary", "type", "trigger", "claim_status", "attribution_entity_id", "participants", "time_expression"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 400},
+        "type": {"type": "string", "enum": ["attack", "disruption", "release", "deployment", "announcement", "legal_action", "regulatory_decision", "transaction", "organizational_change", "research_publication", "discovery", "physical_occurrence", "other"]},
+        "trigger": {"$ref": "#/$defs/literal"},
+        "claim_status": {"$ref": "#/$defs/claim_status"},
+        "attribution_entity_id": {"type": ["string", "null"], "pattern": "^e[1-9][0-9]*$"},
+        "participants": {"type": "array", "maxItems": 24, "items": {"$ref": "#/$defs/participant"}},
+        "time_expression": {"anyOf": [{"$ref": "#/$defs/literal"}, {"type": "null"}]}
+      }
+    },
+    "fact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "subject_entity_id", "value_type", "value_text", "value_number", "unit_text", "normalized_date", "claim_status", "attribution_entity_id", "evidence"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,59}$"},
+        "subject_entity_id": {"type": ["string", "null"], "pattern": "^e[1-9][0-9]*$"},
+        "value_type": {"type": "string", "enum": ["text", "quantity", "money", "date", "duration", "identifier", "boolean"]},
+        "value_text": {"type": "string", "minLength": 1, "maxLength": 240},
+        "value_number": {"type": ["number", "null"]},
+        "unit_text": {"type": ["string", "null"], "minLength": 1, "maxLength": 40},
+        "normalized_date": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "claim_status": {"$ref": "#/$defs/claim_status"},
+        "attribution_entity_id": {"type": ["string", "null"], "pattern": "^e[1-9][0-9]*$"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    }
+  }
+}
