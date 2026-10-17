@@ -27,6 +27,30 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Random singleton Luna API sample — 2026-10-17
+
+The user explicitly requested the saved OpenAI API key for a random 100 current
+singletons, overriding the Luna skill's Codex transport for this study only.
+Frozen plan `8b036faef7e3f373a0fc1358bebde90d4de501bac7a420f75709a489636507fd`
+sampled 100 of the original 15,537 singletons and retrieved three candidates each
+from the 19,549 eligible pilot articles using saved vectors, no temporal cutoff.
+Final result `63ded06fabfb4878605e858cfba50e5c22f39daa3410550a6a32d3af7eb61e12`
+reports **14 supported-match proposals / 41 uncertain / 42 unmatched among the
+top three / 3 incomplete**. These are model references, not accepted memberships
+or human accuracy. Ten supported anchors have a candidate within seven
+publication days; four only have longer-gap dated support among tested candidates.
+Current groups remain unchanged. See [method, failure handling and results](docs/SINGLETON_LUNA_API_SAMPLE.md).
+
+All 300 authorized pair requests / 600 exposures are spent, zero retries and
+zero pending: 297 valid references (20 same, 193 different, 84 uncertain), three
+response-retention exclusions. The original stop after 60 requests is preserved;
+an append-only operational continuation processed only the 240 untouched pairs
+under the same user scope and cumulative ceiling, without redraw, changed model
+packets or guard relaxation. Do not rerun, refill or retry this completed queue
+by default. Observed model was `gpt-6-luna`; recorded usage on 297 responses
+costs USD 0.067911 at uncached Standard rates, not an invoice. Billing for three
+excluded responses is unknown. No new embeddings or group adoption occurred.
+
 ## Provider metadata candidate — 2026-10-17
 
 The offline `provider-anchored-event-split-v1` result

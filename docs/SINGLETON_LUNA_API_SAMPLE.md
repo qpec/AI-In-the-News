@@ -180,3 +180,53 @@ One additional source-free integration test exercised the exact 60-attempt
 stop, 240-request continuation, retained invalid result, cumulative ceiling,
 immutable original stop and duplicate-free resume. It passed, with Ruff and
 mypy checks. This is software verification, not new source/model research.
+
+## Completed bounded sample — 2026-10-17
+
+Final result
+`63ded06fabfb4878605e858cfba50e5c22f39daa3410550a6a32d3af7eb61e12`.
+Exact presentation record
+`6a86462cc69c00904ba151410bd014843624cca2e1acd8b757ae1b825b1ca261`
+was shown in chat with the counts, coverage and three source-linked model
+examples. The sample, original 300 requests and original groups were unchanged.
+
+| Outcome over the original 100 sampled singletons | Articles |
+| --- | ---: |
+| At least one supported same-event pair; grouping proposal | 14 |
+| No supported match; at least one uncertain comparison | 41 |
+| All three candidates different-event; unmatched among top three | 42 |
+| Incomplete due to response-retention exclusions | 3 |
+
+All **300 requests / 600 article exposures** were attempted exactly once,
+including the first 60: **297 valid / 3 invalid / 0 pending / 0 retries**.
+The 297 valid pairs contain **20 same-event, 193 different-event and 84
+uncertain** references. Pair counts are not event counts or counts of distinct
+sampled articles. Ninety-seven anchors have all three valid comparisons; the
+denominator remains the original 100, with the other three visible as incomplete.
+
+The original rejected response remains invalid. The continuation added two
+isolated response-retention exclusions; none was classified or retried, and the
+credential guard and original stop record remained intact. No response payload,
+flagged value or usage is reconstructed for these exclusions. Non-content HTTP
+receipts for continuation responses remain protected. This does not establish
+that the flags were genuine credentials. The cumulative 300-request ceiling is
+now exhausted; do not refill or retry by default.
+
+Of the 14 supported-match anchors, **10 have at least one supported candidate
+within seven publication days**. The other **4 have only longer-gap dated
+support among the tested candidates**. These are publication gaps, not event
+dates. They remain proposals for separate cross-window review. No new group,
+membership, accepted dossier, model precision or recall is established.
+
+Requested and returned model: `gpt-6-luna`. Usage is available on 297 responses:
+484,749 input / 38,873 output / 523,622 total tokens. Applying the documented
+uncached Standard rates gives **USD 0.067911**, not a verified invoice. Usage and
+billing for three attempted responses remain unavailable, never assumed zero.
+The conservative planning reservation was USD 0.563186; it is not actual spend.
+
+This is a random pilot singleton screen, not human validation, full-article
+reading, whole-group purity, 90% precision, unrestricted recall or proof that
+the 42 unmatched articles are unique. Further evidence is needed for uncertain
+cases, and whole-group consistency review is needed before adopting supported
+links. The full per-article/candidate results, exact packets and model outputs
+remain protected outside Git. No new embeddings or live news collection ran.
