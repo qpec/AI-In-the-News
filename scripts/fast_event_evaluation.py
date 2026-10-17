@@ -81,8 +81,11 @@ def main() -> int:
         result = engine.execute("luna_group_validation", payload,
             objective="Repair event-group evaluation with mechanically audited replay and a frozen full-support pair sample; preserve uncertainty and original groups",
             actor=args.actor)
-        print(json.dumps({"id": result["id"], "method": result["method"], "status": result.get("status"),
-            "wall_seconds": time.perf_counter() - started, "model_authorized": result.get("model_authorized", False)}), flush=True)
+        summary = {"id": result["id"], "method": result["method"], "status": result.get("status"),
+                   "wall_seconds": time.perf_counter() - started}
+        if "model_authorized" in result:
+            summary["model_authorized"] = result["model_authorized"]
+        print(json.dumps(summary), flush=True)
         return 0 if args.phase != "run" or result["status"] == "complete" else 1
     finally:
         engine.close()

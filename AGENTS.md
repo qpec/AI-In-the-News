@@ -130,6 +130,23 @@ The 191-million-pair random tail can leave recall very uncertain at small budget
 Human-review templates are blinded; self-asserted reviewers do not establish
 independently validated gold. Original memberships remain unchanged.
 
+The user subsequently instructed **Keep going until precision 90**, authorizing
+that exact proposed 68-call/136-exposure/zero-retry plan. It is now completed as
+`534e49b0895111db1b55d2fb53a825b8e2e9309f4a9a88bd2c0dbe095c82f6aa`:
+all 68 responses valid, zero retries/failures/unknowns/pending. Four canaries
+passed; 64 evaluation pairs have 28 same-event/28 different-event/8 uncertain
+references. Within-group sample: 25 same/5 different/2 uncertain out of 32.
+Precision point remains unavailable; sample missingness diagnostics are
+78.1%–84.4%, with conditional 95% sampling interval 56.2%–96.0%. **90% was not
+demonstrated.** Full-frame recall remains poorly determined. Runtime was
+138.858 seconds, not a same-workload benchmark. This is a model-reference pair
+evaluation, not independent human accuracy or whole-group purity. Target protocol
+`26299ba9e6b4a0fbd0acecacfd2f60c8557f1f434e7286bbe211c2a62ba618a5`
+was registered before labels. Do not tune against this 64-pair evaluation and
+claim it remains held out, rerun completed tasks or extend this model budget by
+default. Original memberships are unchanged; any stricter candidate must be
+separately frozen and assessed on fresh references under concrete run approval.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

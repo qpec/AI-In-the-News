@@ -58,6 +58,28 @@ reviewed evidence and held-out evaluation are still needed for accuracy claims.
 
 ## Audited operation
 
+### Predeclared precision target — 2026-10-17
+
+The user instructed “Keep going until precision 90” after the concrete
+68-call/136-exposure/zero-retry run was proposed. This authorizes that frozen
+run; it does not remove its failure stop or authorize unlimited new queues.
+The operational target is **at least 90% model-reference pair precision** for
+the frozen guarded seven-day groups. All 32 within-group references must be
+decisive for a point estimate; 29/32 would meet the point target. Uncertain,
+failed, pending and unknown references remain visible and are never dropped.
+
+Report the existing exact simultaneous 95% confidence interval separately.
+Even 32/32 cannot establish a 90% lower bound under that conservative interval.
+Neither the point target nor its interval establishes human-validated accuracy
+or whole-group purity. The frozen 64 evaluation pairs cannot be used to tune
+an improved policy and then validate that same policy. Subsequent development
+must use eligible older development references and a fresh evaluation sample,
+with retained pair coverage, multiarticle coverage and singleton growth shown.
+A policy retaining no pairs has undefined precision.
+
+This additive target is registered before new evaluation labels are inspected;
+it changes neither the prepared plan nor its prompts, sampling or bindings.
+
 Run from the repository root using the existing frozen environment:
 
 ```powershell
@@ -160,3 +182,54 @@ separately. Exact presentation
 was shown in chat. No empirical new-contract precision/recall or independently
 validated accuracy is claimed. The remaining execution gate is concrete approval
 for this new 68-call/136-exposure/zero-retry plan; the old approval is exhausted.
+
+## Executed bounded evaluation — 2026-10-17
+
+The subsequent instruction “Keep going until precision 90” authorized the
+concretely proposed new plan. Target protocol
+`26299ba9e6b4a0fbd0acecacfd2f60c8557f1f434e7286bbe211c2a62ba618a5`
+was registered before inspecting its new labels. Execution result
+`534e49b0895111db1b55d2fb53a825b8e2e9309f4a9a88bd2c0dbe095c82f6aa`
+completed all **68 calls / 136 article exposures / zero retries**, with
+68 valid responses and zero failed, unknown or pending responses. Four
+sequential canaries passed and are excluded from the following estimates.
+
+| Evaluation stratum | Same event | Different event | Uncertain | Sample size |
+| --- | ---: | ---: | ---: | ---: |
+| Within current groups | 25 | 5 | 2 | 32 |
+| Retrieved between groups | 3 | 15 | 6 | 24 |
+| Random between-group tail | 0 | 8 | 0 | 8 |
+
+**The 90% target was not demonstrated.** Pair precision has no point estimate
+because two within-group references are uncertain. Its sample missingness
+diagnostic is **78.1%–84.4%**; even the optimistic sample endpoint is below
+90%. The complete-case 25/30 = 83.3% is only a diagnostic that excludes those
+two references. The conservative simultaneous 95% sampling interval is
+**56.2%–96.0%**, conditional on correct model reference labels; neither sample
+missingness endpoints nor model judgments establish true population accuracy.
+
+Full-frame pair recall also has no point estimate. Its conditional sampling
+interval is approximately **0.0028%–99.17%**, so corpus recall remains poorly
+determined. Three sampled same-event pairs lie between groups; eight negative
+random-tail references do not prove absence of other missed links.
+Whole-group purity and independent human accuracy remain unmeasured here.
+
+The complete audited execution took **138.858 seconds**. Preflight was not
+timed separately, and this is not a same-workload speed comparison with the
+old batched evaluator. Original memberships, embeddings and old study records
+remain unchanged. Exact original presentation artifact:
+`ba51eeb1068ab19ba3bd8a9c08bfd90139f744eee650eefac54e809fb7451fbe`.
+The CLI's trailing default `model_authorized: false` is a display fallback for
+an absent result field; the execution had a persisted plan-bound policy and
+authorization record. It is not evidence of an unauthorized run.
+
+The additive `scripts/event_eval_overview.py` operation verifies the target,
+plan and retained assessment bindings, logs inspected lead references and source
+URL SQL, then saves the exact overview against both original and diagnostic
+result IDs. Diagnostic `ed702f1e712b83f187c9b83dfe2a1af3503856ec944626256e494d76c2928ce0`
+and presentation record `a489bf8752802e9594c11c527f806a3e44857c5c15109c682417c2ef434a5805`
+were prepared and shown in this chat, including two attributed model examples.
+This reporting step made zero new model calls. One source-free audited runtime
+integration test, Ruff and mypy passed for the new reporting code. The CLI now
+omits the authorization display field when it is absent, rather than inventing
+a false value.
