@@ -64,6 +64,18 @@ Technical/unknown outcomes stop without retries. The deadline does not cancel
 remote jobs. Check the current owner before continuing; never start a second
 controller or infer completion from this historical checkpoint.
 
+The original controller subsequently stopped at 516 responses (258 per corpus):
+298 raw valid, 217 content-invalid, one technical error, zero pending provider
+jobs. Retained projections covered 266 and recovered 64, giving 362 mechanically
+usable records, not human accuracy or accepted dossiers. Offline progress report
+`4c308d44eb67c2ccf04cd53541f83bf5b0fe256d9d52ab785492be6e1e074a85`
+confirms USD0.200230107 recorded usage and USD0.362894297 reserved entirely for
+unsubmitted work; all submitted usage is settled. The technical error was a
+completed response with explicit commentary and final_answer messages, rejected
+by the old single-message parser. Preserve that original stop and response.
+The user conditionally authorized the full remaining queue if checks pass;
+continuation must be an explicit audited amendment, never a stop/budget reset.
+
 ## Empirical scope-reduction experiments — 2026-10-17
 
 The user rejected metadata-only recommendations and requested actual rigorous

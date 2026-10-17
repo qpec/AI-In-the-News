@@ -150,3 +150,30 @@ only one controller against this owner. The saved-key wrapper accepts
 new plan or budget to continue after a stop. Thirteen synthetic controller tests
 passed, covering scheduling, restart, deferrals and unknown outcomes; these do
 not establish extraction quality.
+
+## Retained progress and phase-envelope stop — 2026-10-17
+
+The original controller stopped at 16:00:16 UTC (18:00:16 Europe/Amsterdam),
+after 516 provider responses: 258 per corpus. There were no unfinished jobs or
+missing response rows. Raw statuses were 298 valid, 217 content-invalid and one
+technical error. The retained citation-subset projections covered only the first
+266 responses and recovered 64 additional records; combined mechanical coverage
+was 362/516, with 153 unresolved content-invalid records and one technical error.
+The other 250 responses had not undergone citation-subset projection.
+
+Offline report `4c308d44eb67c2ccf04cd53541f83bf5b0fe256d9d52ab785492be6e1e074a85`
+reconciled complete usage for all 516 requests: conservative charge
+USD0.200230107, zero submitted/unresolved cost reservations, and USD0.362894297
+reserved for staged/unsubmitted requests. The 198,712 remaining eligible
+requests were not submitted. No new inference or provider calls were made for
+this report. Exact protected Markdown:
+`bda9953f973b784f296b17e009b5f2f1dcbb41e5e99d85a3a71c0788eba5ee91`.
+
+The technical error was `response:not_single_message`: the provider returned a
+completed, fully accounted Luna response with a `commentary` message followed by
+a `final_answer` message. The original parser required a single message.
+[Official Responses guidance](https://developers.openai.com/api/docs/guides/deployment-checklist)
+distinguishes these phases. Any compatibility replay must preserve both original
+messages, select an unambiguous explicit final answer, rerun the unchanged
+extraction validator, and retain the original error and stopped controller.
+This checkpoint does not authorize clearing that stop or retrying the article.
