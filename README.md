@@ -12,6 +12,11 @@ The subsequent [corrected event-vector comparison](docs/EVENT_CLUSTERING_COMPARI
 
 The [repaired event-group evaluator](docs/FAST_EVENT_EVALUATION.md) uses short grounded pair judgments, a fail-fast canary, probability sampling with a random retrieval tail, and separate blinded human references. It preserves the failed earlier run and reports incomplete precision/recall honestly; software checks alone do not establish grouping accuracy.
 
+The separate [fixed stricter grouping candidate](docs/PRECISION_CANDIDATE.md)
+uses saved vector features to propose complete-link splits inside the guarded
+seven-day groups. It reports retained grouping coverage and prepares a separate
+evaluation; it does not adopt memberships or infer precision from similarity.
+
 ## Run the working demonstration
 
 Requires Python 3.12 or 3.13 and `uv`. Dependencies are locked in `uv.lock`.
