@@ -407,7 +407,11 @@ class Ledger:
         if not row or (kind and row["kind"] != kind):
             raise AuditError(f"Missing or wrong version type: {kind or 'record'}")
         data = self.artifacts.read(row["artifact"])
-        if canonical(data) != row["payload"]:
+        # JSON converts integer object keys to strings. Re-canonicalizing the
+        # parsed value can therefore reorder valid keys (2, 10 -> "10", "2").
+        # read() fully hashes the artifact bytes; hash the exact projection bytes
+        # too, as verify() does, rather than comparing a lossy parsed round trip.
+        if hashlib.sha256(row["payload"].encode("utf-8")).hexdigest() != row["artifact"]:
             raise AuditError("Record projection differs from its artifact")
         return dict(data)
 
