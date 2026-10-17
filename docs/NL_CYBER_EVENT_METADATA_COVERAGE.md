@@ -113,3 +113,90 @@ Protected proof artifact:
 `1aacfbfcb15717bdd74b4386d80b48ab01356bace059f2226d357a41933467b2`.
 The original presentation remains retained; the amended exact overview gives
 the eight quarantine recoveries and one changed assignment explicitly.
+
+## Executed storage repair — 2026-10-17
+
+`nl-cyber-event-metadata-repair-v2` now rebuilds the protected working collection
+through `Research.execute("newsapi_collection", action="event_metadata_repair")`.
+The runner is `scripts/repair_nl_cyber_event_metadata.py`. Protocol, question,
+source diagnosis selection and exploratory profile are registered before reads.
+This deterministic metadata repair performs no article interpretation, grouping,
+network requests or model calls. Its additional NewsAPI cost is zero.
+
+The v2 metadata projection preserves the exact `eventUri` value and key presence,
+including null, absent and malformed values. The general `metadata_only` importer
+now preserves this field with input-hash and record-index provenance without raw
+records or bodies. Existing v1 resolution/minimal-recovery methods retain their
+original projection for historical proof compatibility; their legacy compact
+summaries are not the corrected storage format for new collection work.
+
+Each repaired article has a base receipt/index and original hash, its new hash,
+every available saved observation, exact event values, receipt creation sequence
+and retrieval time. The most recent durable receipt with an explicit event field
+wins; explicit null supersedes an older ID, while absent fields cannot erase
+known metadata. Earlier IDs remain in history. Only `eventUri` may change in the
+original article record. Quarantines, missing bodies and original sources remain
+unchanged. The seven-year collection contains every original saved ID plus the
+six metadata additions, including the five saved-only historical IDs.
+
+The actual result restores 578 populated event-ID values to the 2,700-record
+auxiliary metadata view. In the full collection, two quarantined records gain
+IDs, six gain explicit nulls and one previously populated ID becomes null in a
+later saved observation. Final coverage is 11,296/61,095 (18.49%) populated,
+49,556 explicit null and 243 absent; empty/invalid states are both zero. Across
+all retained observations, 11,297 articles have an ID. The latest selected values
+contain 2,845 distinct provider IDs; these are not validated event dossiers.
+There are still 257 missing bodies and 251 quarantined base records. Final
+failures/pending are zero; no new source retrieval occurred.
+
+| Year | Saved articles | Populated latest saved ID | Coverage | Null | Absent |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 2020 | 8,312 | 1,770 | 21.29% | 6,530 | 12 |
+| 2021 | 10,252 | 2,406 | 23.47% | 7,818 | 28 |
+| 2022 | 9,547 | 1,474 | 15.44% | 8,028 | 45 |
+| 2023 | 7,133 | 964 | 13.51% | 6,142 | 27 |
+| 2024 | 7,979 | 1,200 | 15.04% | 6,722 | 57 |
+| 2025 | 8,565 | 1,439 | 16.80% | 7,066 | 60 |
+| 2026 through 15 October | 9,307 | 2,043 | 21.95% | 7,250 | 14 |
+| Total | 61,095 | 11,296 | 18.49% | 49,556 | 243 |
+
+The updated protected `id-manifest-final-proof.zip` embeds the unchanged previous
+retrieval proof and the corrected collection. The old standalone proof is also
+preserved as `id-manifest-final-proof-before-event-metadata-repair.zip`.
+`cybercrime-nl-collection-event-metadata-v2.zip` contains yearly JSONL files,
+corrected metadata supplements and a manifest; `cybercrime-nl-collection-latest.json`
+points to the new immutable result and artifact hashes. These files include
+private permitted source material and must remain outside Git/public exports.
+
+Independent replay verified all 61,095 reconstructed base hashes, all 2,700 v2
+projections, exact year-file membership and per-year summaries. Membership is
+bound to the prior identity manifest and proven additions; metadata parsed
+responses must match their retained raw bytes. All historical proof phases also
+replay. This does not claim external attestation, provider completeness today,
+or recovery of unavailable original raw bytes. Original receipt timestamps are
+retained from audited source records but those full receipts are only referenced
+by the package; later metadata receipt timestamps replay directly from embedded
+receipts.
+
+An initial offline execution failed before final-file publication because a
+generic line splitter treated a Unicode separator inside article text as a
+record boundary. Its failed audit and generated intermediate artifacts remain
+retained. The corrected reader splits only on JSONL newline delimiters; a
+synthetic Unicode regression passes. The successful rerun reused the same
+registered method bindings and recorded its changed implementation identity.
+
+Result: `8635b4fd52f424280138d22545e994f5ed7e0a65d48bafcbdb3a79c8be8885a5`.
+Collection artifact:
+`062a4704910c5eadd161c24d5cc02e03fa27e4eb81b69ef0f301d5778a8e9396`.
+Proof artifact:
+`827a6a169a68776a40bda1d4d816674f7d4ea3bf66487aa40549d30452c0b72b`.
+Exact prepared presentation:
+`802c85acdf2c246bc9eea0db3332e23a3de7e21215a4f3d0059d704a67080bcb`.
+Presentation capture establishes preparation, not verified delivery/reading.
+
+Accounting remains 431 reported and 561 conservative tokens of the original 583,
+including all 26 unitemized reservations, with 22 conservatively remaining.
+Validation covered 78 distinct targeted tests for projection/import, repair,
+historical resolution/minimal recovery, proof and presentation. Ruff passed on
+all touched implementation/runner/tests; mypy passed on the new repair/projection,
+importer and runner. The full suite was not rerun for this adapter change.

@@ -283,6 +283,9 @@ def verify_proof_bytes(raw: bytes) -> Json:
     """Recompute checksums and ID comparisons from the packaged evidence itself."""
     try:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            if "event-metadata-repair.json" in archive.namelist():
+                from .newsapi_metadata_repair import verify_repaired_proof
+                return verify_repaired_proof(raw)
             checksums = json.loads(archive.read("file-sha256.json"))["files"]
             if set(checksums) != set(archive.namelist()) - {"file-sha256.json"}:
                 raise AuditError("Proof package file inventory differs from checksums")
@@ -385,7 +388,7 @@ def verify_proof_bytes(raw: bytes) -> Json:
 def export_proof(engine: Research, session: str, reference: str, filename: str = "id-manifest-proof.zip") -> str:
     """Write the same anchored bytes to one fixed, protected, user-readable path."""
     raw = engine.ledger.artifacts.read_bytes(reference)
-    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip", "id-manifest-block-proof.zip", "id-manifest-final-proof.zip", "id-manifest-final-proof-before-resolution.zip"}:
+    if filename not in {"id-manifest-proof.zip", "id-manifest-quarter-proof.zip", "id-manifest-quarter-proof-initial.zip", "id-manifest-block-proof.zip", "id-manifest-final-proof.zip", "id-manifest-final-proof-before-resolution.zip", "id-manifest-final-proof-before-event-metadata-repair.zip"}:
         raise ResearchError("Use a fixed registered proof filename in protected storage")
     target = engine.ledger.root / filename
     if target.is_symlink() or target.is_junction():

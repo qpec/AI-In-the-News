@@ -46,7 +46,7 @@ def import_newsapi(engine: Research, session: str, context: Context, data: Json)
     require_no_credentials(records)
     original = engine.ledger.artifacts.put_bytes(raw) if retention == "permitted" else None
     articles = []
-    for record in records:
+    for index, record in enumerate(records):
         article = {
             "source_key": f"eventregistry:{record['uri']}",
             "title": record.get("title", ""),
@@ -60,6 +60,18 @@ def import_newsapi(engine: Research, session: str, context: Context, data: Json)
         }
         if retention == "permitted":
             article["raw_record"] = record
+        else:
+            # Metadata-only retention excludes raw/body but permits this exact
+            # provider field. Record its presence separately from its value.
+            if "eventUri" in record:
+                article["eventUri"] = record["eventUri"]
+            article["event_uri_provenance"] = {
+                "method": "newsapi-stored-event-uri-preservation-v1",
+                "provider_field": "eventUri",
+                "field_present": "eventUri" in record,
+                "record_index": index,
+                "input_sha256": source_hash,
+            }
         articles.append(article)
     return engine._ingest(
         session,

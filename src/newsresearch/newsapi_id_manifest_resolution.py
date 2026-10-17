@@ -11,6 +11,7 @@ from math import ceil
 
 from .common import Json, ResearchError
 from .newsapi_collection import collection_request
+from .newsapi_metadata import project_article_metadata
 
 RESOLUTION_METHOD = "nl-cyber-id-manifest-resolution-v1"
 MAX_PAGES = 30
@@ -55,9 +56,8 @@ def templates(ids: list[str], control: str) -> Json:
 
 
 def _metadata(article: Json) -> Json:
-    if article.get("body") not in (None, ""):
-        raise ResearchError("Unexpected article body in metadata-only resolution")
-    return {key: article.get(key) for key in ("uri", "title", "url", "date", "lang", "source")}
+    # Historical v1 proof replay must reproduce its original exact field set.
+    return project_article_metadata(article, version=1)
 
 
 def _integer(value: object) -> bool:
