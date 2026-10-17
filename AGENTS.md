@@ -27,6 +27,31 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Saved-text event extraction pilot — 2026-10-17
+
+The [source-level event extraction implementation](docs/EVENT_EXTRACTION_PILOT.md)
+prepares and executes provisional event mentions from complete retained text,
+without re-embedding or adopting memberships. Plan
+`c532c7ce77af1ad916f17aaa15055132d16fb52ae635488d0c4f300bb1a68bce`, study
+`saved-text-event-extraction-pilot-20261017-v1`, is prepared in the original
+`luna-seven-day-validation-20261016-v1` owner: 12/12 full-text packets, 253 passages,
+38,797 characters, zero missing/oversized/unfilled slots. Four current-group pairs
+(eight articles) plus four singletons were selected by frozen ranks from 13,659
+development sources; 5,888 sealed-body-validation sources and two unresolved
+prior-attempt sources were excluded. No label-based selection or new vectors.
+
+Zero extraction/model calls and zero approvals: all 12 articles remain pending.
+Proposed scope is 12 Codex Luna calls/12 article exposures/zero retries; first two
+sequential contract canaries, then sequential execution with a durable first
+invalid/incomplete/unknown stop. It needs fresh exact-plan authorization; previous
+grouping or singleton approvals do not apply. Use `scripts/event_extraction_pilot.py`
+from frozen commit `ff91b645345e3475b4af3de02d0935cda1d307e5` in the attached
+`event-extraction-pilot` managed checkout, or an exact code-equivalent restore.
+Preserve exact resume and original ownership; no automatic group adoption.
+Presentation `eec98bd4b16b9cb4bb6e1758b440a448649cd3a9ab175e50ce3a7905bd0a23fe`
+and a protected blank review template are retained. 84 synthetic checks passed;
+actual extraction quality, human review and event coreference remain unmeasured.
+
 ## Random singleton Luna API sample — 2026-10-17
 
 The user explicitly requested the saved OpenAI API key for a random 100 current

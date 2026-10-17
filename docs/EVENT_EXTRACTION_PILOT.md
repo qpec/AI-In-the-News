@@ -169,3 +169,47 @@ field-level quotes, dates and missingness, sequential canaries, exact cache reus
 approval binding, interrupted preparation, short frames, unknown/invalid/incomplete
 responses, response-retention exclusions and audit-write failure. No real model
 was called by these tests. Synthetic results establish software behavior only.
+
+### Executed offline preparation — 2026-10-17
+
+Plan `c532c7ce77af1ad916f17aaa15055132d16fb52ae635488d0c4f300bb1a68bce`
+is frozen under study `saved-text-event-extraction-pilot-20261017-v1` in the
+original `luna-seven-day-validation-20261016-v1` owning workspace.
+Presentation `eec98bd4b16b9cb4bb6e1758b440a448649cd3a9ab175e50ce3a7905bd0a23fe`
+preserves the prepared overview with available source links; its content was
+shown in chat. UI visibility/reading and a verified delivery time are unobserved.
+
+| Preparation scope | Actual result |
+| --- | ---: |
+| Original guarded grouping frame | 19,549 articles |
+| Eligible development sources | 13,659 |
+| Excluded sealed validation bodies | 5,888 articles |
+| Excluded unresolved prior-attempt sources | 2 articles |
+| Selected / prepared article packets | 12 / 12 |
+| From four current-group pairs / current singletons | 8 / 4 |
+| Full source passages / source characters | 253 / 38,797 |
+| Missing text / oversized / unfilled slots | 0 / 0 / 0 |
+| New embeddings / extraction calls / extraction results | 0 / 0 / 0 |
+| Pending article extraction / completed human reviews | 12 / 0 |
+
+The protected blank review artifact is
+`7c2424a98f6272bd5b4b4924a14d6c19d6b677455b08f8aa0a16a63cbb23157a`.
+Selection did not read evaluation-label artifacts, score new queries or rebuild
+vectors. Current group membership is a sampling aid, not an accepted same-event
+label. Actual event extraction, its semantic quality and later grouping remain
+unmeasured.
+
+Execution code is frozen at commit
+`ff91b645345e3475b4af3de02d0935cda1d307e5` in the attached managed checkout
+`C:/Users/ynhan/.codex/worktrees/event-extraction-pilot/AI-In-the-News`.
+All 84 focused tests also passed there in 17.99 seconds before preparation.
+Run the exact queue from that checkout (or an exact code-equivalent restore),
+not from independently changing source files in the shared main checkout.
+Full preflight and exact code/executable bindings remain mandatory.
+
+The proposed run is **12 Codex Luna requests / 12 article exposures / zero
+retries**, with the first two as sequential contract canaries and first-failure
+stop. **No model approval was registered and no model was dispatched.** Fresh
+approval must name this plan and scope; earlier grouping approvals do not apply.
+Preparing a review template does not establish an authenticated reviewer,
+independent human gold or a completed review-import/acceptance workflow.

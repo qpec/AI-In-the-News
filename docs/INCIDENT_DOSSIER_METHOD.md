@@ -52,6 +52,13 @@ Measure candidate recovery of known same-event links, false merges, false splits
 
 The existing code implements candidate retrieval, not a complete substantive event-identity pipeline. Its confirmed source-to-dossier exclusivity prevents one article joining multiple active dossiers; event-mention records and membership support need implementation. Current exact-neighbor checks measure numerical vector retrieval, not semantic/event recall. No corpus search, event extraction, clustering or model run was executed for this design.
 
+**Implementation update, 2026-10-17:** the separate [saved-text extraction pilot](EVENT_EXTRACTION_PILOT.md)
+now implements source-level event-mention packets, an evidence-grounded schema,
+provisional mention records and a bounded audited Codex executor without
+re-embedding. The earlier paragraph describes the original design checkpoint.
+Model execution still needs concrete plan-bound permission. This addition does
+not complete event coreference, multi-event dossier membership or human validation.
+
 Primary research supports considering [entity/event context](https://aclanthology.org/P19-1409/) and [document structure and cluster consistency](https://aclanthology.org/2021.acl-long.374/). The workflow above is a project proposal, not a reproduction or validated application of those systems.
 
 ## Gegevensvoorbereiding v2
