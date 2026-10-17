@@ -106,3 +106,22 @@ replays the invalid output and flags literal contrary phrases in stored positive
 reasons. It reads no new sources, performs no model calls, changes no labels and
 does not establish that unflagged proposals are correct. Keep the 19 as raw
 model proposals rather than validated event dossiers.
+
+## Offline diagnostic checkpoint — 2026-10-17
+
+Diagnostic `60505e8faaf2a92e937b58625893aa546b1d149e92606a7588e53e58180f98f0`
+and exact overview
+`3b708f39b59e3ffb08431aa849799c5c40eaeefe471fc751d2b24cdb096e9d8a`
+preserve the same 19/21/59/1 raw counts. One positive pair, affecting one proposed
+match anchor, contains the registered literal warning cues; labels are not
+changed, and unflagged outputs are not assumed correct. The single invalid
+HTTP200 comparison replays as `singleton_api_incomplete_or_wrong_model`; it
+remains incomplete. Every observed model ID was `gpt-6-luna`. Do not silently
+retry it or relaunch the exhausted 132-attempt manifest.
+
+Of the 19 raw model-proposed matches, 12 have a dated same-event candidate within
+seven publication days; seven have only longer-gap dated support among their
+positive candidates. These are publication-gap workload counts, not event dates
+or validated long-span links. No groups were adopted. The offline diagnosis made
+zero model calls, retained original results and performed no source-event
+inference. Its focused source-free check, Ruff, mypy and diff validation passed.

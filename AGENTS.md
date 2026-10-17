@@ -27,6 +27,35 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Singleton expanded-context Luna follow-up — 2026-10-17
+
+The explicitly requested [expanded-context follow-up](docs/SINGLETON_CONTEXT_FOLLOWUP.md)
+of the same 41 uncertain and three incomplete sample anchors is completed as
+`e308c3f54861be056827031c86b5918ab563c463ac464dc1799c6136dea7c142`.
+All 132 frozen comparisons were attempted through OpenAI API `gpt-6-luna`:
+131 valid, one invalid, zero pending; three explicit original retry links, zero
+automatic retries and 264 new article exposures. All stored paragraph text was
+supplied for 171/173 distinct articles; two were capped. Other 56 anchor results
+and all original candidate lists remain unchanged. Raw updated totals are
+**19 proposed matches / 21 uncertain / 59 unmatched-top3 / 1 incomplete**.
+The original three incomplete anchors resolved to one match, one uncertain and
+one unmatched; the remaining incomplete is a newly failed completion validation.
+
+Offline diagnostic
+`60505e8faaf2a92e937b58625893aa546b1d149e92606a7588e53e58180f98f0`
+flags one positive pair reason with literal contrary phrases; this is a
+retrospective warning, not accepted source/event review. Do not call all 19
+correct matches. Twelve proposals have within-seven-day dated support and seven
+only longer-gap support among tested positive candidates. Publication gaps are
+not event dates; no group memberships changed and no human accuracy or recall
+was established. The one HTTP200 invalid output replays as
+`singleton_api_incomplete_or_wrong_model`; all observed model IDs were Luna.
+The 132-attempt queue is exhausted: no default retry, refill or duplicate run.
+Exact final overview:
+`3b708f39b59e3ffb08431aa849799c5c40eaeefe471fc751d2b24cdb096e9d8a`.
+Usage was 871,345 input / 27,571 output tokens; USD0.100920 is the uncached
+Standard estimate, not an invoice. All failed and earlier judgments remain.
+
 ## Saved-text event extraction pilot — 2026-10-17
 
 The [source-level event extraction implementation](docs/EVENT_EXTRACTION_PILOT.md)
