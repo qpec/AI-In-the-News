@@ -565,3 +565,44 @@ Do not resume the stopped 12-article pilot or transfer its approval to v2.
 V2 method/prompt/schema registration note:
 `071a294d7699ed055141b75370baf6a0d715abec8f7413343b0bed4cf9eddafa`;
 contract digest `61d5829d9d97457867dbaa59f8dce5588f8fa575e2a0e0f669ee5b4a142519a7`.
+
+## Full-text multibatch preparation — 2026-10-17
+
+The user accepted the v2 contract and selected **full retained input text**,
+asking for the quickest multibatch process. [The preparation](docs/LUNA_MULTIBATCH.md)
+is implemented and executed offline, with no new embeddings or model calls.
+Keep the two corpora separate; queued-token capacity is shared across them.
+One article per request, exact-input aliases within corpus only, immutable
+contract snapshots, stable IDs, 2M proxy-token/64MiB/2,500-request shard targets,
+and a fair capacity scheduler are implemented. Four HTTP workers is not a
+four-remote-job limit. Actual account capacity remains unknown; no wall-time
+or fastest-throughput claim is validated.
+
+Dedicated owners `luna-fulltext-multibatch-incident-reports-20261017-v1` and
+`luna-fulltext-multibatch-cybercrime-20261017-v1` retain completed preparations:
+
+- Incident result `f39bc9380ce572aa5ec66156c7badc66ec852783e1bc301446efff8c6a429cbc`:
+  148,025 saved rows, 144,982 full-input requests/387 shards, no aliases;
+  2,608 retention-unavailable and 435 body-unavailable rows.
+- Cybercrime result `c91132f38369d77d2374879d52f5409e9176bf67138d03cae53f168210f7385b`:
+  61,089 saved rows, 60,838 full bodies, 60,836 requests/155 shards, two aliases;
+  251 retention-unavailable rows.
+
+All 19 archives verified before/after; zero failed/pending archives, oversized
+packets or manual-context flags. All 205,818 proposed unique model requests
+remain unprocessed. At 800 output tokens/request the separate Batch scenarios
+are USD67.58 and USD27.62; full 4,096-output reservation gives USD187.05 and
+USD77.75. These use an unvalidated cl100k proxy and short-context assumptions,
+not bills, strict caps, model accuracy or paid-run approval. No source labels,
+article exclusions or memberships were adopted. Exact protected Markdown is
+retained; technical notes are unsupported by `record_presentation`.
+
+The manifests contain hash-only descriptors, **not upload-ready requests**;
+production eligibility is unassessed. The new shared-gateway lifecycle module
+is a **production-disabled fixture prototype**, tested with synthetic receipts.
+Audited materialization, sealed-frame/unknown-attempt reconciliation, live
+transport, efficient session-scoped validation, polling/rate control and receipt
+recovery remain unfinished. Do not imply the entire archive is production-ready
+or treat this method choice as paid authorization. Preserve the stopped original
+12-article extraction. Preparation code is frozen at `958a2b6`; lifecycle
+prototype at `a4ca927`. Do not rerun preparations solely to display results.

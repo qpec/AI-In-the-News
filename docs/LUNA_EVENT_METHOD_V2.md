@@ -200,11 +200,15 @@ The earlier all-row audit remains historical v1 workload evidence: 144,982
 usable incident-reports rows and 60,838 usable cybercrime rows. Its full-body
 input premium over 300+300-word inputs was approximately USD3.06 across the two
 separate corpora at the frozen Batch input rate and fixed output assumption.
-Those are raw saved-row workloads, not unique events. **The new prompt/schema,
-paragraph-ID overhead and actual output lengths have not been priced on the
-full corpus. Do not present v1 totals as v2 cost estimates.** A practical run
-must measure these, reserve a conservative output budget and reconcile usage.
-Local byte limits are not provider token or billing caps.
+Those are raw saved-row workloads, not unique events. The later accepted
+full-input [multibatch preparation](LUNA_MULTIBATCH.md#execution-status) measures
+the v2 serialized prompt/schema/paragraph inputs for both complete manifests.
+At an assumed 800 output tokens per request its separate-corpus estimates sum
+to USD95.20; reserving the full 4,096-token output allowance gives USD264.80.
+Actual output lengths and Luna tokenization remain unmeasured. Do not use the
+historical v1 totals as v2 estimates or treat these scenarios as strict billing
+caps. A practical run still needs a concrete selection, conservative reservation
+and usage reconciliation.
 
 Before deployment, freeze a new partition-bound plan and assess new canaries
 followed by an explicitly authorized bounded study. Do not resume the stopped

@@ -159,3 +159,42 @@ oversized/manual-context requests. The 155 planned files contain 309,045,448
 input-token proxies and 1,433,731,401 prospective JSONL bytes. The 800-output
 scenario is USD27.62; reserving 4,096 output tokens each gives USD77.75. These
 are conditional estimates, not billed usage or a confirmed budget ceiling.
+
+Incident-reports preparation completed in its own dedicated owner:
+
+- Result `f39bc9380ce572aa5ec66156c7badc66ec852783e1bc301446efff8c6a429cbc`.
+- Manifest `e715846555cadfe91a55b71b9f03fd22bd29e58ae5c0e0e39d8850747bec089e`.
+- Shard plan `bc495846d3108fe1ede53020b60eb8bcd0af91124f18034e72f6d2e523bae0d0`.
+- Exact protected overview
+  `39c8fb9c45c2fb8ff49156180c821a3295e65379b263feaaee29141262b6276d`.
+
+It scanned all 148,025 rows in eleven verified archives: 144,982 usable bodies
+and unique requests, no exact-input aliases, 2,608 retention-unavailable rows
+and 435 missing/blank/nontext bodies. There were no malformed rows, failed or
+pending archives, or oversized/manual-context requests. The 387 planned files
+contain 771,725,821 input-token proxies and 3,737,030,481 prospective JSONL bytes.
+
+| Corpus | Saved rows | Unique full-input requests | Planned files | Batch USD at 400 / 800 / 1,600 output tokens | Full 4,096-output reservation |
+| --- | ---: | ---: | ---: | --- | ---: |
+| Incident reports | 148,025 | 144,982 | 387 | 53.08 / 67.58 / 96.58 | 187.05 |
+| Cybercrime | 61,089 | 60,836 | 155 | 21.54 / 27.62 / 39.79 | 77.75 |
+
+Adding the separate technical workloads gives 205,818 proposed unique requests
+and 542 planned files. The cost scenarios sum to USD74.62 / USD95.20 / USD136.37,
+or USD264.80 at the full output allowance. Input proxies total 1,080,771,269;
+with a 1.25 capacity reserve the combined workload exceeds a one-billion-token
+queue, although each corpus alone fits that illustrative tier. The two corpora
+must not independently claim the full shared capacity at the same time. No
+account allowance was observed and no completion time is established.
+
+These counts cover all saved rows for technical costing; they do not qualify
+all requests for production. Exact-input reuse saves only two calls here and
+must not be advertised as a substantial reduction. Missingness is explicit:
+2,859 retention-unavailable and 435 body-unavailable rows across the separate
+corpora. All 205,818 proposed model requests remain unprocessed. There are zero
+new eligibility labels, extracted events, entity results or accepted dossiers.
+
+The final full-input decision did not create another model approval. Preserve
+the per-corpus owners and exact preparation results; do not rescan merely to
+redisplay them. The note kind is unsupported by `record_presentation`; exact
+per-corpus overviews are protected, with no claim of verified chat delivery.
