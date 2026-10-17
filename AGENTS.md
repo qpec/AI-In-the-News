@@ -76,6 +76,23 @@ by the old single-message parser. Preserve that original stop and response.
 The user conditionally authorized the full remaining queue if checks pass;
 continuation must be an explicit audited amendment, never a stop/budget reset.
 
+That amendment is now registered as continuation
+`4c75b7d1a156b0d06bd8a6bb77a271601647bbd77345a3c2f828a5f1a6279cdf`,
+bound to exact offline phase proof
+`13f4f2480b6aff860ec9682e5d966a54df57358f4d05dce94241a1c83ae190c5`.
+The single controller was launched with that reference after 95 focused tests.
+Only this exact settled historical parser error is acknowledged; original
+statuses/stop, shared accounting, no-retry rule and original deadline remain.
+New technical/unknown outcomes still stop. Check the running controller before
+any further launch. Start control result
+`9461a5949ab419ed2c21417fc46adccdb957f61d88c27a425c953aba9b06a32a`
+had no blockers; this is not a claim that the remaining queue is complete.
+Its offline projection
+`2017781837391a2168360c9cf07deb93275eec872f7ac354ceb12b66cdd955eb`
+now covers all 516: 414 derived valid/102 invalid, plus one distinct phase-replay
+recovery, giving 415 combined mechanically usable/101 content-invalid. No paid
+calls, retries, embeddings or memberships occurred in that projection.
+
 ## Empirical scope-reduction experiments — 2026-10-17
 
 The user rejected metadata-only recommendations and requested actual rigorous

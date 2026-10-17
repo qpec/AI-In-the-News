@@ -194,3 +194,43 @@ selected final JSON text is never concatenated or rewritten. Twenty-eight
 synthetic checks passed; the observed replay establishes this retained response's
 mechanical compatibility, not semantic accuracy. Continuation must explicitly
 bind this proof and preserve the original stop and shared accounting.
+
+## Explicit continuation after verified phase replay — 2026-10-17
+
+The user subsequently instructed, "if everything checks out run it full".
+After reviewing the retained failure, settled accounting and deterministic replay,
+registration result
+`aac4ac59efc80496bf1d7d9abc9f1fa5526b8c4bc61d7b178f58bf0281839ceb`
+created immutable continuation
+`4c75b7d1a156b0d06bd8a6bb77a271601647bbd77345a3c2f828a5f1a6279cdf`.
+This acknowledges only the exact historical settled phase-parser error. It
+preserves the original error, stopped controller, budget, reservations, frozen
+queue, full-text prompt, output allowance and original 24-hour deadline. It does
+not authorize retries, new budgets or dossier acceptance. New technical/unknown
+errors still stop processing. Registration itself made zero model calls.
+
+Implementation checkpoint `9eca243` passed 95 focused synthetic tests, Ruff,
+five-file mypy checks and PowerShell wrapper syntax validation. A supplementary
+hook storage failure interrupted an optional agent patch; that patch was not
+applied. Subsequent serialized checks and the audited registration preflight
+succeeded before continuation. No production research ran during that failure.
+
+The single continuation controller was launched with `--continuation-ref` bound
+to the above record. Initial control result
+`9461a5949ab419ed2c21417fc46adccdb957f61d88c27a425c953aba9b06a32a`
+reported no blockers, 516 assessed/submitted, zero unfinished jobs, 198,712
+unsubmitted requests, conservative usage USD0.200230107 and staged/unsubmitted
+reservations USD0.362894297. This is a start checkpoint, not whole-corpus
+completion. Never launch a second controller without reconciling the live one.
+
+Its first offline projection completed as
+`2017781837391a2168360c9cf07deb93275eec872f7ac354ceb12b66cdd955eb`:
+all 516 originals now have citation-subset projections, 414 mechanically valid
+and 102 invalid, with 116 recoveries over the original 298 valid responses.
+The separate historical phase replay adds one distinct valid record: 415 combined
+mechanically usable and 101 content-invalid, without overwriting any original.
+There were zero new model calls, paid retries, embeddings or memberships in this
+projection. This is neither accuracy nor a count of qualifying unique events.
+Exact protected presentation:
+`64ee89adff4b5bf976a93805c9ad37027f256fc0ebffe1167624ab49ab1e7165`.
+These technical result kinds remain unsupported by `record_presentation`.
