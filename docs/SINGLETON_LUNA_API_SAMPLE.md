@@ -139,3 +139,44 @@ instructions. It retained the failure and sent zero model requests. The key was
 renamed `user_instruction`; the source/credential rules were not relaxed. The
 successful preparation above is the only sample drawn. Use this exact plan on
 execution/resume; do not redraw or create another model budget.
+
+## First API result and bounded operational amendment — 2026-10-17
+
+Result `b35ecce5f1bd3d59b1a083af54dbeafa7b388ae460edaffda8ff4509a8f218a5`
+retained 60 attempted pairs: 59 valid references and one invalid response, zero
+retries. The sample had 1 supported-match article, 6 uncertain, 12 unmatched
+among top three and 81 incomplete; 240 pairs were not attempted. Those are
+partial results, not rates for the completed 100-source sample. Presentation
+`e2df4e8572c605fbdff175087c6a1ec59457fa954c3daf8c8166ab7ce07674e9`
+captured the exact overview and model examples. Observed usage was available for
+59 responses: 96,532 input and 7,131 output tokens, USD 0.013219 at uncached
+Standard rates, not an invoice. Billing for the rejected response is unknown.
+
+An audited, metadata-only diagnosis established HTTP 200 but a retention-guard
+rejection before a linked response artifact or parsed usage was available. The
+flagged value/content is not recovered, guessed or logged; this does not prove
+that it was a genuine credential. It remains invalid, never an unmatched finding.
+
+The explicit user request still authorizes the same 100-source sample. The
+separate execution-only method
+`singleton-luna-openai-top3-v1:untouched-continuation-v1` freezes only the **240
+previously unattempted pairs**, preserving the sample, candidate rankings, exact
+requests, original versions, original stop and all 60 spent attempts. No failed
+pair is repeated. A new immutable operational protocol/policy binds these
+untouched tasks to the existing user scope, with the same cumulative maximum
+300 requests / 600 exposures / USD 2 planning reservation; it creates no added
+model budget or semantic criterion. Normal execution of the old stopped plan
+remains blocked; the stop record is never reset or deleted.
+
+For this operational amendment, isolated response-retention rejections are
+quarantined individually without classification; unrelated prepared tasks may
+continue. Full non-content receipt hashes/lengths and HTTP metadata are retained
+for new responses. HTTP failures, unknown transport outcomes or schema/citation
+failures still stop dispatch, and audit storage errors propagate immediately.
+The raw credential guard is unchanged. The operational exception was registered
+before continuation, not silently applied to the original stopped result.
+
+One additional source-free integration test exercised the exact 60-attempt
+stop, 240-request continuation, retained invalid result, cumulative ceiling,
+immutable original stop and duplicate-free resume. It passed, with Ruff and
+mypy checks. This is software verification, not new source/model research.

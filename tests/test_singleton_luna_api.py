@@ -118,3 +118,44 @@ def test_audited_api_exact_intent_results_resume_and_stop(tmp_path, invalid) -> 
         engine.ledger.verify()
     finally:
         engine.close()
+
+
+def test_untouched_continuation_keeps_one_retention_exclusion_and_shared_budget(tmp_path, monkeypatch) -> None:
+    from newsresearch import singleton_api_continuation as continuation
+
+    class PartialTransport(FakeTransport):
+        def send(self, body, client_request_id):
+            response = super().send(body, client_request_id)
+            if self.calls == 60:
+                # A fictional placeholder exercises the guard. No real key and
+                # no flagged response bytes are retained in the fixture store.
+                return EmbeddingHTTPResponse(json.dumps({"fictional": "Bearer" + " placeholder"}).encode(), 200, "fictional-request")
+            return response
+
+    location = tmp_path / "fictional-continuation-store"
+    original = FixtureResearch(location, config=Config(offline=False))
+    original.singleton_transport = PartialTransport()
+    try:
+        plan = original.execute("status", {}, objective="Synthetic setup", actor="test:synthetic")
+        parent = original.execute("luna_group_validation", {"phase": "singleton_api_execute", "plan": plan,
+            "authorize_user_request": USER_INSTRUCTION}, objective="Synthetic parent", actor="test:synthetic")
+        assert parent["model_attempts"] == 60 and parent["pair_statuses"] == {"valid": 59, "invalid": 1}
+    finally:
+        original.close()
+    monkeypatch.setattr(continuation, "PARENT_RESULT", parent["id"])
+    engine = continuation.SingletonContinuationResearch(location, config=Config(offline=False))
+    engine.singleton_transport = FakeTransport()
+    try:
+        payload = {"phase": "singleton_api_continue_untouched"}
+        result = engine.execute("luna_group_validation", payload, objective="Synthetic continuation", actor="test:synthetic")
+        assert result["model_attempts"] == 300 and engine.singleton_transport.calls == 240
+        assert result["pair_statuses"] == {"valid": 299, "invalid": 1}
+        assert result["counts"]["incomplete"] == 1 and result["pending_pairs"] == 0
+        assert result["original_stop_preserved"] and result["automatic_retries"] == 0
+        assert engine.ledger.db.execute("SELECT count(*) FROM records WHERE kind='singleton_api_stop'").fetchone()[0] == 1
+        replay = engine.execute("luna_group_validation", payload, objective="Synthetic exact resume", actor="test:synthetic")
+        assert replay["counts"] == result["counts"] and engine.singleton_transport.calls == 240
+        assert engine.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 300
+        engine.ledger.verify()
+    finally:
+        engine.close()
