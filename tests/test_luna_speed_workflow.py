@@ -175,6 +175,10 @@ def test_audited_run_retains_and_renders_valid_results_and_cannot_restart(prepar
     assert "valid outputs: 6" in result["markdown"]
     assert "Entities:" in result["markdown"] and "https://example.invalid/" in result["markdown"]
     assert engine.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 6
+    report = call(engine, "luna_group_validation", {"phase": "report", "result": result["id"]})
+    assert report["counts"] == result["counts"]
+    assert report["markdown"] == result["markdown"]
+    assert len(seen) == 6
     with pytest.raises(ResearchError, match="spent_no_restart"):
         call(engine, "luna_group_validation", payload)
     assert len(seen) == 6
@@ -210,3 +214,39 @@ def test_dispatch_intent_audit_failure_prevents_model_call(prepared_speed, monke
         call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
             "authorization_text": "Run only this fictional audit-failure fixture"})
     assert seen == []
+
+
+def test_deadline_reservation_is_pending_not_a_provider_return(prepared_speed, monkeypatch):
+    from newsresearch.gateway import ProviderResponse
+
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch)
+    engine.config = replace(engine.config, offline=False)
+    def deadline(session, provider, *, next_call, record_response, **kwargs):
+        invocation, attempt = next_call(0.5, 599.5)
+        assert invocation.request["attempt"] == attempt
+        response = ProviderResponse(None, "codex-cli", None, raw_response={
+            "unknown_outcome": False, "dispatched": False, "failure": "deadline_before_dispatch"})
+        assert record_response(attempt, response, None, 600.1) is False
+        return {"stop_reason": "deadline", "elapsed_seconds": 600.2, "peak_in_flight": 0,
+                "timings": [{"attempt": attempt, "persistence_offset": 600.2}]}
+    monkeypatch.setattr(engine.gateway, "run_window", deadline)
+    result = call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+        "authorization_text": "Run only this fictional before-dispatch deadline fixture"})
+    assert seen == []
+    assert result["counts"] == {"not_dispatched": 1}
+    assert result["provider_calls"] == result["returned_by_deadline"] == result["late_returns"] == 0
+    assert result["pending"] == 6 and result["usage_missing"] == 0
+    assert result["valid_persisted_by_deadline"] == 0
+    assert not engine.ledger.unresolved
+    engine.ledger.verify()
+
+
+def test_missing_permission_fails_before_dispatch(prepared_speed, monkeypatch):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch)
+    engine.config = replace(engine.config, offline=False)
+    with pytest.raises(ResearchError, match="authorization_required"):
+        call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"], "authorization_text": ""})
+    assert seen == []
+    assert engine.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 0
