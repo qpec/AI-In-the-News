@@ -81,3 +81,28 @@ the protected plan. Six new focused checks passed, plus 32 existing pair-contrac
 checks; Ruff, mypy on both new modules and `git diff --check` passed. These are
 software checks, not corpus judgments. The concrete user request above authorizes
 this exact bounded follow-up; persist its plan-bound permission before dispatch.
+
+## Expanded-context run — 2026-10-17
+
+Result `e308c3f54861be056827031c86b5918ab563c463ac464dc1799c6136dea7c142`
+retains all 132 new attempts / 264 article exposures: 131 valid, one invalid,
+zero pending and zero automatic retries. All three explicit original retries
+ran. Raw updated counts are 19 model-proposed matches, 21 uncertain, 59 unmatched
+among the original top three and one incomplete. The original 56 settled results
+are unchanged. The old 41 uncertain cases became four proposed matches, 20
+uncertain, 16 unmatched and one incomplete; the old three incomplete became one
+proposed match, one uncertain and one unmatched. Existing groups are unchanged.
+
+All observed responses identified `gpt-6-luna`. Usage on all 132 responses was
+871,345 input / 27,571 output tokens; USD0.100920 at uncached Standard rates is a
+usage-based estimate, not an invoice. The invalid result still incurs observed
+usage. Exact original presentation:
+`1ad4e0cac5a15046740ec407c93b149b473006b5987f467f39c340c16b3929b8`.
+
+The displayed positive example has a reason saying there is insufficient basis
+to match a focal event. Structural citation validation does not detect this
+semantic inconsistency. A separate offline, explicitly retrospective diagnostic
+replays the invalid output and flags literal contrary phrases in stored positive
+reasons. It reads no new sources, performs no model calls, changes no labels and
+does not establish that unflagged proposals are correct. Keep the 19 as raw
+model proposals rather than validated event dossiers.
