@@ -5,15 +5,38 @@
 Recovery commit `c0e03dc` was launched exactly once at 2026-10-17 23:16 UTC
 through `scripts/run_luna_budget_recovery_with_key.ps1` into
 `scripts/run_luna_budget_recovery.py`, exec session `74034`. The current Python
-worker is PID `120012`, with launcher PID `126604`. It is performing the full
-audit integrity preflight, so this launch is not yet proof of new dispatch.
+worker is PID `120012`, with launcher PID `126604`. Its full audit integrity
+preflight passed, and it is counting untouched requests with 16 workers.
 Check this process/output before any action; never launch an old entry point or
 competing writer. The wrapper owns a temporary idle-sleep guard until exit.
 The active 15-minute heartbeat now tracks this recovery; sessions `58044` and
 `43653`, and separate guards `7061`/`42898`, are historical and exited.
 
-The original fast controller has stopped; the historical launch below is not
-evidence of current execution. All 6,516 submitted requests are now reconciled.
+The registered exact finite acknowledgment is
+`7134a16ccfc8ef7a906755595177e2c9db77c25090d7009b407e5357a3e24db9`, result
+`0f324698fb3334578751c76e47d4158bebffc564b3e27035161f7076755fa3d6`.
+Registration made no provider/model calls and left both terminal failures failed.
+The monitor stores this reference for an authorized exact restart through the
+recovery wrapper after proving the previous process exited and its exact outcome.
+No new paid submission was yet confirmed at acknowledgment registration.
+
+### Verified dispatch after recovery
+
+The running controller subsequently confirmed **7,016 submitted / 6,516
+assessed**, with **500 pending in two provider jobs**, one 250-request file per
+corpus. Its own queued input count was 2,302,797 of the provisional 20M limit;
+account-wide capacity remains unverified. Conservative charge was USD2.522781
+and reservations USD0.721517 at displayed precision, with no stop. It moved on
+to staging the next separate-corpus files; 192,212 requests remained
+unmanifested. This is observed parallel dispatch, not completion or accuracy.
+Current parser totals remained 3,953 valid / 2,560 invalid / 3 retained errors;
+4,374 combined mechanically usable records and 4,500 awaiting literal projection
+remain the last reconciled values. The protected controller overview is retained;
+`record_presentation` does not support this technical kind.
+
+The original fast controller stopped; the historical launch below is not
+evidence of current execution. At the pre-recovery checkpoint all 6,516
+submitted requests were reconciled.
 Offline diagnosis `63be5eefc104b8135722e492d1e81e5f4af7bb1c57b89e5181fb044409e3e01c`
 (presentation `52813b66ca55d081c354a8c89be7dd014807230add5fa165000123f501485cf1`)
 confirms the two new incident-report failures were HTTP 200 Luna responses with
@@ -40,8 +63,8 @@ registration and subsequent recovery admission. The shared budget, 4,096 cap,
 corpus separation and original deadline remain unchanged. Twenty-six focused
 recovery checks, eleven existing fast integration checks, Ruff and mypy passed;
 independent code review found no blockers. These are software checks, not a
-new research accuracy study. This paragraph records preparation, not a live
-restart; append the verified recovery launch below.
+new research accuracy study. These preparation checks preceded the verified
+recovery launch and dispatch recorded above.
 
 The user instructed, "I want all processed asap, do as much at once as possible",
 then asked "Parallel?". This authorizes faster scheduling of the existing full-text

@@ -33,15 +33,33 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 `scripts/run_luna_budget_recovery_with_key.ps1` into
 `scripts/run_luna_budget_recovery.py`, exec session `74034`, at 2026-10-17
 23:16 UTC. Its Python worker is PID `120012` (launcher PID `126604`). The
-mandatory integrity preflight is running; launch alone confirms no new paid
-dispatch. Check this process/output first and never launch an old controller
+mandatory integrity preflight passed and it is counting untouched requests
+with 16 workers. Check this process/output first and never launch an old controller
 or a competing owner writer. The recovery wrapper holds its own temporary
 idle-sleep guard. Sessions `58044`/`43653` and guards `7061`/`42898` are
 historical and exited. The active 15-minute heartbeat now tracks the recovery.
 
+The exact finite acknowledgment was registered as
+`7134a16ccfc8ef7a906755595177e2c9db77c25090d7009b407e5357a3e24db9`, result
+`0f324698fb3334578751c76e47d4158bebffc564b3e27035161f7076755fa3d6`.
+For an authorized exact restart, reuse this acknowledgment through the saved-key
+recovery wrapper only after establishing that the prior controller exited and
+reconciling its exact outcome. Do not create another acknowledgment, launch the
+old fast entry point, or exempt any new failure. No new paid submission was yet
+confirmed at acknowledgment registration; the last returned checkpoint follows.
+
+**Verified recovery dispatch:** 7,016 submitted / 6,516 assessed, with 500 pending
+in two unfinished provider jobs (250 per corpus), 2,302,797 own queued input
+tokens, charge USD2.522781 and reserved USD0.721517 at displayed precision.
+The controller reported no stop and moved on to staging more untouched work;
+192,212 requests remained unmanifested. This proves concurrent provider jobs,
+not completion or verified account-wide capacity. All 4,500 outstanding literal
+projections remain deferred until safely drained; earlier counts below are
+the retained pre-recovery checkpoint. Do not open a second writer to inspect it.
+
 Fast controller `58044` stopped with result
 `4b4892cc01214dadca9ba3058a00b750d98faa7e2dca9e72b9f7b003e1bc83f3`.
-All **6,516 submitted requests are now reconciled**, zero pending/reserved;
+At the pre-recovery checkpoint, **6,516 submitted requests were reconciled**, zero pending/reserved;
 conservative charge **USD2.522781411**. Offline diagnostic
 `63be5eefc104b8135722e492d1e81e5f4af7bb1c57b89e5181fb044409e3e01c`
 proves the two new errors were HTTP200 Luna `incomplete` responses with
@@ -65,7 +83,8 @@ before admission inside one audited session; it does not bypass full preflight.
 Only untouched requests may continue. All future technical/unknown errors still
 stop; the same owner, plan, shared USD120/USD150 cap and original deadline apply.
 See [the recovery checkpoint](docs/LUNA_BATCH_THROUGHPUT.md) and inspect live
-state before launching anything. Preparation is not proof of a successful restart.
+state before launching anything. Preparation alone did not prove a restart;
+the subsequently verified dispatch is recorded above.
 
 ## Historical parallel Batch controller and supervision — 2026-10-18
 
