@@ -147,6 +147,30 @@ claim it remains held out, rerun completed tasks or extend this model budget by
 default. Original memberships are unchanged; any stricter candidate must be
 separately frozen and assessed on fresh references under concrete run approval.
 
+The subsequent [coverage-guarded split candidate](docs/PRECISION_CANDIDATE.md)
+is frozen as `076e43ec7b15bcb70357ef9beab792d530fb28dfb5d49ce5ccd4916a4af38cc8`.
+It used the exact retained feature capsule, no reference labels or new models.
+The predeclared margin grid selected delta 0.05 (each original cutoff t becomes
+t + 0.05*(1-t)), retaining 2,961/4,225 within pairs (70.1%) and 3,223/4,012
+originally grouped articles (80.3%): 1,325 multiarticle groups plus 16,326
+singletons. Seven days and complete-link checks remain; original memberships
+are unchanged. Its precision is **unmeasured**, not 90%. The earlier delta-0.25
+proposal is retained but loses 80.1% of co-member pairs. Do not adopt either
+proposal by default. The getter's numeric-JSON-key false rejection was fixed
+using exact immutable-byte hashes, without rewriting research history; the
+exact saved candidate resumed after full preflight.
+
+Its next evaluation plan is fully prepared as
+`158801eb86cefa6bc73add2aa1b20a75c2f9163a5313aa23630176d4ba12edcc`,
+study `coverage-guarded-candidate-pair-evaluation-20261017-v2`: 56 within-group
+pairs, eight random-tail pairs and four canaries; all 68 packets ready, zero
+new model calls and no new approval. One evaluation pair/two canaries overlap
+the previous draw; retain and disclose overlap without copying answers or
+reseeding. Concrete approval for this additional 68-call/136-exposure/zero-retry
+queue has been requested in chat and remains required before dispatch. Use the
+exact existing executor, owner and failure stop; do not treat completed earlier
+approval or the 90% target as permission for unlimited new model queues.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

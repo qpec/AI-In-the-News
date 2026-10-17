@@ -112,3 +112,67 @@ artifacts were rewritten. Full child preflight then passed and the exact
 completed candidate was reused, rather than recreated. Exact presentation
 artifact `a2856f7595c157ed28c0357507e89da9873596ab43fa801d644e1ac59726e245`
 was shown in chat with two source-linked algorithmic split examples.
+
+## Coverage guard, version 2
+
+Before reading the retained feature capsule, `coverage-guarded-event-split-v2`
+registers the fixed margins `0, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2, 0.25`.
+It selects the largest positive margin retaining at least **60% of the original
+within-group pairs** and **70% of originally grouped articles**. If none passes,
+it selects no candidate. These coverage floors are engineering choices made
+after seeing the aggressive candidate's loss; they are not accuracy thresholds
+or recall estimates. They use no reference labels.
+
+`scripts/prepare_coverage_candidate.py` freezes every variant and the selected
+membership from the already retained capsule. It requires no new parent reads.
+The original seven-day gate and all-pair checks remain mandatory. The separate
+`scripts/prepare_candidate_evaluation.py` accepts only the selected positive
+fixed-grid candidate after verifying both floors, then freezes the 56/8 draw
+and four canaries under a new study key. It reports exact five-feature cutoffs,
+grouping coverage and previous-pair overlap before model permission is sought.
+
+Two new pure grid tests plus the original three candidate tests passed; the
+two preparation tests, Ruff and mypy passed. These are software checks; all
+candidate precision values remain unavailable until a model/human assessment.
+
+Executed result `076e43ec7b15bcb70357ef9beab792d530fb28dfb5d49ce5ccd4916a4af38cc8`
+selected **delta 0.05**: 2,961 within-group pairs (70.1% retained), 3,223
+grouped articles (80.3% retained), 1,325 multiarticle groups and 16,326
+singletons. Delta 0.075 retained only 58.2% of pairs and failed the pair floor.
+All eight registered variants completed with zero missing features or pending
+preparation and zero new parent reads, models, embeddings or network calls.
+The 19,549-article frame and original memberships remain unchanged.
+Exact presentation artifact
+`4ae81a7c541639762aaee46a6c980eae97663565a4c84e64cab0d563fd045c46`
+was shown in chat, including the complete coverage table and two linked examples.
+**This selects a coverage tradeoff, not an empirically validated 90% cutoff.**
+
+## Frozen next model queue — awaiting concrete approval
+
+Plan `158801eb86cefa6bc73add2aa1b20a75c2f9163a5313aa23630176d4ba12edcc`,
+study `coverage-guarded-candidate-pair-evaluation-20261017-v2`, prepared all
+68 requests: four canaries, 56 of 2,961 within-candidate pairs and eight of
+191,068,965 between-group pairs. There are zero missing, oversized or pending
+packets, zero new model calls and no approval policy for this queue.
+
+The new draw overlaps one previous evaluation pair and two previous canaries;
+all overlaps are retained, with no replacements or reseeding. The plan requires
+new bound attempts rather than copying previous answers. It is independently
+randomized, not a guaranteed unseen-pair holdout. Exact presentation record
+`b3908f007a836d02fde7e52ae88576f772a197d1b5f2e8492ff31cba17c3d351`
+was shown in chat with the complete cutoff/coverage/sampling report.
+
+| Feature | Original cutoff | Candidate cutoff |
+| --- | ---: | ---: |
+| pooled_cosine | 0.8045148965955685 | 0.8142891517657901 |
+| first_passage_cosine | 0.43776322057104244 | 0.4658750595424903 |
+| symmetric_mean_best_cosine | 0.5652543611119425 | 0.5869916430563453 |
+| top3_mutual_best_mean_cosine | 0.733928638655646 | 0.7472322067228636 |
+| max_passage_cosine | 0.7454312692769067 | 0.7581597058130614 |
+
+After explicit approval for these 68 calls / 136 exposures / zero retries,
+use `scripts/fast_event_evaluation.py run` with the exact plan and study above,
+the original owning protected workspace, and a newly persisted plan-bound
+approval. Keep the first-failure latch and original memberships unchanged.
+Do not reuse the completed first-run approval, silently raise limits or launch
+an additional queue merely to reach a desired score.
