@@ -119,4 +119,43 @@ by `record_presentation` and require an exact protected Markdown artifact.
 
 No v2 paid Batch jobs, model calls or embeddings have been run. The selected
 input strategy and software preparation are distinct from execution approval.
-Current preparation results and verification are recorded below when available.
+
+Implemented and exercised offline:
+
+- `scripts/luna_multibatch.py`: immutable contract snapshots, complete request
+  construction, stable IDs/hashes, streaming shards and fair capacity scheduling.
+- `scripts/prepare_luna_multibatch.py`: audited whole-manifest technical
+  preparation with all unavailable rows retained and exact protected reports.
+- `src/newsresearch/event_multibatch_gateway.py`: **fixture-only prototype**
+  extending the shared gateway with asynchronous action/attempt state,
+  one writer, bounded network-worker simulation, cross-corpus queue reservations,
+  receipt identity checks and result reconciliation. Production is hard disabled.
+
+The prototype has no live HTTP transport. An audited materializer, reconciled
+eligibility/holdout selection, staggered polling, creation-rate control and
+explicit unknown-receipt recovery still need integration. It currently
+revalidates the whole plan in each phase; that must be made efficient within
+an audited session before a corpus-scale service. Neither its tests nor the
+offline shard plan establish production throughput. A canary approval cannot
+substitute for these missing components.
+
+The dedicated preparation/input/contract suites passed 162 synthetic checks;
+the gateway prototype passed 22. Ruff passed across source, tests and scripts;
+mypy passed for 127 source modules and the two new preparation helpers. These
+are software checks, not model-quality or event-count findings.
+
+Cybercrime preparation completed in its dedicated owner:
+
+- Result `c91132f38369d77d2374879d52f5409e9176bf67138d03cae53f168210f7385b`.
+- Manifest `d48dd5947f0aa5f84462feceec08f49c86d15a5778450bf1aeb5260a292c2818`.
+- Shard plan `0baf333da907b9854a9a741bbb22950f63a3dec4885bb9d53e7e6ccaef7c3f84`.
+- Exact protected overview
+  `4e9c7c91e032ef239ccbb40b1800483036949cc0d78ca768d2b4b262cc9e90ec`.
+
+It scanned all 61,089 rows in eight verified archives: 60,838 usable full bodies,
+60,836 unique exact-input requests, two aliases, and 251 retention-unavailable
+rows. There were no missing bodies, malformed rows, failed/pending archives or
+oversized/manual-context requests. The 155 planned files contain 309,045,448
+input-token proxies and 1,433,731,401 prospective JSONL bytes. The 800-output
+scenario is USD27.62; reserving 4,096 output tokens each gives USD77.75. These
+are conditional estimates, not billed usage or a confirmed budget ceiling.

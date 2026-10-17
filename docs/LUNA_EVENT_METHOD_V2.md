@@ -1,12 +1,16 @@
 # Full retained text and compact event extraction — v2
 
-This is the current proposed extraction contract, replacing the entity/input
+This is the current extraction contract, replacing the entity/input
 recommendations in [the v1 excerpt method](LUNA_EXCERPT_METHOD.md). The original
 prompt, schema, workload measurements and stopped pilot remain unchanged.
 Implemented components are a pure input builder, prompt, strict JSON Schema,
 literal/reference validator and synthetic tests. No v2 inference, paid API
 batch, article exclusion, grouping, model accuracy measurement or re-embedding
-has occurred. These components are not yet a corpus-wide Batch gateway adapter.
+has occurred. On 2026-10-17 the user accepted this contract and selected full
+retained input text. The [multibatch preparation](LUNA_MULTIBATCH.md) adds exact
+request identities, within-corpus exact-input reuse and capacity-aware shard
+planning. A production Batch gateway remains a separate integration; choosing
+full text is not paid-run authorization.
 
 ## Evidence used to revise the design
 
