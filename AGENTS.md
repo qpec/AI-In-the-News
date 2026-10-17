@@ -27,6 +27,42 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Single-focus, multiple-publisher scope — 2026-10-17
+
+The user requires reports primarily about **one real-world event**, excluding
+multi-event roundups/reviews, and events covered by **at least two different
+publishers**. Same-publisher updates alone do not qualify. Relevant background
+and multiple claims about the focal occurrence do not automatically make an
+article a roundup. Preserve the separate cybercrime/incident-report partitions.
+Different publishers is not an independent-origin or ownership requirement;
+retain syndication flags rather than silently strengthening the user's rule.
+
+[SCOPE_REDUCTION_METHOD](docs/SCOPE_REDUCTION_METHOD.md) specifies cheap
+partitioned hybrid partner retrieval plus a compact focus gate before rich
+extraction, reversible set-aside reasons, and weighted held-out recall checks.
+Missing provider IDs/vectors or no match in a short list do not prove singleton
+status. No semantic scope filter, new group membership or model run was adopted.
+
+The offline metadata audit completed through `Research.execute()` in dedicated
+owner `article-scope-metadata-audit-20261017-v1`: 148,025 incident-report rows in
+11 archives and 61,089 cybercrime rows in eight archives, all hashes/counts
+reconciled; zero failed/pending archives, model calls, embeddings or exclusions.
+Incident reports have populated categories/concepts in 146,715/146,770 rows;
+cybercrime has neither field in any row. Nonblank event IDs cover 70,785/11,295
+rows. Provider-ID buckets with two article identities and two exact source URIs
+number 8,436/1,526 and cover 60,632/9,891 rows, respectively: metadata hints only,
+not normalized publisher counts, confirmed events, recall or retained workload.
+All observed content types are news; checked genre/Signal Type fields are absent.
+These are pre-dedup/pre-protected-quarantine archive rows, not retained-text counts.
+
+Protected result notes are
+`e67bf52c5f59e79a0e1410f83b37ebebbbf70dbdd83dbf5b2861be05c4380bf3`
+and `695025fc5dbffff6fd54642576291162c6cdf510f58d65d5e049c4bc5b37257a`.
+Exact aggregate reports are saved as protected note artifacts;
+`record_presentation` does not support this metadata-note kind. No recall or
+cost-saving estimate follows from these counts. The historical singleton
+judgments did not assess the new single-focus/different-publisher gate.
+
 ## Separate corpora and full-article dossier audit — 2026-10-17
 
 The user requires **cybercrime separate from incident reports**, explicitly in
