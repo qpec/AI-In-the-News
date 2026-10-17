@@ -122,3 +122,20 @@ Official references: [Luna model](https://developers.openai.com/api/docs/models/
 
 Execution results will be appended after the prepared study is run; this section
 alone claims no new model results.
+
+## Executed offline preparation — 2026-10-17
+
+Frozen plan `8b036faef7e3f373a0fc1358bebde90d4de501bac7a420f75709a489636507fd`
+contains the random 100-singleton sample and **300 distinct pairs**, all 300
+prepared with zero unavailable packets. Every anchor was scored against 19,548
+other grouping-eligible pilot articles. No new models, embeddings or membership
+changes occurred. Exact presentation record
+`ac3800f6640029e34e94c69f7c235e52d940ee2c3649c36a7fe95db4b994dfff`
+was shown with the first singleton's three source-linked, scored candidates.
+
+The first preparation attempt failed before the draw because the audit guard
+rejects a metadata key literally named `authorization`, even for benign user
+instructions. It retained the failure and sent zero model requests. The key was
+renamed `user_instruction`; the source/credential rules were not relaxed. The
+successful preparation above is the only sample drawn. Use this exact plan on
+execution/resume; do not redraw or create another model budget.
