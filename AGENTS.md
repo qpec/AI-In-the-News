@@ -189,6 +189,23 @@ refill or expand this completed queue by default. Its compact exact report
 is presentation record
 `5d4dfb36599fffd74f3da6a78db7770cee840a3be19a699ee775c1ea7d537273`.
 
+The label-blind fine-grid branch is frozen as
+`b8ea9c90f2cf2aca428e643dcb65a5fe5610632d60d5b9f2e0f6b0523235c210`:
+delta 0.07, 2,557 co-member pairs (60.5% retained), 2,967 grouped articles
+(74.0% retained), 1,246 multiarticle groups and 16,582 singletons. No labels,
+models or new parent reads selected it; original memberships are unchanged.
+Its plan `d7f8d1080e9f1251b0038915a95935943509c8ed8e7299e7c80727a4feff72c2`,
+study `coverage-guarded-fine-candidate-pair-evaluation-20261017-v3`, prepared
+all 68 packets (56 within/eight tail/four canaries). Two evaluation pairs and
+three canaries overlap earlier plans; retain/disclose overlap and do not copy
+answers. The user explicitly approved **Run this bounded margin-0.07 check**:
+68 calls/136 exposures/zero retries, its own immutable policy and first-failure
+stop. No broader queue or membership adoption is authorized. Exact historical
+v2 preparation resume needs the retained `15d18cd` code; its numerical defaults
+remain but generic grid code hashes changed. See the method's metadata-error
+note: the old v2 question said .25 while its actual candidate/cutoffs were .05;
+the v3 question is margin-specific. Never silently rewrite the old question.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

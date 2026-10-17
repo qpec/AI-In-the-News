@@ -4,7 +4,8 @@ from __future__ import annotations
 import pytest
 
 from newsresearch.common import Config, Context, ResearchError
-from newsresearch.event_candidate_evaluation import CANDIDATE_METHOD, CandidateEvaluationResearch, _coverage, frozen_draw
+from newsresearch.event_candidate_evaluation import (CANDIDATE_METHOD, FINE_CANDIDATE_METHOD, FINE_METHOD,
+    FINE_STUDY, METHOD as PREPARATION_METHOD, CandidateEvaluationResearch, _coverage, frozen_draw)
 from newsresearch.event_eval_math import estimate_pair_metrics
 from newsresearch.event_eval_workflow import METHOD, save
 from newsresearch.runtime import audited_handler
@@ -54,8 +55,12 @@ class FixtureResearch(CandidateEvaluationResearch):
                 "max_input_bytes": 32768, "max_output_bytes": 16384, "codex_executable": "fictional-never-run",
                 "executable_sha256": "fictional-not-executed"}}
         old_id = self.ledger.record(session, "luna_group_validation_plan", "fictional-original", old)
+        previous_id = self.ledger.record(session, "luna_group_validation_plan", "fictional-previous", {
+            **old, "preparation_method": PREPARATION_METHOD, "original_plan": old_id,
+            "tasks": [draw["design"]["selected_pairs"][1]]}) if data.get("fine") else None
         membership_ref = save(self, session, membership, "Invented candidate memberships")
-        candidate = {"method": CANDIDATE_METHOD, "delta": .05, "original_evaluation_plan": old_id,
+        candidate = {"method": FINE_CANDIDATE_METHOD if data.get("fine") else CANDIDATE_METHOD,
+            "delta": .055 if data.get("fine") else .05, "original_evaluation_plan": old_id,
             "baseline_group_result": "fictional-baseline", "unchanged_original_memberships": True,
             "candidate_membership": membership_ref,
             "original_rule": {"features": [f"fictional-feature-{i}" for i in range(5)], "thresholds": [.8] * 5},
@@ -64,20 +69,26 @@ class FixtureResearch(CandidateEvaluationResearch):
             "candidate": {"groups": 80, "grouped_articles": 160, "within_pairs": 80},
             "retained_pairs_fraction": 1, "grouped_article_fraction": 1}
         candidate_id = self.ledger.record(session, "event_group_refinement_result", "fictional-candidate", candidate)
-        return {"candidate_result": candidate_id, "original_plan": old_id}
+        return {"candidate_result": candidate_id, "original_plan": old_id, **({"previous_plan": previous_id} if data.get("fine") else {})}
 
 
-def test_audited_preparation_freezes_68_packets_and_reuses_exact_plan_without_models(tmp_path):
+@pytest.mark.parametrize("fine", [False, True])
+def test_audited_preparation_freezes_68_packets_and_reuses_exact_plan_without_models(tmp_path, fine):
     engine = FixtureResearch(tmp_path / "synthetic-store", config=Config(offline=True))
     try:
         def call(operation, payload):
             return engine.execute(operation, payload, objective="Source-free candidate preparation test", actor="test:synthetic")
-        fixture = call("status", {})
-        data = {"phase": "prepare_candidate_pairs", **fixture}
+        fixture = call("status", {"fine": fine})
+        data = {"phase": "prepare_fine_candidate_pairs" if fine else "prepare_candidate_pairs", **fixture}
         result = call("luna_group_validation", data)
         assert len(result["tasks"]) == 68 and all(task["status"] == "prepared" for task in result["tasks"])
         assert result["limits"] == {"max_requests": 68, "max_article_exposures": 136, "max_retries": 0}
-        assert len(result["overlap"]["evaluation_pair_ids"]) == 1
+        if fine:
+            assert result["overlap"]["previous_task_pairs"] == 2
+            assert result["preparation_method"] == FINE_METHOD and result["study_key"] == FINE_STUDY
+            assert result["previous_plans"] == [fixture["original_plan"], fixture["previous_plan"]]
+        else:
+            assert len(result["overlap"]["evaluation_pair_ids"]) == 1
         assert result["model_authorized"] is False and result["new_model_calls"] == 0
         assert result["candidate_rule"]["thresholds"] == [.81] * 5
         assert result["baseline_counts"]["within_pairs"] == result["candidate_counts"]["within_pairs"] == 80

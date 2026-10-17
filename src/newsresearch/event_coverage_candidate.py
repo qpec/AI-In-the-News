@@ -20,14 +20,15 @@ MIN_PAIR_RETENTION = .60
 MIN_GROUPED_RETENTION = .70
 
 
-def coverage_grid(groups: Json, rows: list[Json], rule: Json) -> Json:
+def coverage_grid(groups: Json, rows: list[Json], rule: Json, *,
+                  deltas: tuple[float, ...] = DELTAS, method: str = METHOD) -> Json:
     """Validate delta zero once, then compare only the registered finite grid."""
     checked = split_candidate(groups, rows, rule)
     baseline = {**checked["baseline"], "group_size_counts": {
         str(size): count for size, count in checked["baseline"]["group_size_counts"].items()}}
     features = {(row["left"], row["right"]): row for row in checked["feature_rows"]}
     variants: list[Json] = []
-    for delta in DELTAS:
+    for delta in deltas:
         candidate_rule = {**rule, "thresholds": [cut + delta * (1 - cut) for cut in rule["thresholds"]]}
         proposed = []
         for parent, members in sorted(groups.items()):
@@ -36,7 +37,7 @@ def coverage_grid(groups: Json, rows: list[Json], rule: Json) -> Json:
                        if predicts(features[(left, right)], candidate_rule)]
             for group in complete_link_groups(members, passing)["groups"]:
                 identity = parent if group["members"] == members else digest({
-                    "method": METHOD, "delta": delta, "parent": parent, "members": group["members"]})
+                    "method": method, "delta": delta, "parent": parent, "members": group["members"]})
                 proposed.append({"group_id": identity, "members": group["members"], "parent_group": parent})
         sizes = [len(group["members"]) for group in proposed]
         counts = {"groups": len(sizes), "multi_article_groups": sum(size > 1 for size in sizes),
@@ -51,7 +52,7 @@ def coverage_grid(groups: Json, rows: list[Json], rule: Json) -> Json:
                          "retained_pairs_fraction": pair_retention, "grouped_article_retention_fraction": article_retention,
                          "eligible": eligible})
     selected = max((variant for variant in variants if variant["eligible"]), key=lambda variant: variant["delta"], default=None)
-    if variants[0]["counts"] != baseline:
+    if any(row["delta"] == 0 and row["counts"] != baseline for row in variants):
         raise AuditError("coverage_candidate_delta_zero_counts_changed")
     return {"baseline": baseline, "variants": variants, "selected": selected,
             "all_source_count": checked["source_count"], "retained_feature_rows": len(checked["feature_rows"]),
@@ -72,6 +73,11 @@ def render(result: Json) -> str:
         counts = result["candidate"]
         lines.extend(["", f"Selected the largest eligible delta: **{result['delta']}**; at least 60% of original within pairs and 70% of originally grouped articles retained.",
                       f"Candidate: {counts['multi_article_groups']:,} multi-article groups, {counts['singletons']:,} review singletons; sizes {counts['group_size_counts']}."])
+    if result.get("reference_delta") is not None:
+        if result["stricter_than_reference"]:
+            lines.append(f"This is a stricter margin than the earlier coarse delta {result['reference_delta']}; its precision is unobserved.")
+        else:
+            lines.append(f"**No stronger coverage-eligible margin than {result['reference_delta']} was found in this fixed fine grid.**")
     lines.extend(["", f"Scope: {result['all_source_count']:,} frozen articles; {result['retained_feature_rows']:,} original internal feature rows; missing feature pairs {result['missing_feature_pairs']}; pending preparation 0. Baseline replay passed.",
                   "Each subgroup requires every pair to pass all five stricter cutoffs and the original seven-day gate. Only splits inside current groups are proposed.",
                   "**Precision remains unavailable.** The fixed grid and coverage rule use no evaluation or historical-reference labels. Fresh evaluation remains necessary; no membership adoption occurred.",
@@ -87,10 +93,17 @@ def render(result: Json) -> str:
 
 
 class CoverageCandidateResearch(Research):
+    METHOD = METHOD
+    DELTAS: tuple[float, ...] = DELTAS
+    PHASE = "prepare_coverage_grid"
+    MANIFEST_KIND = "event_coverage_candidate_manifest"
+    EXTRA_IMPLEMENTATION: tuple[str, ...] = ()
+    REFERENCE_DELTA: float | None = None
+
     @audited_handler
     def _refine_event_groups(self, session: str, context: Context, data: Json) -> Json:
         if (set(data) != {"phase", "parent_candidate", "comparison_key", "user_instruction"}
-                or data.get("phase") != "prepare_coverage_grid" or data.get("parent_candidate") != PARENT_CANDIDATE
+                or data.get("phase") != self.PHASE or data.get("parent_candidate") != PARENT_CANDIDATE
                 or not self.config.offline or any(not isinstance(value, str) or not value.strip() for value in data.values())):
             raise ResearchError("coverage_candidate_exact_offline_inputs_required")
         parent = self.ledger.get(PARENT_CANDIDATE, "event_group_refinement_result")
@@ -100,9 +113,9 @@ class CoverageCandidateResearch(Research):
             raise AuditError("coverage_candidate_parent_binding_changed")
         if context.versions and context.versions != parent["versions"]:
             raise ResearchError("coverage_candidate_context_differs_from_parent")
-        method = {"method": METHOD, "parent_candidate": PARENT_CANDIDATE, "capsule": parent["capsule"],
+        method = {"method": self.METHOD, "parent_candidate": PARENT_CANDIDATE, "capsule": parent["capsule"],
                   "original_evaluation_plan": parent["original_evaluation_plan"], "baseline_group_result": GROUP_RESULT,
-                  "input_versions": parent["versions"], "deltas": list(DELTAS), "minimum_pair_retention": MIN_PAIR_RETENTION,
+                  "input_versions": parent["versions"], "deltas": list(self.DELTAS), "minimum_pair_retention": MIN_PAIR_RETENTION,
                   "minimum_originally_grouped_article_retention": MIN_GROUPED_RETENTION,
                   "selection": "Largest positive delta satisfying both coverage floors; otherwise no candidate",
                   "source_scope": "Exact retained capsule; baseline replay; complete-link splits only; seven-day gate unchanged",
@@ -110,9 +123,9 @@ class CoverageCandidateResearch(Research):
                   "external_parent_reads": 0, "new_model_calls": 0, "user_instruction": data["user_instruction"],
                   "observed_chat_timestamp": None,
                   "implementation": {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in (
-                      Path(__file__).name, "event_precision_candidate.py", "event_rule_application.py", "event_pair_monotone.py", "event_pair_selection.py")}}
+                      Path(__file__).name, "event_precision_candidate.py", "event_rule_application.py", "event_pair_monotone.py", "event_pair_selection.py", *self.EXTRA_IMPLEMENTATION)}}
         key = data["comparison_key"]
-        previous = self.ledger.db.execute("SELECT id,payload FROM records WHERE kind='event_coverage_candidate_manifest' AND logical_key=?", (key,)).fetchall()
+        previous = self.ledger.db.execute("SELECT id,payload FROM records WHERE kind=? AND logical_key=?", (self.MANIFEST_KIND, key)).fetchall()
         if previous:
             if len(previous) != 1 or json.loads(previous[0][1])["method"] != method:
                 raise ResearchError("coverage_candidate_key_binds_another_immutable_method")
@@ -126,7 +139,7 @@ class CoverageCandidateResearch(Research):
                         "population_estimate": False, "text": "Prepare a fixed margin grid with predeclared coverage floors",
                         "rules": method["source_scope"], "unit": "Provisional reports of one real-world event"}})["id"]
             manifest = {"method": method, "versions": versions, "registered_at": utc()}
-            manifest_id = self.ledger.record(session, "event_coverage_candidate_manifest", key, manifest)
+            manifest_id = self.ledger.record(session, self.MANIFEST_KIND, key, manifest)
         bound = Context(context.objective, context.actor, versions)
         previous_results = self.ledger.db.execute("SELECT id,payload FROM records WHERE kind='event_group_refinement_result' AND logical_key=?", (key,)).fetchall()
         if previous_results:
@@ -140,10 +153,11 @@ class CoverageCandidateResearch(Research):
             if (capsule.get("method") != "fixed-margin-event-split-v1" or capsule.get("original_rule") != parent["original_rule"]
                     or capsule.get("parameters") != [GROUP_RESULT, APPLICATION_RESULT]):
                 raise AuditError("coverage_candidate_retained_capsule_binding_changed")
-            output = coverage_grid(capsule["groups"], capsule["feature_rows"], capsule["original_rule"])
+            output = coverage_grid(capsule["groups"], capsule["feature_rows"], capsule["original_rule"],
+                                   deltas=self.DELTAS, method=self.METHOD)
             if output["all_source_count"] != parent["all_source_count"] or output["baseline"] != parent["baseline"]:
                 raise AuditError("coverage_candidate_original_scope_changed")
-            variants_artifact = _save(self, session, {"method": METHOD, "manifest": manifest_id, "variants": output["variants"]},
+            variants_artifact = _save(self, session, {"method": self.METHOD, "manifest": manifest_id, "variants": output["variants"]},
                                       "All predeclared coverage variants frozen without label access")
             selected = output["selected"]
             membership_artifact = None
@@ -160,13 +174,15 @@ class CoverageCandidateResearch(Research):
                                                       for source in members[:2]]})
                     if len(examples) == 2:
                         break
-            result = {"method": METHOD, "versions": versions, "manifest": manifest_id, "parent_candidate": PARENT_CANDIDATE,
+            result = {"method": self.METHOD, "versions": versions, "manifest": manifest_id, "parent_candidate": PARENT_CANDIDATE,
                       "capsule": parent["capsule"], "candidate_membership": membership_artifact,
                       "original_evaluation_plan": parent["original_evaluation_plan"], "baseline_group_result": GROUP_RESULT,
                       "unchanged_original_memberships": True, "original_memberships_changed": False, "adopted": False,
                       "all_source_count": output["all_source_count"], "source_count": output["all_source_count"],
                       "baseline": output["baseline"], "candidate": selected["counts"] if selected else None,
                       "delta": selected["delta"] if selected else None, "rule": selected["rule"] if selected else None,
+                      "reference_delta": self.REFERENCE_DELTA,
+                      "stricter_than_reference": bool(selected and self.REFERENCE_DELTA is not None and selected["delta"] > self.REFERENCE_DELTA),
                       "original_rule": capsule["original_rule"], "variants_artifact": variants_artifact,
                       "variant_summary": [{field: row[field] for field in ("delta", "counts", "retained_pairs_fraction", "grouped_article_retention_fraction", "eligible")} for row in output["variants"]],
                       "retained_pairs_fraction": selected["retained_pairs_fraction"] if selected else None,

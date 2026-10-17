@@ -20,11 +20,15 @@ DELTA_GRID = (.025, .05, .075, .1, .15, .2, .25)
 SEED = "coverage-guarded-candidate-pair-evaluation-20261017-v2"
 SIZES = {"within_group": 56, "between:random_tail": 8}
 STUDY = "coverage-guarded-candidate-pair-evaluation-20261017-v2"
+FINE_METHOD = "coverage-guarded-fine-candidate-pair-preparation-v3"
+FINE_CANDIDATE_METHOD = "coverage-guarded-event-split-v3"
+FINE_STUDY = "coverage-guarded-fine-candidate-pair-evaluation-20261017-v3"
+FINE_DELTA_GRID = (.05, .055, .06, .065, .07, .075)
 
 
-def _coverage(candidate: Json) -> Json:
+def _coverage(candidate: Json, grid: tuple[float, ...] = DELTA_GRID) -> Json:
     delta = candidate.get("delta")
-    if type(delta) not in {int, float} or delta not in DELTA_GRID:
+    if type(delta) not in {int, float} or delta not in grid:
         raise ResearchError("candidate_eval_positive_fixed_grid_delta_required")
     baseline, current = candidate["baseline"], candidate["candidate"]
     if any(type(row.get(key)) is not int or row[key] <= 0 for row in (baseline, current)
@@ -38,17 +42,17 @@ def _coverage(candidate: Json) -> Json:
         raise ResearchError("candidate_eval_pair_retention_inconsistent")
     return {"minimum_pair_retention": .60, "minimum_grouped_article_retention": .70,
         "pair_retention": pairs, "grouped_article_retention": articles,
-        "delta_grid": [0, *DELTA_GRID], "delta_selection": "Largest positive fixed-grid delta passing both guards, chosen without labels"}
+        "delta_grid": [0, *grid], "delta_selection": "Largest positive fixed-grid delta passing both guards, chosen without labels"}
 
 
-def frozen_draw(membership: Json, previous_tasks: list[Json]) -> Json:
+def frozen_draw(membership: Json, previous_tasks: list[Json], *, seed: str = SEED) -> Json:
     """One prospectively fixed draw; overlap is reported, never rejected/replaced."""
     groups: dict[str, list[str]] = {}
     for source, group in membership.items():
         if not isinstance(source, str) or not source or not isinstance(group, str) or not group:
             raise ResearchError("candidate_eval_membership_invalid")
         groups.setdefault(group, []).append(source)
-    design = build_pair_design(groups, {}, sample_sizes=SIZES, seed=SEED)
+    design = build_pair_design(groups, {}, sample_sizes=SIZES, seed=seed)
     if len(design["selected_pairs"]) != 64:
         raise ResearchError("candidate_eval_requires_56_within_and_8_tail_pairs")
     old_pairs = {task["pair_id"] for task in previous_tasks}
@@ -78,16 +82,20 @@ def frozen_draw(membership: Json, previous_tasks: list[Json]) -> Json:
 
 def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
-    if set(data) != {"phase", "candidate_result", "original_plan"}:
+    fine = data.get("phase") == "prepare_fine_candidate_pairs"
+    fields = {"phase", "candidate_result", "original_plan"} | ({"previous_plan"} if fine else set())
+    if set(data) != fields:
         raise ResearchError("candidate_eval_preparation_fields_invalid")
+    method, candidate_method, study, grid = ((FINE_METHOD, FINE_CANDIDATE_METHOD, FINE_STUDY, FINE_DELTA_GRID)
+        if fine else (METHOD, CANDIDATE_METHOD, STUDY, DELTA_GRID))
     own_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    content = {"method": METHOD, "candidate_result": data["candidate_result"], "original_plan": data["original_plan"],
-        "seed": SEED, "sample_sizes": SIZES, "canaries": 4, "implementation_sha256": own_hash,
+    content = {"method": method, "candidate_result": data["candidate_result"], "original_plan": data["original_plan"],
+        "seed": study, "sample_sizes": SIZES, "canaries": 4, "implementation_sha256": own_hash,
         "sampling": "One full-support fixed-seed pair SRS draw; within candidate groups and entire between-group complement",
         "overlap": "Read previous pair IDs only after registration; retain and disclose overlap without reseeding, replacement, or label reuse",
         "estimand": "Unordered-pair precision/recall over all candidate-frame articles; no pair exclusions",
         "evaluation": "Largest positive prospectively fixed-grid delta preserving >=60% of pairs and >=70% of grouped articles; no old model labels read or used as new references",
-        "candidate_method": CANDIDATE_METHOD, "delta_grid": [0, *DELTA_GRID],
+        "candidate_method": candidate_method, "delta_grid": [0, *grid],
         "precision_target": {"target": .90,
             "decision": "Point target passes only with complete decisive within-group references and pair precision >= .90",
             "missingness": "Unresolved references stay null; show pessimistic and optimistic same-event counts and fractions",
@@ -95,19 +103,24 @@ def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
             "human_accuracy_established": False},
         "limitations": "Model-reference intervals condition on correct fixed labels; random-tail recall may remain uninformative; no human gold or whole-group claim",
         "model_calls": 0, "approval_created": False, "original_memberships_changed": False}
-    protocol = engine._version(session, context, {"kind": "protocol", "key": STUDY,
+    if fine:
+        content["previous_plan"] = data["previous_plan"]
+        content["minimum_delta_exclusive"] = .05
+    protocol = engine._version(session, context, {"kind": "protocol", "key": study,
         "content": content, "amend_latest": True,
         "reason": "Freeze independent seed, allocation, overlap policy and candidate result before reading pair IDs or membership"})["id"]
     candidate = engine.ledger.get(data["candidate_result"], "event_group_refinement_result")
     old = engine.ledger.get(data["original_plan"], "luna_group_validation_plan")
-    if (candidate.get("method") != CANDIDATE_METHOD
+    if (candidate.get("method") != candidate_method
             or candidate.get("original_evaluation_plan") != data["original_plan"]
             or candidate.get("baseline_group_result") != old.get("group_result")
             or candidate.get("unchanged_original_memberships") is not True
             or old.get("method") != EXECUTION_METHOD
             or (context.versions and context.versions != old["versions"])):
         raise ResearchError("candidate_eval_candidate_or_baseline_binding_invalid")
-    coverage = _coverage(candidate)
+    if fine and (type(candidate.get("delta")) not in {int, float} or candidate["delta"] <= .05):
+        raise ResearchError("candidate_eval_no_improved_fine_candidate_no_queue")
+    coverage = _coverage(candidate, grid)
     membership = engine.ledger.artifacts.read(candidate["candidate_membership"])
     original_sources = {source for members in old["design"]["groups"].values() for source in members}
     if not isinstance(membership, dict) or set(membership) != original_sources:
@@ -116,10 +129,21 @@ def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
         "candidate_result": data["candidate_result"], "membership_artifact": candidate["candidate_membership"],
         "original_plan": data["original_plan"], "fields": ["design.groups", "tasks.pair_id"],
         "model_assessments_or_labels_read": False})
-    draw = frozen_draw(membership, old["tasks"])
+    previous_tasks = list(old["tasks"])
+    if fine:
+        previous = engine.ledger.get(data["previous_plan"], "luna_group_validation_plan")
+        if (previous.get("method") != EXECUTION_METHOD or previous.get("preparation_method") != METHOD
+                or previous.get("original_plan") != data["original_plan"]
+                or previous.get("versions", {}).get("dataset") != old["versions"].get("dataset")):
+            raise ResearchError("candidate_eval_previous_plan_lineage_invalid")
+        previous_tasks.extend(previous["tasks"])
+        engine.ledger.append(session, "event.candidate.eval.previous_pairs.inspected", {
+            "plans": [data["original_plan"], data["previous_plan"]], "fields": ["tasks.pair_id"],
+            "model_assessments_or_labels_read": False})
+    draw = frozen_draw(membership, previous_tasks, seed=study)
     binding = digest({"candidate_result": data["candidate_result"], "original_plan": data["original_plan"],
         "protocol": protocol, "implementation": implementation(), "preparation_sha256": own_hash})
-    rows = engine.ledger.db.execute("SELECT id,payload FROM records WHERE kind='luna_group_validation_plan' AND logical_key=?", (STUDY,)).fetchall()
+    rows = engine.ledger.db.execute("SELECT id,payload FROM records WHERE kind='luna_group_validation_plan' AND logical_key=?", (study,)).fetchall()
     if rows:
         prior = engine.ledger.get(rows[-1]["id"], "luna_group_validation_plan")
         if prior.get("study_binding") != binding:
@@ -130,14 +154,14 @@ def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
                 "markdown": render(prior), "destination": "codex_chat", "status": "prepared_for_delivery"}), "reused": True}
     versions = {**old["versions"], "protocol": protocol}
     for kind, value in {
-        "question": {"text": "Does the prospectively fixed margin .25 split candidate reach 90% unordered-pair model-reference precision, with explicit unresolved references and recall uncertainty?"},
+        "question": {"text": (f"Does the frozen fine-grid margin {candidate['delta']} split candidate reach 90% unordered-pair model-reference precision, with explicit unresolved references and recall uncertainty?" if fine else "Does the prospectively fixed margin .25 split candidate reach 90% unordered-pair model-reference precision, with explicit unresolved references and recall uncertainty?")},
         "selection": {"rules": {"candidate_result": data["candidate_result"], "frame": candidate["candidate_membership"],
-            "seed": SEED, "sample_sizes": SIZES, "pair_exclusions": [], "overlap": draw["overlap"]}},
+            "seed": study, "sample_sizes": SIZES, "pair_exclusions": [], "overlap": draw["overlap"]}},
         "profile": {"mode": "systematic", "population_estimate": False,
             "purpose": "Conditional candidate-frame model-reference pair diagnostics; no accepted population finding"},
     }.items():
         versions[kind] = engine._version(session, Context(context.objective, context.actor, versions), {
-            "kind": kind, "key": STUDY, "content": value})["id"]
+            "kind": kind, "key": study, "content": value})["id"]
     leads: dict[str, Json | None] = {}
     tasks = []
     quarantine = set(old.get("quarantined_source_versions", []))
@@ -160,11 +184,11 @@ def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
                     task["status"] = "oversize"
                 task["request"] = save(engine, session, request, "New candidate pair request; no old answer reuse or model approval")
         tasks.append(task)
-    plan = {"method": EXECUTION_METHOD, "preparation_method": METHOD, "versions": versions,
-        "study_key": STUDY, "study_binding": binding, "original_plan": data["original_plan"],
+    plan = {"method": EXECUTION_METHOD, "preparation_method": method, "versions": versions,
+        "study_key": study, "study_binding": binding, "original_plan": data["original_plan"],
         "candidate_result": data["candidate_result"], "group_result": data["candidate_result"],
         "baseline_group_result": candidate["baseline_group_result"], "candidate_delta": candidate["delta"],
-        "candidate_method": CANDIDATE_METHOD, "coverage_guards": coverage,
+        "candidate_method": candidate_method, "coverage_guards": coverage,
         "candidate_rule": candidate["rule"], "original_rule": candidate["original_rule"],
         "baseline_counts": candidate["baseline"], "candidate_counts": candidate["candidate"],
         "retained_pairs_fraction": candidate["retained_pairs_fraction"],
@@ -176,6 +200,8 @@ def prepare(engine: Any, session: str, context: Context, data: Json) -> Json:
         "source_count": len(membership), "pair_estimand_not_whole_group_purity": True,
         "model_authorized": False, "new_model_calls": 0, "original_groups_unchanged": True,
         "review_required": True, "examples": []}
+    if fine:
+        plan["previous_plans"] = [data["original_plan"], data["previous_plan"]]
     return present(engine, session, Context(context.objective, context.actor, versions),
         "luna_group_validation_plan", plan, render(plan))
 
@@ -199,7 +225,7 @@ def render(plan: Json) -> str:
         f"Frozen strata {strata}. Packet coverage {dict(Counter(task['status'] for task in plan['tasks']))}.\n\n"
         "Four separate sequential canaries precede 56 within-group and eight random-tail evaluation pairs. "
         "The proposed maximum is 68 Luna calls / 136 article exposures / zero retries, with first-failure stop and up to four workers.\n\n"
-        f"Old 68-pair overlap: {len(overlap['evaluation_pair_ids'])} evaluation pairs {overlap['evaluation_pair_ids']}; "
+        f"Previous-plan pair overlap: {len(overlap['evaluation_pair_ids'])} evaluation pairs {overlap['evaluation_pair_ids']}; "
         f"{len(overlap['canary_pair_ids'])} canaries {overlap['canary_pair_ids']}. "
         "No pairs were excluded, replaced or reseeded. Any overlap remains in the full-frame estimand and would require a new attempt; old labels are not new references. "
         "This is an independently randomized draw, not a guaranteed unseen-pair holdout.\n\n"
@@ -212,6 +238,6 @@ def render(plan: Json) -> str:
 class CandidateEvaluationResearch(EventEvaluationResearch):
     @audited_handler
     def _luna_group_validation(self, session: str, context: Context, data: Json) -> Json:
-        if data.get("phase") == "prepare_candidate_pairs":
+        if data.get("phase") in {"prepare_candidate_pairs", "prepare_fine_candidate_pairs"}:
             return prepare(self, session, context, data)
         return super()._luna_group_validation(session, context, data)

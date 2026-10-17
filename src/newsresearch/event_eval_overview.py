@@ -10,8 +10,17 @@ from .event_eval_workflow import METHOD as EVALUATION_METHOD, EventEvaluationRes
 from .event_pair_reference import validate_answer, validate_request
 from .runtime import audited_handler
 
-METHOD = "fast-event-pair-target-overview-v1"
+METHOD = "fast-event-pair-target-overview-v2"
 TARGET_METHOD = "event-pair-precision-90-target-v1"
+CANDIDATE_PREPARATION_METHOD = "coverage-guarded-candidate-pair-preparation-v2"
+FINE_PREPARATION_METHOD = "coverage-guarded-fine-candidate-pair-preparation-v3"
+FROZEN_CANDIDATE_TARGET = {
+    "target": .90,
+    "decision": "Point target passes only with complete decisive within-group references and pair precision >= .90",
+    "missingness": "Unresolved references stay null; show pessimistic and optimistic same-event counts and fractions",
+    "confidence": "Report the 95% conditional sampling interval separately; point target does not require or imply a 95% lower bound of .90",
+    "human_accuracy_established": False,
+}
 LABELS = ("same_event", "different_event", "uncertain", "invalid", "unknown", "unavailable", "pending")
 
 
@@ -79,25 +88,40 @@ def _percent(value: Any) -> str:
     return "unavailable" if value is None else f"{100 * value:.1f}%"
 
 
+def _range(value: Any) -> str:
+    if isinstance(value, dict):
+        suffix = "; nonzero-denominator conditional"
+        if value["zero_denominator_possible"]:
+            suffix += "; zero denominator possible"
+        return "–".join(_percent(value[key]) for key in ("lower", "upper")) + suffix
+    return "unavailable (null)" if value is None else "–".join(_percent(x) for x in value)
+
+
 def render(value: Json) -> str:
     precision, recall = value["pair_precision"], value["pair_recall"]
     target = value["target_status"]
     interval = precision["confidence_interval"]
     bounds = precision["weighted_missingness_bounds"]
-    status = "met on model references" if target["status"] == "met_for_model_references" else "NOT demonstrated/met"
-    text = (f"90% pair-precision target: {status} ({target['status']}). Frozen run: {value['execution_status']}.\n\n"
-        f"Canaries (excluded from estimates): {value['canary_counts']}. "
-        f"Evaluation pairs: {value['evaluation_counts']}. Within-group pairs: {value['within_counts']}.\n\n"
-        f"Pair precision: {_percent(precision['point'])}; "
-        f"{100 * value['confidence']['level']:.0f}% conditional sampling interval "
-        f"{[_percent(x) for x in interval] if interval else 'unavailable'}; "
-        f"missingness plug-in bounds {[_percent(x) for x in bounds] if bounds else 'unavailable'}. "
-        f"Confidence lower bound reaches 90%: {target['confidence_lower_at_target']}.\n\n"
-        f"Even the optimistic sample missingness bound is below 90%: {target['optimistic_sample_bound_below_target']}.\n\n"
-        f"Full-frame pair recall: {_percent(recall['point'])}; confidence interval {recall['confidence_interval']}; "
-        f"missingness plug-in bounds {recall['weighted_missingness_bounds']}. "
-        f"Retrieved-pool recall: {_percent(value['candidate_pool_recall']['point'])}. "
-        "The retrieved channel is the saved 100-anchor union; the small random-tail sample can leave recall very uncertain.\n\n"
+    status = {"met_for_model_references": "met on model references", "below_target": "below target",
+        "unresolved": "not demonstrated: unresolved references"}[target["status"]]
+    count_rows = []
+    for name, key in (("Canaries (excluded)", "canary_counts"), ("All evaluation pairs", "evaluation_counts"),
+                      ("Within-group evaluation", "within_counts")):
+        counts = value[key]
+        count_rows.append("| " + " | ".join([name, str(counts["total"]), *[str(counts[label]) for label in LABELS]]) + " |")
+    count_table = ("| Scope | Total | Same | Different | Uncertain | Invalid | Unknown | Unavailable | Pending |\n"
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n" + "\n".join(count_rows))
+    text = (f"**90% pair-precision target: {status}.** Frozen run: {value['execution_status']}.\n\n"
+        f"{count_table}\n\n"
+        "| Metric | Point | 95% conditional sampling interval | Missingness plug-in bounds |\n"
+        "| --- | ---: | --- | --- |\n"
+        f"| Pair precision | {_percent(precision['point'])} | {_range(interval)} | {_range(bounds)} |\n"
+        f"| Full-frame pair recall | {_percent(recall['point'])} | {_range(recall['confidence_interval'])} | {_range(recall['weighted_missingness_bounds'])} |\n\n"
+        f"Complete decisive within-group references: {'yes' if target['complete_decisive_within_references'] else 'no'}. "
+        f"Confidence lower bound reaches 90%: {'yes' if target['confidence_lower_at_target'] else 'no'}. "
+        f"Optimistic sample missingness bound below 90%: {'yes' if target['optimistic_sample_bound_below_target'] else 'no'}. "
+        f"Retrieved-pool recall point: {_percent(value['candidate_pool_recall']['point'])}; "
+        f"scope: {value['retrieved_scope']}. The small random-tail sample can leave recall very uncertain.\n\n"
         f"Recorded run: {value['attempts']} calls, {value['article_exposures']} article exposures, "
         f"{value['retries']} retries. Stop/obstacle: {value['obstacle']}. "
         "This overview made zero new model calls. Model lead references are not human gold; citation checks do not prove event identity. "
@@ -123,23 +147,35 @@ def render(value: Json) -> str:
 
 def overview(engine: Any, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
-    if set(data) != {"phase", "result", "target_protocol"}:
+    from_plan = set(data) == {"phase", "result", "target_from_plan"} and data["target_from_plan"] is True
+    if not from_plan and set(data) != {"phase", "result", "target_protocol"}:
         raise ResearchError("event_eval_overview_fields_invalid")
     protocol = engine._version(session, context, {"kind": "protocol", "key": METHOD,
-        "content": {"method": METHOD, "result": data["result"], "target_protocol": data["target_protocol"],
+        "content": {"method": METHOD, "result": data["result"],
+            "target_source": "frozen_result_versions_protocol" if from_plan else data["target_protocol"],
             "procedure": "Verify frozen plan and version bindings, transcribe existing metrics, counts and up to two retained examples",
             "model_calls": 0, "new_evaluations": 0, "memberships_changed": False},
         "amend_latest": True, "reason": "Register compact exact reporting before reading any result, target, or evidence"})["id"]
-    target = engine.ledger.get(data["target_protocol"], "protocol")["content"]
     result = engine.ledger.get(data["result"], "luna_group_validation_result")
-    if (target.get("method") != TARGET_METHOD or type(target.get("target")) not in {float, int}
-            or target["target"] != .90 or target.get("frozen_plan") != result.get("plan")
-            or result.get("method") != EVALUATION_METHOD):
+    if result.get("method") != EVALUATION_METHOD:
         raise ResearchError("event_eval_overview_target_or_result_binding_invalid")
     plan = engine.ledger.get(result["plan"], "luna_group_validation_plan")
     if (plan.get("method") != EVALUATION_METHOD or result["versions"] != plan["versions"]
             or result["study_key"] != plan["study_key"] or (context.versions and context.versions != plan["versions"])):
         raise ResearchError("event_eval_overview_plan_or_versions_invalid")
+    target_protocol = result["versions"]["protocol"] if from_plan else data["target_protocol"]
+    target = engine.ledger.get(target_protocol, "protocol")["content"]
+    if from_plan:
+        if (target.get("method") not in {CANDIDATE_PREPARATION_METHOD, FINE_PREPARATION_METHOD}
+                or plan.get("preparation_method") != target.get("method")
+                or not plan.get("candidate_result") or not plan.get("original_plan")
+                or target.get("candidate_result") != plan["candidate_result"]
+                or target.get("original_plan") != plan["original_plan"]
+                or digest(target.get("precision_target")) != digest(FROZEN_CANDIDATE_TARGET)):
+            raise ResearchError("event_eval_overview_frozen_target_binding_invalid")
+    elif (target.get("method") != TARGET_METHOD or type(target.get("target")) not in {float, int}
+            or target["target"] != .90 or target.get("frozen_plan") != result.get("plan")):
+        raise ResearchError("event_eval_overview_target_or_result_binding_invalid")
     tasks = plan["tasks"]
     expected = {task["pair_id"]: task for task in tasks}
     outcomes = result["outcomes"]
@@ -178,11 +214,12 @@ def overview(engine: Any, session: str, context: Context, data: Json) -> Json:
         if len(examples) == 2:
             break
     value = {"method": METHOD, "versions": plan["versions"], "overview_protocol": protocol,
-        "target_protocol": data["target_protocol"], "original_result": data["result"], "plan": result["plan"],
+        "target_protocol": target_protocol, "original_result": data["result"], "plan": result["plan"],
         "execution_status": result["status"], "target_status": _target_status(within_counts, metrics["pair_precision"], .90),
         "canary_counts": _counts(canaries, outcomes), "evaluation_counts": _counts(evaluation, outcomes),
         "within_counts": within_counts, "pair_precision": metrics["pair_precision"], "pair_recall": metrics["pair_recall"],
         "candidate_pool_recall": metrics["candidate_pool_recall"], "confidence": metrics["confidence"],
+        "retrieved_scope": "not sampled in this candidate evaluation" if from_plan else "saved 100-anchor retrieval union",
         "attempts": result["workflow_model_attempts"], "article_exposures": result["workflow_article_exposures"],
         "retries": result["automatic_retries"], "obstacle": result["obstacle"], "examples": examples,
         "new_model_calls": 0, "new_evaluations": 0, "human_validated": False, "memberships_changed": False}

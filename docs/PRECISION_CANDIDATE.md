@@ -224,3 +224,63 @@ in the preparation protocol, without creating a retrospective success criterion.
 The explicit earlier target-protocol reporting route remains supported. Two
 focused synthetic integration tests, Ruff and mypy passed for this reporting
 extension; execution code and the frozen model bindings were unchanged.
+
+## Fixed fine-grid branch — version 3
+
+The failed delta-0.05 assessment remains an evaluation result; its individual
+labels are not used to fit this branch. The separately registered fine grid
+uses only the retained feature capsule and coverage: fixed deltas
+`0.05, 0.055, 0.06, 0.065, 0.07, 0.075`, with the unchanged 60% pair and 70%
+grouped-article retention floors. The largest eligible margin is selected.
+The new method `coverage-guarded-event-split-v3` has its own immutable manifest
+kind and phase. It makes no new model calls or membership adoption.
+
+Executed result
+`b8ea9c90f2cf2aca428e643dcb65a5fe5610632d60d5b9f2e0f6b0523235c210`
+selected **delta 0.07**: 2,557 co-member pairs (60.5% retained), 2,967 grouped
+articles (74.0% retained), 1,246 multiarticle groups and 16,582 singletons.
+Delta 0.075 fails the pair coverage floor (58.2%). All six variants completed
+over the same 19,549 articles and 4,225 complete features; zero missing features,
+pending preparations, new parent reads, models, embeddings or network calls.
+**Candidate precision is unmeasured.** Exact presentation artifact
+`c872d2a2e01da14e15dc1b262bfd7b8560ef02d253b42c1306aac164f2463f6e`
+was shown in chat with all six rows and two attributed algorithmic split examples.
+
+The fine evaluator uses a new method/seed/study and reports overlap against
+both previous evaluation plans, with no exclusions, replacements, reseeding or
+old-answer reuse. It refuses to prepare a new queue unless delta is strictly
+greater than 0.05. Preparation does not extend the completed model approvals.
+All candidate results, including failures to demonstrate 90%, remain visible.
+
+The pure grid helper now accepts explicit grid/method parameters and its wrapper
+uses class defaults. The v2 numerical defaults are preserved, but its manifest
+code hash changed: exact historical v2 preparation resume requires the retained
+`15d18cd` implementation. Existing completed records and protected artifacts are
+unchanged; all eleven shared execution-binding files remain unchanged. Focused
+source-free grid, preparation and reporting tests, Ruff and mypy passed.
+
+The frozen v3 evaluation plan is
+`d7f8d1080e9f1251b0038915a95935943509c8ed8e7299e7c80727a4feff72c2`,
+study `coverage-guarded-fine-candidate-pair-evaluation-20261017-v3`.
+All 68 requests were prepared: 56 of 2,557 within-group pairs, eight of
+191,069,369 between-group pairs and four canaries; zero missing or pending
+packets and zero model calls during preparation. Two evaluation pairs and
+three canaries overlap the union of the previous plans. No pair was replaced,
+excluded or reseeded; old responses do not enter the new assessment.
+Exact preparation presentation record
+`395f4f211b721d49ff67b8ed936d41773633c8f297429216394a2c01bc8be8c3`
+was shown in chat with the exact five cutoffs and complete coverage.
+
+After seeing this concrete scope, the user explicitly selected **Run this
+bounded margin-0.07 check**. It authorizes at most 68 new Codex Luna calls,
+136 article exposures and zero retries under its own immutable policy, with
+the first-failure stop retained. Original memberships remain unchanged.
+
+Code review also identified a metadata error in the historical v2 preparation:
+its question text retained a literal “margin .25” from the earlier template,
+although its candidate ID, membership, actual rule, protocol and presentation
+were bound to delta 0.05. The model wire uses the neutral same-event inclusion
+instructions and lead evidence, not that question text or the cutoff. The
+v2 record is preserved without silent correction; the v3 question explicitly
+uses its actual frozen margin. This limits the precision of the old metadata
+description, not the reported v2 pair counts or executed cutoff values.

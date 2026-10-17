@@ -15,7 +15,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--result", required=True)
-    parser.add_argument("--target-protocol", required=True)
+    target = parser.add_mutually_exclusive_group(required=True)
+    target.add_argument("--target-protocol")
+    target.add_argument("--target-from-plan", action="store_true",
+        help="Use only the exact precision target registered in the frozen v2/v3 candidate-preparation protocol")
     parser.add_argument("--actor", default="codex:fast-pair-result-overview")
     args = parser.parse_args()
     for stream in (sys.stdout, sys.stderr):
@@ -24,8 +27,9 @@ def main() -> int:
     config = Config.load(Path(__file__).resolve().parents[1] / "research.toml")
     engine = EventEvaluationOverviewResearch(args.workspace, config=replace(config, offline=True))
     try:
+        target_input = {"target_from_plan": True} if args.target_from_plan else {"target_protocol": args.target_protocol}
         result = engine.execute("luna_group_validation", {"phase": "pair_target_overview",
-            "result": args.result, "target_protocol": args.target_protocol},
+            "result": args.result, **target_input},
             objective="Present the frozen pair-evaluation results against the preregistered 90% model-reference precision target",
             actor=args.actor)
         print(result["presentation"]["markdown"], flush=True)
