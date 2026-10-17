@@ -92,6 +92,12 @@ Its offline projection
 now covers all 516: 414 derived valid/102 invalid, plus one distinct phase-replay
 recovery, giving 415 combined mechanically usable/101 content-invalid. No paid
 calls, retries, embeddings or memberships occurred in that projection.
+First resumed submission
+`054658898bb52ef2c0a62f8f3ba4dbb007c6dde8efc3a8b0cdf34a742e2de6e1`
+raised confirmed submission to 766 including 16 canaries: 516 returned/250
+pending, another 250 staged/token-deferred, zero ambiguous creation outcomes.
+Charge remained USD0.200230107; pending/staged reservations USD0.719710 at
+displayed precision. The controller remained active at this checkpoint.
 
 ## Empirical scope-reduction experiments — 2026-10-17
 

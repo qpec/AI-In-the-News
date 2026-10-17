@@ -234,3 +234,13 @@ projection. This is neither accuracy nor a count of qualifying unique events.
 Exact protected presentation:
 `64ee89adff4b5bf976a93805c9ad37027f256fc0ebffe1167624ab49ab1e7165`.
 These technical result kinds remain unsupported by `record_presentation`.
+
+The first resumed submission completed as
+`054658898bb52ef2c0a62f8f3ba4dbb007c6dde8efc3a8b0cdf34a742e2de6e1`:
+750 bulk requests confirmed cumulatively, plus the original 16 canaries, giving
+766 total submitted. Of these, 516 had returned and 250 were pending. Another
+250 staged requests were deferred by the local input-token guard; there were
+zero unconfirmed creation outcomes. Conservative cumulative charge remained
+USD0.200230107; combined pending/staged reservations were USD0.719710 at displayed
+precision. The controller remained active. Exact protected presentation:
+`2bb3b5440de3b28fac2610e3ed34c41045c5ac84a51fcaa9d47b3e7ad16355b0`.
