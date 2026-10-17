@@ -56,6 +56,25 @@ Exact final overview:
 Usage was 871,345 input / 27,571 output tokens; USD0.100920 is the uncached
 Standard estimate, not an invoice. All failed and earlier judgments remain.
 
+## Saved-vector event retrieval — 2026-10-17
+
+The user requested quick, cheap retrieval with the existing RAG store. The
+[offline retrieval pilot](docs/EVENT_RAG_RETRIEVAL.md) completed as
+`bab295a2261938382de5035010784ac07e5c19efc50a791d71df917044d1b140` in the original
+`luna-seven-day-validation-20261016-v1` owner: 12 frozen extraction-pilot query
+articles against 13,659 development targets, 163,896 nonself scores, top three
+per query (36 directed results / 33 distinct targets). All 39 distinct query and
+candidate endpoints have saved full text (920 passages); zero missing vectors,
+missing text, pending candidate slots or failed queries. Local ranking took
+0.485 seconds; complete CLI execution including preflight/audit took 53.316
+seconds. No new embeddings, LLM/network calls, relevance tags or group changes.
+Scores are similarities, not event identity probabilities or validated accuracy.
+Presentation `9873fe29d10a5811c01400e67d5876976fdc5dd9edf1c031dc8bcc0c77a33002`
+was shown with all rankings. Use `scripts/event_rag_retrieval.py` from commit
+`45e9777cdaf6efb5872cd85812c955d7151e93ce` in attached `event-rag-retrieval`
+checkout for exact reuse. The original Luna extraction plan below remains
+unexecuted; this retrieval instruction did not create a model approval.
+
 ## Saved-text event extraction pilot — 2026-10-17
 
 The [source-level event extraction implementation](docs/EVENT_EXTRACTION_PILOT.md)
