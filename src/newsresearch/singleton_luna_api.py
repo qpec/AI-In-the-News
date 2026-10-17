@@ -150,7 +150,7 @@ def prepare(engine: Any, session: str, context: Context) -> Json:
               "limits": {"anchors": 100, "requests": 300, "article_exposures": 600, "retries": 0, "workers": 4},
               "canary": "First four actual sample pair requests sequential as structural canaries; included in sample, no extra research calls",
               "transport": "Explicit user-selected OpenAI API using stored key; overrides Luna skill Codex transport for this study only",
-              "authorization": USER_INSTRUCTION, "membership_changes": False,
+              "user_instruction": USER_INSTRUCTION, "membership_changes": False,
               "quality": "Lead-only model screening, not human gold, full-group consistency, true uniqueness, or corpus recall"}
     protocol = engine._version(session, context, {"kind": "protocol", "key": STUDY, "content": method})["id"]
     parent = ledger.get(PARENT_CANDIDATE, "event_group_refinement_result")
