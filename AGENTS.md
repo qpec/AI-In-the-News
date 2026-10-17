@@ -27,6 +27,31 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Shared USD150 full-text Batch authorization — 2026-10-17
+
+The user explicitly authorized the prepared API Batch workflow subject to a
+USD150 maximum. [The cost guard](docs/LUNA_BATCH_BUDGET.md) uses one USD120
+operating limit across both separate corpora, retaining USD30 margin. Use only
+owner `luna-fulltext-batch-budget-20261017-v1`, authorization of that same name,
+and plan `5ca47b44989d35bd364dc8a23b04a2509382085641e646ac3a9f5ca01032335f`.
+Never create a fresh budget, reset reservations, retry articles or resume the
+old stopped extraction/speed queues. Exact provider counts plus capped output
+must be reserved before paid dispatch; unknown costs remain reserved. This
+ledger estimates this run's API usage, not taxes or unrelated account bills.
+
+Prepared scope: 138,453 incident-report and 60,775 cybercrime requests,
+199,228 total, with full text and unchanged v2 prompt/4,096 output allowance.
+The sixteen Batch canaries completed as
+`ad993337142e6a21bf5abf4d7cd1f2043173ed6cb2b641f4921929cd0a09516b`:
+10 raw valid/six invalid, zero technical/unknown/pending, conservative usage
+USD0.006767549. Raw focus: five single/five none. No embeddings or memberships.
+Retrospective deterministic citation-subset projection
+`9e1e024f296dd5d25ab9d9e0d50c47a6e8455c103481b740857dfe49ef813ca1`
+recovers four records without inference: 14 derived valid/two still invalid.
+Original statuses remain unchanged; this is mechanical validity, not accuracy.
+Larger waves must reuse the existing manifests/shared ledger and check live
+state before dispatch; this checkpoint does not assert they are completed.
+
 ## Empirical scope-reduction experiments — 2026-10-17
 
 The user rejected metadata-only recommendations and requested actual rigorous

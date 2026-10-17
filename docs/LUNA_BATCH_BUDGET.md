@@ -87,3 +87,38 @@ budget. Saved credentials are injected into the child process only by
 These modules are separate from the earlier fixture-only multibatch gateway,
 whose production gate remains closed. Keep source text, exports, requests,
 responses, working databases and logs outside both Git repositories.
+
+## Executed canaries and citation-only projection
+
+Both eight-request Batch files were submitted and completed. Reconciliation
+`ad993337142e6a21bf5abf4d7cd1f2043173ed6cb2b641f4921929cd0a09516b`
+retains 16 responses: **10 contract-valid / six invalid / zero technical errors,
+unknowns or pending**. Incident reports had three valid/five invalid; cybercrime
+seven valid/one invalid. Raw valid focus labels were five single/five none.
+All usage reconciled against the provider counts; conservative shared usage
+estimate USD0.006767549, zero remaining reservations. This is not an invoice.
+Original failures remain preserved, without paid retries or group adoption.
+
+Offline error replay
+`f455d52fcbbbf1908c27340b571bae932f4d0506fd0921e8b9b0a19711e79c18`
+found that four failures involved only additional literal references lacking
+the exact supplied surface. A separately registered retrospective projection
+removes only those references when another original reference contains the
+unchanged literal. It changes no values, facts or roles and introduces no
+references. Unknown/excluded references and ungrounded values cannot be repaired
+this way. Original outputs/statuses are never overwritten.
+
+Executed projection
+`9e1e024f296dd5d25ab9d9e0d50c47a6e8455c103481b740857dfe49ef813ca1`
+has **14 mechanically valid derived records / two still invalid**, with zero
+new models or paid retries. This is not 87.5% semantic accuracy, held-out
+validation or accepted event membership. Exact presentation:
+`ebaf1ed12323609d95b5b04087860c53b86af968e1d2a1d9e99b0e593990ff58`.
+
+Later waves use at most 250 requests per corpus, the same immutable queue and
+shared authorization. The local two-million reserved-input-token guard limits
+in-flight exposure conservatively; it is not a verified project rate limit.
+Budget/queue deferrals retain all request identities and available receipts.
+Unknown provider actions and technical failures block further dispatch. The
+mechanical canary gate requires full accounting and at least one valid raw
+output per corpus; it does not validate extraction accuracy.
