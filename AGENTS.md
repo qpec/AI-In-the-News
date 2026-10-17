@@ -171,6 +171,24 @@ queue has been requested in chat and remains required before dispatch. Use the
 exact existing executor, owner and failure stop; do not treat completed earlier
 approval or the 90% target as permission for unlimited new model queues.
 
+The user has now replied **Go**, explicitly authorizing that exact prepared
+68-call/136-exposure/zero-retry candidate queue. Persist its own immutable
+plan-bound policy before dispatch; do not reuse the earlier approval or expand
+the queue. Preserve the prepared plan, study key, original owner and failure
+stop. No automatic membership adoption or independent human validation follows.
+
+That approved candidate queue is now **completed**, result
+`fe5404e07d882fa1e4851d27154ea553239ec2890e8ff415dd535f4588f52d9f`:
+68 valid responses, 136 exposures, zero retries/failures/unknowns/pending;
+139.258 seconds. Excluding four canaries, within-candidate references are
+48 same/7 different/1 uncertain out of 56, plus eight different-event tail
+pairs. The precision point is unavailable; sample diagnostics 85.7%–87.5%,
+conditional 95% interval 72.2%–95.4%. **90% was not demonstrated.** Recall and
+whole-group quality remain unresolved; no memberships changed. Do not rerun,
+refill or expand this completed queue by default. Its compact exact report
+is presentation record
+`5d4dfb36599fffd74f3da6a78db7770cee840a3be19a699ee775c1ea7d537273`.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

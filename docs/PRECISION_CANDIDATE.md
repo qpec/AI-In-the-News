@@ -147,7 +147,7 @@ Exact presentation artifact
 was shown in chat, including the complete coverage table and two linked examples.
 **This selects a coverage tradeoff, not an empirically validated 90% cutoff.**
 
-## Frozen next model queue — awaiting concrete approval
+## Frozen model queue and concrete approval
 
 Plan `158801eb86cefa6bc73add2aa1b20a75c2f9163a5313aa23630176d4ba12edcc`,
 study `coverage-guarded-candidate-pair-evaluation-20261017-v2`, prepared all
@@ -176,3 +176,51 @@ the original owning protected workspace, and a newly persisted plan-bound
 approval. Keep the first-failure latch and original memberships unchanged.
 Do not reuse the completed first-run approval, silently raise limits or launch
 an additional queue merely to reach a desired score.
+
+The user subsequently replied **Go** to this exact proposal. That instruction
+authorizes this 68-call/136-exposure/zero-retry queue through the existing Codex
+Luna account and shared gateway. A new immutable plan-bound policy is persisted
+before dispatch, with expiry `2026-10-18T23:59:59Z`; preserve its instruction,
+identity and expiry on resume. The first-run approval is not reused, original
+memberships remain unchanged and no broader model queue is authorized.
+
+## Executed candidate evaluation — 2026-10-17
+
+Result `fe5404e07d882fa1e4851d27154ea553239ec2890e8ff415dd535f4588f52d9f`
+completed all **68 calls / 136 article exposures / zero retries** in
+**139.258 seconds**. All responses were structurally valid, with zero failed,
+unknown or pending outcomes. The four canaries passed the contract barrier
+(two same-event/two different-event) and are excluded from estimates.
+
+| Evaluation stratum | Same event | Different event | Uncertain | Total |
+| --- | ---: | ---: | ---: | ---: |
+| Within the delta-0.05 candidate | 48 | 7 | 1 | 56 |
+| Random between-group tail | 0 | 8 | 0 | 8 |
+
+**90% was not demonstrated.** The precision point remains unavailable because
+one within-pair reference is uncertain. Sample missingness diagnostics are
+**85.7%–87.5%**: even the optimistic endpoint is below 90%. The complete-case
+48/55 = 87.3% is a diagnostic only. Its conditional 95% sampling interval is
+**72.2%–95.4%**. The earlier baseline and this candidate have different frames
+and independent draws; their scores are not a paired significance comparison.
+
+Full-frame recall is also unavailable. Its conditional interval is approximately
+**0.0027%–100%**. The 100% plug-in recall diagnostic comes from zero same-event
+references among only eight sampled tail pairs; it does not establish perfect
+recall. This run did not sample a separate retrieved pool. Model error and human
+accuracy are outside these intervals, and whole-group purity remains unmeasured.
+The intervals are simultaneous across each run's strata, not across all candidate
+iterations or after choosing a successful run.
+
+Original memberships remain unchanged. Exact original presentation artifact:
+`3128dc57e1340755b511e5dd8774799ef1a0b4163f04280b55f7011cec1e3a1d`.
+The compact audited overview is diagnostic
+`c4e46ba884d79c72c204aa5b3b71d4b062dc7c5e279b5323f0df0ce95c8aacd4`,
+presentation record
+`5d4dfb36599fffd74f3da6a78db7770cee840a3be19a699ee775c1ea7d537273`.
+It was shown in chat with two attributed model examples and exact cited prefixes.
+Reporting made zero additional model calls and used the target criteria frozen
+in the preparation protocol, without creating a retrospective success criterion.
+The explicit earlier target-protocol reporting route remains supported. Two
+focused synthetic integration tests, Ruff and mypy passed for this reporting
+extension; execution code and the frozen model bindings were unchanged.
