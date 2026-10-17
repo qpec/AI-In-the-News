@@ -122,6 +122,14 @@ The monitor pauses after reconciliation and final presentation; it does not
 archive this chat. Future readers must inspect live state rather than treating
 this checkpoint as current completion or a restart instruction.
 
+A temporary Windows idle-system-sleep guard is active in exec session `7061`,
+bound to controller PID `104080` and its exact process start time. It uses
+`SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)`, allows display
+sleep and releases itself after that controller exits. It changes no persistent
+power setting. Supervision should recreate this temporary guard for the verified
+new controller identity after any safe restart; it cannot prevent an explicit
+shutdown, forced sleep, power loss or app termination.
+
 Each controller status and reconciliation report retains its exact protected
 Markdown. `record_presentation` does not support these technical result kinds;
 there is no claim of supported presentation capture or verified chat delivery.
