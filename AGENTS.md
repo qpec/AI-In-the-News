@@ -27,6 +27,44 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Empirical scope-reduction experiments — 2026-10-17
+
+The user rejected metadata-only recommendations and requested actual rigorous
+reduction trials with defensible missingness. The [offline experiments](docs/SCOPE_REDUCTION_EXPERIMENTS.md)
+are completed, with separate manifests and no new models/embeddings or semantic
+exclusions. Do not describe deferred work as saved analysis or missing IDs as
+negative eligibility. The original single-focus plus two-different-publishers
+criterion remains; the stopped extraction lineage is not resumed.
+
+Whole-archive runs in `article-reduction-experiments-20261017-v1` reconciled
+148,025 incident-report and 61,089 cybercrime rows, zero failed/pending archives.
+Current guard/body availability leaves 144,982/60,838 usable and 3,043/251
+unavailable rows. Conditional exact title/body/language focus-input reuse removes
+1,189/3,781 repeats; date-sensitive source-neutral extraction reuse removes only
+18/92. Initial two-publisher provider-hint queues need 16,614/3,052 inputs, with
+128,350/57,694 DEFERRED, not excluded. Provider buckets/source URIs remain hints.
+420 archive-row feasibility-review anchors are frozen (240/180), all unreviewed,
+with no new model approval. These are row-weighted, not event or distinct-report
+samples. One-look hypergeometric planning treats unresolved references as possible
+misses; no omission target passed and unavailable evidence remains separately
+bounded without a missing-at-random assumption.
+
+Protected result notes:
+`f610d63fb26f364ccb96c2d53753ea83a2a7893caab59be932b345bbd4aa7ec8`
+and `271481a27b231ed768e28f3fcf98864e5941ab855fba5d64441d81495893d392`.
+
+Separate retrospective replay in the original Luna owner is note
+`97ee7810cc6f321c9ab27d6c2a0fb9cbfb91febf22489bdc3fcea63ae4e9768c`:
+100 anchors/392 endpoints all partition-verified as incident reports, 299 valid
+old pair references plus one invalid, no new judgments. Of 18 anchors with raw
+cross-publisher same-event model proposals, top-one retains12, top-two15,
+seven-day12, both-provider-IDs-required8, equal-nonmissing-IDs5, and equal-IDs-
+when-both-present15. Removing same-source pairs retains18 with266 rather than
+300 comparisons. These are original-top-k-then-filter/no-refill diagnostics, not
+fresh retrieval, human accuracy or corpus recall. No cybercrime extrapolation.
+All exact reports are protected note artifacts; `record_presentation` does not
+support these new technical note kinds. Sixty-six synthetic checks passed.
+
 ## Single-focus, multiple-publisher scope — 2026-10-17
 
 The user requires reports primarily about **one real-world event**, excluding
