@@ -122,3 +122,31 @@ Budget/queue deferrals retain all request identities and available receipts.
 Unknown provider actions and technical failures block further dispatch. The
 mechanical canary gate requires full accounting and at least one valid raw
 output per corpus; it does not validate extraction accuracy.
+
+## First bulk submission and bounded continuation
+
+The first wave staged 250 requests per corpus. Submission result
+`06319d55da11ab95f6f9684778c6274cf4f94d5e2c69ce4d9930509d56d3bdc7`
+confirmed **250 incident-report requests submitted/pending**, with the 250
+cybercrime requests deferred by the local token guard. There were zero ambiguous
+creation outcomes or execution obstacles. At this checkpoint, cumulative
+recorded usage was USD0.006767549 and outstanding reservations USD0.718869308.
+Reservations include counted requests in the deferred file; these are not an
+invoice or evidence that the deferred file ran. Exact presentation:
+`c0172e2309995fdf3aad175a41e2e2f53b074779465b982b762e6d61c2ef8f3c`.
+
+`scripts/run_luna_budget_workflow.py` continues the same plan in one sequential
+process. It reconciles existing jobs, preserves original and derived results,
+submits retained waiting files, then stages the next frozen queue prefix. A
+token-cap deferral waits for a changed budget state. A budget deferral closes
+admission permanently for this controller run while already submitted jobs are
+reconciled. Technical/unknown outcomes stop the controller without retries.
+
+The initial controller run freezes implementation hashes and a 24-hour local
+scheduling deadline, both preserved on restart. The deadline is checked between
+phases; it does not cancel provider jobs or release their reservations. Launch
+only one controller against this owner. The saved-key wrapper accepts
+`-Phase workflow -AllowPaidExecution` with the existing plan ID. Do not create a
+new plan or budget to continue after a stop. Thirteen synthetic controller tests
+passed, covering scheduling, restart, deferrals and unknown outcomes; these do
+not establish extraction quality.

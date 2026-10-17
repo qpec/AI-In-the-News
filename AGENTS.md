@@ -52,6 +52,18 @@ Original statuses remain unchanged; this is mechanical validity, not accuracy.
 Larger waves must reuse the existing manifests/shared ledger and check live
 state before dispatch; this checkpoint does not assert they are completed.
 
+The first bulk result
+`06319d55da11ab95f6f9684778c6274cf4f94d5e2c69ce4d9930509d56d3bdc7`
+confirmed 250 incident-report requests submitted/pending and 250 cybercrime
+requests deferred by the local token guard, zero ambiguous outcomes. Shared
+charge estimate USD0.006767549 and reservations USD0.718869308 at that checkpoint.
+The single-process `scripts/run_luna_budget_workflow.py` continues only this plan
+and ledger, preserving its initial 24-hour scheduling deadline across restart.
+Budget deferral closes admission; existing jobs can still be reconciled.
+Technical/unknown outcomes stop without retries. The deadline does not cancel
+remote jobs. Check the current owner before continuing; never start a second
+controller or infer completion from this historical checkpoint.
+
 ## Empirical scope-reduction experiments — 2026-10-17
 
 The user rejected metadata-only recommendations and requested actual rigorous

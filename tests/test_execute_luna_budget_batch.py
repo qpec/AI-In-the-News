@@ -63,6 +63,9 @@ class FixtureResearch(runner.ExecutionResearch):
     def _status(self, session, context, data):
         if data["phase"] != "fixture":
             return super()._status(session, context, data)
+        import luna_event_contract_v2 as contract
+        packet, _ = contract.fictional_example()
+        packet_ref = runner.save(self, session, packet, "Synthetic full-text packet")
         tasks = []
         for corpus in ("incident-reports", "cybercrime"):
             for index in range(data.get("per_corpus", 8)):
@@ -75,11 +78,13 @@ class FixtureResearch(runner.ExecutionResearch):
                 request = {"custom_id": custom, "method": "POST", "url": "/v1/responses", "body": body}
                 request_ref = runner.save(self, session, request, "Synthetic Batch row")
                 tasks.append({"custom_id": custom, "corpus_id": corpus, "request_body_ref": body_ref,
-                              "request_ref": request_ref, "descriptor": {"synthetic": True}})
+                              "request_ref": request_ref, "packet_ref": packet_ref,
+                              "descriptor": {"synthetic": True}})
         price = PricePolicy("gpt-6-luna", 100_000_000, 125_000_000, 500_000_000,
                             (1, 2), (11, 10), (2, 1), (3, 2), 272_000,
                             "https://example.invalid/synthetic-price", "2026-10-17T00:00:00Z")
-        plan = {"authorization_id": runner.STUDY, "price_policy": asdict(price), "canary_tasks": tasks}
+        plan = {"authorization_id": runner.STUDY, "price_policy": asdict(price), "canary_tasks": tasks,
+                "versions": {}, "pending_requests": len(tasks), "contract_sha256": contract.contract_digest()}
         plan_id = self.ledger.record(session, runner.PLAN_KIND, "synthetic-plan", plan)
         return {"plan": plan_id}
 
