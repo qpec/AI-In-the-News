@@ -10,6 +10,8 @@ The [event-pair cutoff study](docs/EVENT_PAIR_CUTOFF_STUDY.md) prepares a frozen
 
 The subsequent [corrected event-vector comparison](docs/EVENT_CLUSTERING_COMPARISON.md) reuses the exact saved pilot, checks complete memberships and batch/order behavior, and compares compact geometric groups. Independent same-event validation remains outstanding.
 
+The [repaired event-group evaluator](docs/FAST_EVENT_EVALUATION.md) uses short grounded pair judgments, a fail-fast canary, probability sampling with a random retrieval tail, and separate blinded human references. It preserves the failed earlier run and reports incomplete precision/recall honestly; software checks alone do not establish grouping accuracy.
+
 ## Run the working demonstration
 
 Requires Python 3.12 or 3.13 and `uv`. Dependencies are locked in `uv.lock`.

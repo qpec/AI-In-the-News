@@ -33,6 +33,16 @@ An event need not be an incident or involve harm. Ambiguous/multiple focal event
 or inadequate leads require uncertainty. This is a model screen, not human gold.
 
 For statistical grouping evaluation, read [the sampling and execution guide](references/group-validation.md).
+For new AI In the News precision/recall work, prefer the repaired pair evaluator
+in `docs/FAST_EVENT_EVALUATION.md` and `scripts/fast_event_evaluation.py`. It uses
+two bounded leads, short source span IDs, four sequential contract canaries and
+a probability sample including the retrieval tail. The first invalid/unknown
+response latches a stop; do not spend a full queue on a broken output contract.
+The original 399-call study is exhausted and must not be resumed or refilled.
+Its failures remain preserved. New model runs need a new plan-bound approval;
+offline structural replay is not execution of the new prompt. Report pair
+precision separately from whole-group purity and candidate-pool recall separately
+from full-frame recall. A small tail sample may leave recall uninformative.
 Sample groups with logged inclusion probabilities; report strict whole-group
 precision separately from missed-link checks. Existing-group inspection cannot
 establish recall. Examine independent cross-group candidates and retain the
