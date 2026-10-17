@@ -72,8 +72,9 @@ Scores are similarities, not event identity probabilities or validated accuracy.
 Presentation `9873fe29d10a5811c01400e67d5876976fdc5dd9edf1c031dc8bcc0c77a33002`
 was shown with all rankings. Use `scripts/event_rag_retrieval.py` from commit
 `45e9777cdaf6efb5872cd85812c955d7151e93ce` in attached `event-rag-retrieval`
-checkout for exact reuse. The original Luna extraction plan below remains
-unexecuted; this retrieval instruction did not create a model approval.
+checkout for exact reuse. At that retrieval checkpoint the original extraction
+plan was unexecuted; retrieval itself did not create a model approval. The
+subsequent explicitly authorized extraction attempt is recorded below.
 
 ## Saved-text event extraction pilot — 2026-10-17
 
@@ -88,7 +89,8 @@ without re-embedding or adopting memberships. Plan
 development sources; 5,888 sealed-body-validation sources and two unresolved
 prior-attempt sources were excluded. No label-based selection or new vectors.
 
-Zero extraction/model calls and zero approvals: all 12 articles remain pending.
+At the preparation checkpoint there were zero extraction/model calls and zero
+approvals: all 12 articles were pending.
 Proposed scope is 12 Codex Luna calls/12 article exposures/zero retries; first two
 sequential contract canaries, then sequential execution with a durable first
 invalid/incomplete/unknown stop. It needs fresh exact-plan authorization; previous
@@ -99,6 +101,31 @@ Preserve exact resume and original ownership; no automatic group adoption.
 Presentation `eec98bd4b16b9cb4bb6e1758b440a448649cd3a9ab175e50ce3a7905bd0a23fe`
 and a protected blank review template are retained. 84 synthetic checks passed;
 actual extraction quality, human review and event coreference remain unmeasured.
+
+The user subsequently explicitly authorized running this prepared 12-article
+pilot. Its plan-bound Codex execution is **partial and stopped**, result
+`b664258ff1db9c8ccc22664ea9eef3adf50fb7fb09e32b75810c80dc6d628843`:
+one attempted article / one invalid response / zero valid / 11 pending,
+zero retries or new embeddings, and no membership changes. The first canary
+latched the frozen first-failure stop; do not resume, retry, refill or clear it
+by default. No API-key substitute was used. The configured model alias was
+`gpt-6-luna`; observed model identity was unavailable.
+
+Audited offline replay found `event_extraction_literal_not_grounded`: the JSON
+schema and exact-quote checks passed, but 15 field values did not occur exactly
+in their own supplied supporting quotes. Fifteen raw event proposals and their
+entities are retained solely as rejected, unvalidated diagnostic previews;
+**zero usable/provisional event mentions**, no accepted events or human review.
+Pending/invalid is not a negative event finding. The full diagnostic presentation
+is `6385dec138476b21cc7bd9c1c5d20dd7701af1a25107af846eba68f779171617`.
+Report-only tooling `scripts/present_event_extraction.py` uses the same owner,
+exact frozen contract, offline `Research.execute()` and protected presentations;
+it performs no new model calls and cannot change extraction statuses.
+Concise table presentation
+`a5d99e9b760f24c45f4a8c8ab401161d43f3becf10c9310d2630888a1e6ed735`
+preserves every rejected raw summary and participant field. Nineteen synthetic
+reporting tests passed; they do not establish extraction quality.
+See the [execution checkpoint](docs/EVENT_EXTRACTION_PILOT.md#authorized-execution-and-rejected-output-diagnosis--2026-10-17).
 
 ## Random singleton Luna API sample — 2026-10-17
 

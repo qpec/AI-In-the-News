@@ -213,3 +213,90 @@ stop. **No model approval was registered and no model was dispatched.** Fresh
 approval must name this plan and scope; earlier grouping approvals do not apply.
 Preparing a review template does not establish an authenticated reviewer,
 independent human gold or a completed review-import/acceptance workflow.
+
+### Authorized execution and rejected-output diagnosis — 2026-10-17
+
+The user subsequently instructed: **Now run the prepared 12-article event
+extraction pilot without re-embedding and show me the extracted events and
+entities.** This exact instruction and the 12-request / 12-exposure / zero-retry
+scope were retained as immutable plan-bound approval before gateway dispatch.
+Execution used the frozen checkout and original owner above, with no API-key
+fallback or new retrieval/embedding work.
+
+Result `b664258ff1db9c8ccc22664ea9eef3adf50fb7fb09e32b75810c80dc6d628843`
+is **partial**, with the first-failure stop durably latched:
+
+| Execution scope | Actual result |
+| --- | ---: |
+| Authorized / attempted article requests | 12 / 1 |
+| Valid / invalid / incomplete / unknown responses | 0 / 1 / 0 / 0 |
+| Pending articles / automatic retries | 11 / 0 |
+| New embeddings / membership changes | 0 / 0 |
+| Usable provisional event mentions / completed human reviews | 0 / 0 |
+| Raw rejected proposals in the retained invalid response | 15 |
+
+The first canary failed with safe aggregate code
+`event_extraction_output_invalid`. Audited deterministic replay of its retained
+response against the frozen request and contract identified
+`event_extraction_literal_not_grounded`: schema validation and exact source-quote
+checks passed, but 15 literal fields did not occur in the supporting quotes
+attached to those fields. The rejected output includes expanded entity names
+where the supplied quote contains only a surname or pronoun, discontinuous
+trigger paraphrases, and an identifier absent from its own quote. This describes
+mechanical contract violations; it does not adjudicate semantic correctness.
+
+All 15 raw event summaries and participant entities remain available in the
+protected diagnostic report, explicitly rejected and outside provisional event
+counts. No output was repaired, accepted, grouped or relabeled; missing/invalid
+processing is not evidence that an article contains no event. The other 11
+articles were not dispatched. Do not clear the stop or silently use the remaining
+slots: an amended method and separately approved concrete continuation are needed
+before additional inference.
+
+Configured model alias: `gpt-6-luna`, through audited Codex CLI. The response did
+not expose an observed model ID or provider request ID. Observed usage was 22,237
+input tokens and 9,866 output tokens; no billing estimate is inferred. Retained
+stdout/stderr were 33,481/158 bytes, within the 65,536-byte acceptance cap.
+
+The original execution overview is presentation
+`e02ff1ce067c7d48dda8f29fe4865ec6ea83c3503a8a8acce2fd1ef4ff968947`.
+Corrected full diagnostic presentation:
+`6385dec138476b21cc7bd9c1c5d20dd7701af1a25107af846eba68f779171617`;
+compact diagnostic presentation:
+`ae31aea723f517f67d4705206872bc6440530f02e839a420a63198f942dad6fe`;
+diagnostic artifact:
+`aee769fec649a123b968e9b354d76e462189dcda18605e3bb53391847b0e4c58`.
+These preserve the attempted article's source link, every literal mismatch and
+supporting quote/passage ID, all rejected proposals/entities, and every remaining
+article's pending status. Bodies, outputs and reports remain outside Git.
+
+An earlier report's source file changed during preflight after its code was
+loaded. Its later file hash therefore did not identify the loaded implementation.
+Append-only note
+`7957b93f6fcfa8973c8278b3b9652d7cb8b2f541f8e7a1625cd1a9b6dd027d60`
+supersedes those two earlier presentations without changing the extraction
+result or deleting history. Reporting now captures its source hash at module
+load, before preflight. UI visibility/reading and a verified delivery time remain
+unobserved.
+
+The additive reporter registers its profile before inspection, verifies exact
+plan/result/request/assessment bindings, replays the original contract, records
+inspected passages and preserves presentations through `Research.execute()`.
+It enforces offline configuration and cannot call a model, retry an extraction,
+change a status or accept an event. Run it with the frozen extraction runtime on
+the module path (the command below is issued from the frozen checkout):
+
+```powershell
+uv run --offline --frozen python C:/Users/ynhan/Desktop/Repositories/AI-In-the-News/scripts/present_event_extraction.py --workspace "$env:LOCALAPPDATA/AI-In-the-News/luna-seven-day-validation-20261016-v1" --result b664258ff1db9c8ccc22664ea9eef3adf50fb7fb09e32b75810c80dc6d628843
+```
+
+The subsequent concise chat presentation
+`a5d99e9b760f24c45f4a8c8ab401161d43f3becf10c9310d2630888a1e6ed735`
+retains all 15 raw summaries and participant names/types/roles verbatim in a
+rejected-output table, the attempted source link, coverage and one diagnostic
+example. The full/compact contents remain identical to the corrected reports
+above; the new records preserve their own display profile and session.
+This is an offline presentation step, with no additional inference or accepted
+results. Nineteen focused synthetic reporting tests passed, plus Ruff and mypy.
+These test report fidelity, binding checks, failure preservation and append-only
+corrections; they do not validate extraction accuracy.
