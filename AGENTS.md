@@ -27,6 +27,36 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Current Batch recovery checkpoint — 2026-10-18
+
+Fast controller `58044` stopped with result
+`4b4892cc01214dadca9ba3058a00b750d98faa7e2dca9e72b9f7b003e1bc83f3`.
+All **6,516 submitted requests are now reconciled**, zero pending/reserved;
+conservative charge **USD2.522781411**. Offline diagnostic
+`63be5eefc104b8135722e492d1e81e5f4af7bb1c57b89e5181fb044409e3e01c`
+proves the two new errors were HTTP200 Luna `incomplete` responses with
+`max_output_tokens`, exactly 4096 output tokens and complete settled usage.
+Their exact assessment IDs are
+`f8923a8d2d5248ba19b71f327f6c3d09e0c5b530bb1f469ec7c2aef3b89d6828` and
+`8ad4c63809538ba36eac24292aba3690aa05b93d4caad3145b3ec05342c9c9a4`.
+Both remain failed, with no usable output or retries. The older third error
+retains its separate original phase recovery. Parser counts are 3953 valid /
+2560 invalid / 3 error / 0 unknown; 4374 combined mechanically usable records
+include existing derivations, and 4500 still lack literal-subset projection.
+These are provisional mechanical counts, not accuracy or accepted dossiers.
+
+The diagnostic process `43653` and its sleep guard `42898` have exited.
+New `luna_budget_failure_ack.py` and `run_luna_budget_recovery.py` implement a
+finite, exact-proof continuation while leaving the old fast implementation,
+stop and request identities intact. Twenty-six focused checks, eleven existing
+fast integration checks, Ruff, mypy and independent code review passed.
+The combined entry point registers/verifies the exact two-failure acknowledgment
+before admission inside one audited session; it does not bypass full preflight.
+Only untouched requests may continue. All future technical/unknown errors still
+stop; the same owner, plan, shared USD120/USD150 cap and original deadline apply.
+See [the recovery checkpoint](docs/LUNA_BATCH_THROUGHPUT.md) and inspect live
+state before launching anything. Preparation is not proof of a successful restart.
+
 ## Parallel Batch controller and supervision — 2026-10-18
 
 The user's "all processed asap" / "Parallel?" instruction is implemented in
@@ -790,3 +820,43 @@ occurred at 600.076–600.098 seconds; these timings do not prove their cause or
 remote cancellation. Zero new calls, repairs or changed statuses. Exact
 Markdown `ef533fee107d8bfcc526588a9293c5fea4db77562eb4dd36b765824621d259a9`;
 JSON `c84984bdb91fcfd8d48888e2becce0c1e66c53e63fda040b6913c257d335ba54`.
+
+## Luna API Batch stopped; submitted work reconciled — 2026-10-18
+
+The [fast Batch launch](docs/LUNA_BATCH_THROUGHPUT.md) is historical; controller
+session `58044` exited with `technical_stop`, result
+`4b4892cc01214dadca9ba3058a00b750d98faa7e2dca9e72b9f7b003e1bc83f3`,
+presentation `5ea37f1dd5fd5dc5c5f280d87a23a6bbb906614e03575e1ca1ff446cca6016ec`.
+Its old temporary sleep guard `7061` has released. Do not treat the launch
+checkpoint as evidence that extraction is still running.
+
+Subsequent audited reconciliation
+`4de8109544101e83154b1312db55f84006316542568d08cdd7e31898c2be9086`
+accounted for **6,516 submitted and returned**, **zero pending**, **zero reserved**,
+and **USD 2.522781** conservative usage cost at displayed precision, not an
+invoice. Current parser totals are **3,953 valid / 2,560 invalid / 3 technical
+errors / 0 unknown**. Original raw totals remain **3,947 valid / 2,554 invalid /
+15 errors**, with **12 phase derivations** preserved separately. Focus among
+current-parser-valid outputs is **1,550 single / 396 multiple / 1,889 none /
+118 uncertain**. There are **192,712 unsubmitted**, including **500 staged**.
+These are provisional article outputs, not accepted events or dossiers;
+invalid, staged and unprocessed are not negative eligibility findings.
+Reconciliation made no new inference calls, retries, embeddings or memberships.
+
+Exact reconciliation presentation:
+`295d931847b5a1fe015cf02795f0be00ab6f1294a76151d9f3abd8af394a76ce`;
+budget state:
+`3f185f3a6a2e2a7af6912be305697d82f2e63d9d6db2c4fb6e0f73dbb1ae72d8`.
+The exact causes of the **two new technical errors** beyond the preserved
+historical phase error are **not yet known**. No restart, stop reset, implicit
+retry or new dispatch before exact audited diagnosis and an explicit, tested
+append-only amendment. Keep the same USD 120 operating cap / USD 150 ceiling
+and original admission deadline **2026-10-18 15:44:53 UTC**; later reconciliation
+of already submitted work is permitted.
+
+At this checkpoint, sole-owner offline `ProgressResearch` diagnosis is still
+running in exec `43653`, Python PID `73620`, after sequential reconciliation;
+temporary sleep guard `42898` is bound to it. **Do not launch a competing owner
+writer.** Its report is not yet available. Exact protected Markdown is retained
+for the completed steps; these technical kinds do not support
+`record_presentation`.

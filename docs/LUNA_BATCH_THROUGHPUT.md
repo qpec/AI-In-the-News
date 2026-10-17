@@ -1,5 +1,38 @@
 # Luna Batch throughput amendment
 
+## Current recovery checkpoint — 2026-10-18
+
+The original fast controller has stopped; the historical launch below is not
+evidence of current execution. All 6,516 submitted requests are now reconciled.
+Offline diagnosis `63be5eefc104b8135722e492d1e81e5f4af7bb1c57b89e5181fb044409e3e01c`
+(presentation `52813b66ca55d081c354a8c89be7dd014807230add5fa165000123f501485cf1`)
+confirms the two new incident-report failures were HTTP 200 Luna responses with
+status `incomplete`, reason `max_output_tokens`, and exactly 4,096 output tokens.
+Both have complete usage and settled charges; neither has usable output.
+The historical third error remains separately recovered by its original phase
+proof. Cost is USD2.522781411, reserved USD0, and pending requests zero.
+
+The exact two failed assessment IDs are
+`f8923a8d2d5248ba19b71f327f6c3d09e0c5b530bb1f469ec7c2aef3b89d6828` and
+`8ad4c63809538ba36eac24292aba3690aa05b93d4caad3145b3ec05342c9c9a4`.
+The completed diagnosis process `43653` and its sleep guard `42898` have exited.
+Of the returned records, 4,374 are mechanically usable including existing
+derivations; 4,500 still lack literal-subset projection. This is not accuracy,
+article eligibility, two-publisher qualification or accepted event grouping.
+
+The new finite acknowledgment and recovery modules leave frozen fast-v1 intact.
+They retain both failed attempts, all charges and the original stop. A separate
+run may process only untouched requests after recomputing exact raw-row,
+manifest, model, usage, billing and terminal-failure proofs. Acknowledgment
+does not repair or accept those outputs, and no future error is exempted.
+One initial full `Research.execute()` preflight covers both durable proof
+registration and subsequent recovery admission. The shared budget, 4,096 cap,
+corpus separation and original deadline remain unchanged. Twenty-six focused
+recovery checks, eleven existing fast integration checks, Ruff and mypy passed;
+independent code review found no blockers. These are software checks, not a
+new research accuracy study. This paragraph records preparation, not a live
+restart; append the verified recovery launch below.
+
 The user instructed, "I want all processed asap, do as much at once as possible",
 then asked "Parallel?". This authorizes faster scheduling of the existing full-text
 queue, within the original shared USD150 ceiling and USD120 operating limit.
@@ -133,3 +166,52 @@ shutdown, forced sleep, power loss or app termination.
 Each controller status and reconciliation report retains its exact protected
 Markdown. `record_presentation` does not support these technical result kinds;
 there is no claim of supported presentation capture or verified chat delivery.
+
+### Stopped fast run and completed reconciliation — 2026-10-18
+
+The successful launch above is historical. Fast controller session `58044`
+subsequently exited with `technical_stop`, retaining terminal result
+`4b4892cc01214dadca9ba3058a00b750d98faa7e2dca9e72b9f7b003e1bc83f3`
+and exact presentation
+`5ea37f1dd5fd5dc5c5f280d87a23a6bbb906614e03575e1ca1ff446cca6016ec`.
+The controller is stopped; its former temporary sleep guard `7061` has released.
+
+Audited reconciliation then accounted for all **6,516 submitted requests**:
+all returned, **zero pending and zero reserved cost**. The conservative recorded
+usage estimate is **USD 2.522781 at displayed precision**, not an invoice.
+The immutable reconciliation result is
+`4de8109544101e83154b1312db55f84006316542568d08cdd7e31898c2be9086`,
+with exact presentation
+`295d931847b5a1fe015cf02795f0be00ab6f1294a76151d9f3abd8af394a76ce`
+and budget state
+`3f185f3a6a2e2a7af6912be305697d82f2e63d9d6db2c4fb6e0f73dbb1ae72d8`.
+
+| Retained interpretation | Valid | Invalid | Technical error | Unknown |
+| --- | ---: | ---: | ---: | ---: |
+| Original raw envelope parser | 3,947 | 2,554 | 15 | 0 |
+| Current parser, preserving 12 phase derivations | 3,953 | 2,560 | 3 | 0 |
+
+Among the **3,953 current-parser-valid** outputs, focus is single in **1,550**,
+multiple in **396**, none in **1,889**, and uncertain in **118**. These counts
+describe provisional article outputs, not accepted events, dossiers or final
+scope eligibility. There are **192,712 unsubmitted articles**, including
+**500 already staged**. Staged, invalid and unprocessed articles are not negative
+eligibility findings. Reconciliation made no new inference calls or retries;
+there were no new embeddings or membership changes.
+
+The three current technical errors include the preserved historical phase error
+and **two new errors whose exact causes are not yet known**. The retained-output
+diagnostic must establish their causes before any continuation decision. Do not
+reset or clear the stop, silently rerun requests, or restart without the exact
+audited diagnosis and an explicit, tested append-only amendment. Preserve the
+same shared USD 120 operating cap, USD 150 ceiling and original admission
+deadline, **2026-10-18 15:44:53 UTC (17:44:53 Europe/Amsterdam)**. Previously
+submitted work may still be reconciled after that deadline.
+
+At this checkpoint the sole owner process is the offline `ProgressResearch`
+diagnostic in exec session `43653`, Python PID `73620`, following the completed
+sequential reconciliation. Temporary sleep guard `42898` is bound to that
+process. **Do not launch a competing owner writer.** The diagnostic has not yet
+returned its report; this checkpoint does not claim its completion. These
+technical result kinds retain protected Markdown but remain unsupported by
+`record_presentation`.
