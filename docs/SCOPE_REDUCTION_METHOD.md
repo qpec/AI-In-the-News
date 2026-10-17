@@ -11,6 +11,112 @@ accept memberships, delete sources, dispatch models or establish a validated
 recall rate. The executed metadata audit recorded below measures
 available stored fields and provider hints, not semantic eligibility.
 
+## Operational definition and decision diagram
+
+Define the method as **staged event selection with a recall audit**. Its objective
+is to minimize expensive full-article extraction while keeping the loss of
+qualifying events within an explicitly chosen, independently evaluated limit.
+The counting unit is an event dossier. Article processing volume, report omission,
+event retention and the completeness of extracted information are separate
+outcomes. The [completed reduction experiments](SCOPE_REDUCTION_EXPERIMENTS.md)
+support the design choices below; the complete semantic pipeline is not yet
+validated or deployed.
+
+An event qualifies when at least two retained reports:
+
+1. belong to the same bound corpus;
+2. each primarily describe one focal occurrence, with background context allowed;
+3. are supported as describing that same occurrence, rather than a related topic;
+4. come from two known, different publishers under a versioned identity mapping.
+
+Additional reports must be checked for dossier consistency. A-B and B-C matches
+do not automatically justify an A-B-C merge. Two publishers carrying syndicated
+text satisfy the publisher-count component, but the shared reporting origin
+remains flagged; independent authorship/ownership is not silently required.
+
+Run the following pipeline independently for incident reports and cybercrime:
+
+```mermaid
+flowchart TD
+    A["One corpus and frozen source versions"] --> B{"Usable retained text?"}
+    B -->|No| U["Unavailable evidence<br/>Keep in coverage and sensitivity bounds"]
+    B -->|Yes| C["Reuse identical task inputs<br/>Preserve every publisher appearance"]
+    C --> D["Retrieve candidate partners from other publishers<br/>Saved vectors + lexical matches + provider hints"]
+    D -->|"Candidate partners"| E{"Full-text eligibility checks"}
+    D -->|"No partner found"| H["Unresolved and deferred<br/>Not a proven singleton"]
+    E -->|"Single focus + same event + two known publishers"| F["Check dossier consistency"]
+    E -->|"Supported roundup or non-event"| X["Proposed scope exclusion<br/>Keep reason and source"]
+    E -->|"No supported partner, unknown publisher or uncertainty"| H
+    H -.->|"Broaden search within the registered budget"| D
+    F --> G["Rich analysis starts with two qualifying reports<br/>Add reports for gaps, new facts or conflicts"]
+    G -.-> V["Independent held-out audit<br/>Retained, excluded and unresolved cases"]
+    X -.-> V
+    H -.-> V
+    U -.->|"Separate missing-evidence sensitivity"| V
+    V -.->|"Failed tolerance: revise and validate afresh"| D
+```
+
+Solid arrows describe processing; dashed arrows describe expansion or evaluation.
+Passing an audit permits the frozen selection policy to be used within its
+evaluated scope; it does not turn missing outcomes into negatives or automatically
+accept every dossier. Review acceptance still requires the registered evidence
+and reviewer or automatic-policy conditions.
+
+| Stage | Work avoided or postponed | Tradeoff and required control |
+| --- | --- | --- |
+| Separate corpora and preserve provenance | Avoid irrelevant cross-corpus comparisons | Some reporting may exist in the other corpus; conclusions concern the selected partition only. Never combine silently. |
+| Exact task-input reuse | Avoid repeated screening of identical title/body/language | Measured potential focus-input reductions are about 0.8% for incident reports and 6.2% for cybercrime. A focus label cannot substitute for date-sensitive extraction, publisher verification or event membership. Bind the future model, prompt, schema and corpus cache versions. |
+| Hybrid different-publisher retrieval | Avoid all-pairs comparison and same-publisher eligibility checks | Similarity/provider IDs generate candidates, not truth. Filter known same-publisher candidates before ranking, refill the shortlist, and retain lexical/metadata routes for missing vectors. Missing IDs and a long publication gap are not exclusion rules. |
+| Compact full-text focus and partner screen | Avoid rich extraction of roundups, non-events and unsupported candidate pairs | The short output is cheap, but complete retained input is still needed. Preserve exact supporting spans and uncertainty. One primary event may include several background events. False-negative screening requires independent evaluation. |
+| Two qualifying reports first | Postpone rich reading of additional reports | This meets a minimum publisher gate, not full evidence completeness. Preserve all links; expand for gaps, corrections, new facts, contradictions and identity ambiguity. Audit missed information separately from missed events. |
+| Reversible set-aside queues | Keep uncertain or low-priority material out of the current rich-analysis queue | Deferral is not proven total savings. Retain reasons, versions, missingness and revisit triggers. Excluded material can remain discovery evidence without counting as an eligible report. |
+| Independent omission and dossier audit | Makes controlled scope reduction assessable | Review itself costs work. Sample retained and every set-aside stratum with recorded probabilities; unresolved references remain possible errors. Report absolute loss bounds as well as percentages, and evaluate event retention separately. |
+
+### Outcomes and missingness
+
+Maintain four operational outcomes: **eligible event dossier**, **supported scope
+exclusion**, **unmatched/uncertain**, and **evidence unavailable**. Until the
+semantic screen and its acceptance policy pass evaluation, exclusion labels are
+proposals. The user-selected two-publisher criterion does not make a failed
+partner search sufficient proof of ineligibility.
+
+Missing categories, concepts or vectors require another candidate route; they
+are missing predictors. Missing publisher identity prevents a positive
+two-publisher decision until resolved. Missing bodies or retention exclusions
+prevent substantive assessment and remain in coverage/sensitivity totals.
+Failed model processing is a missing outcome, not a non-event label.
+
+The primary evaluated population must be named: usable saved-text evidence in
+one corpus. Results cannot be generalized automatically to unavailable evidence
+or all real-world events. For the full archive, bound unavailable eligibility
+without assuming random missingness. One missing report may be the only second
+publisher, so an article-missingness percentage cannot bound event loss.
+
+### Parameters and acceptance
+
+Before evaluation, freeze the source frame, publisher mapping, focus rubric,
+event boundary, candidate routes and expansion budgets, cache contracts,
+additional-reading triggers, evaluation frame and acceptable loss tolerances.
+There is currently no validated universal similarity cutoff, date window or
+top-k choice for this task. A seven-day limit, provider-ID requirements and
+original-top-one truncation lost prior cross-publisher model proposals in the
+completed diagnostic and are not adopted as safe knockouts.
+
+Assess separately: focus-screen errors, recovery of a different-publisher
+partner, event retention with at least two publishers, dossier contamination/
+fragmentation, and information lost by reading only two reports initially.
+Use an independently reviewed event reference frame or defensible multiplicity
+accounting for event-level claims. Report- or archive-row-weighted audit results
+are not event recall.
+
+Choose a loss tolerance explicitly; 1%, 2% and 5% are comparison scenarios, not
+adopted or achieved targets. Use a predeclared final evaluation or a properly
+designed sequential alternative. Revise failed methods using development data
+and validate afresh; do not repeatedly tune on the same held-out answers.
+The prepared 420 archive-row anchors are unreviewed feasibility draws, not a
+passed audit of this complete policy. This definition and diagram introduce no
+new corpus processing, model run, membership change or execution permission.
+
 ## What single-focus means
 
 One primary occurrence can have several participants, dates, claims, consequences
