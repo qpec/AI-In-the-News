@@ -33,6 +33,11 @@ Represent **article → event mention → event dossier**. One article may descr
 
 ### Proposed workflow — not an executed research result
 
+The later [excerpt-first mapping design and picture](EVENT_MAPPING_METHOD_V1.md)
+adds read-once event extraction, provisional unmatched states, progressive
+evidence reading and staged group updates. It is a design proposal; it does not
+adopt new memberships or establish a quality target.
+
 1. **Find candidates with saved embeddings.** Compare stored article passage vectors through audited vector search; no new question embedding is needed. The existing implementation returns up to 20 article candidates after passage search and reranking. This is a starting workload setting, not a validated semantic boundary. Provider `eventUri`, repeated reporting and entity/date matches can supply separate candidate signals; none proves identity. Keep no-match and text-unavailable articles explicit.
 2. **Describe event mentions with evidence.** For plausible candidates, identify actors, specific action/occurrence, affected object, event date/range and location when available, with source passages. Do not rely solely on a generic AI-related matching paragraph. Missing names or dates are not automatic exclusions. Model extraction would require a separately implemented and authorized gateway workflow; human review can establish an initial reference set.
 3. **Decide identity:** `same_event`, `different_event` or `uncertain`. Shared company/topic is insufficient; different publication dates do not establish different events. Missing evidence remains uncertain. No universal cosine cutoff or LLM-estimated query-relevance cutoff determines dossier membership.

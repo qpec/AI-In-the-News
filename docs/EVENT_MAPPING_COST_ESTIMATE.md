@@ -1,5 +1,9 @@
 # Excerpt-based event mapping: API budget estimate
 
+See the subsequent [improved design and diagram](EVENT_MAPPING_METHOD_V1.md).
+Its additional evidence expansion, batch reconciliation and group checks have
+not been priced; the estimates below retain their original two-stage assumptions.
+
 Estimate date: **2026-10-17**. This is engineering planning using already
 documented coverage, current official prices and explicit token assumptions.
 It is not a new corpus measurement, an execution approval or an accuracy result.
