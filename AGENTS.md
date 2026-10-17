@@ -27,6 +27,20 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Provider metadata candidate — 2026-10-17
+
+The offline `provider-anchored-event-split-v1` result
+`595ab46be3ea33f3e218082b789ac826a39308a5e3208ad6fcceb2d2f4579e5d`
+splits only inside the original guarded seven-day groups by exact nonblank
+stored `eventUri`, without evaluation labels. Of 19,549 articles, 9,420 have
+identifiers and 10,129 are null. It produces 771 multiarticle groups containing
+1,931 articles, 17,618 singletons and 1,954 co-member pairs: 46.2% pair retention
+and 48.1% grouped-article retention, failing the existing 60%/70% coverage guard.
+Precision is unavailable; provider agreement is not gold. No model queue,
+approval, membership adoption, new embeddings or paid/network calls occurred.
+See [the method and executed result](docs/PRECISION_CANDIDATE.md#provider-metadata-candidate--2026-10-17).
+Do not launch a model evaluation of this candidate by default.
+
 ## Working grouping decision — 2026-10-16
 
 - The user withdrew the thirty-day compromise before any operating choice was

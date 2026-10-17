@@ -321,3 +321,38 @@ Reporting made zero new model calls. An audited metadata check also appended
 note `cdd4ffb6ef754916c4b5748f116138a867e7b6dea1ee0bcd5eccc0133ade5271`
 about the historical v2 question typo, preserving its original text and actual
 candidate rule without rewriting any record.
+
+## Provider metadata candidate — 2026-10-17
+
+The registered offline method `provider-anchored-event-split-v1` splits only
+inside the original guarded seven-day groups, using exact nonblank stored
+`eventUri` strings. It preserves the original five numerical gates and does not
+normalize identifiers or join different original groups. Unknown identifiers
+remain uncertain singletons, never different-event reference labels. The exact
+SQL, selected source IDs, metadata, partition and split lineage remain protected.
+No evaluation labels selected this candidate.
+
+Result `595ab46be3ea33f3e218082b789ac826a39308a5e3208ad6fcceb2d2f4579e5d`
+covered all 19,549 articles: 9,420 populated identifiers and 10,129 nulls;
+zero other missing/type states, feature failures or pending preparations.
+
+| Metric | Original guarded groups | Provider candidate |
+| --- | ---: | ---: |
+| Multiarticle groups | 1,579 | 771 |
+| Grouped articles | 4,012 | 1,931 |
+| Singletons | 15,537 | 17,618 |
+| Within-group pairs | 4,225 | 1,954 |
+
+Pair retention is 46.2%; grouped-article retention is 48.1%. Both fail the
+existing 60%/70% coverage guard. **Precision remains unavailable**: provider
+agreement is not human gold or proof of event identity. The candidate is not
+adopted and no model queue or approval was prepared. Original memberships remain
+unchanged. This operation made zero model, embedding, network or parent-store
+requests; paid inference cost was USD 0.
+
+The exact presentation artifact
+`4bd25f5fc0c6cac0882c49c68186bc922e7a92d23486dc0cd66db7a207823704`
+was shown in chat with its complete size histogram and two algorithmic split
+examples. Two source-free tests cover the production SQL's missing/null/type
+distinctions, exact string comparison and prevention of cross-group or
+unknown-identifier bridges. Focused tests, Ruff, mypy and CLI help passed.
