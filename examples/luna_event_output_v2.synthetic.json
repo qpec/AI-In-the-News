@@ -1,0 +1,135 @@
+{
+  "synthetic": true,
+  "purpose": "Fictional contract demonstration only; no actual article or model result.",
+  "article": {
+    "title": "Fictional example: Lumen Council launches a school service",
+    "body": "On 4 May 2026, Lumen Council launched StudyLink for local pupils.\n\nThe council said the service covers 12 schools. It is operated by Lumen Council.\n\nRelated stories: Fictional harbor festival opens next week.",
+    "lang": "eng",
+    "dateTimePub": "2026-05-05T09:00:00Z",
+    "source": {
+      "uri": "fictional.example",
+      "title": "Fictional Gazette"
+    }
+  },
+  "output": {
+    "schema_version": "luna-event-v2",
+    "focus": "single",
+    "reason": "main_occurrence",
+    "refs": [
+      "p1",
+      "p2"
+    ],
+    "excluded": [
+      {
+        "reason": "related_story",
+        "refs": [
+          "p3"
+        ]
+      }
+    ],
+    "event": {
+      "summary": "Lumen Council launched StudyLink for local pupils.",
+      "action": {
+        "surface": "launched",
+        "refs": [
+          "p1"
+        ]
+      },
+      "time": {
+        "surface": "4 May 2026",
+        "refs": [
+          "p1"
+        ]
+      },
+      "status": "reported",
+      "status_refs": [
+        "p1"
+      ],
+      "participants": [
+        {
+          "id": "e1",
+          "kind": "organization",
+          "named": true,
+          "surface": "Lumen Council",
+          "refs": [
+            "p1",
+            "p2"
+          ],
+          "roles": [
+            {
+              "role": "initiator",
+              "refs": [
+                "p1"
+              ]
+            },
+            {
+              "role": "operator",
+              "refs": [
+                "p2"
+              ]
+            },
+            {
+              "role": "claim_source",
+              "refs": [
+                "p2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "e2",
+          "kind": "product",
+          "named": true,
+          "surface": "StudyLink",
+          "refs": [
+            "p1"
+          ],
+          "roles": [
+            {
+              "role": "subject",
+              "refs": [
+                "p1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "e3",
+          "kind": "group",
+          "named": false,
+          "surface": "local pupils",
+          "refs": [
+            "p1"
+          ],
+          "roles": [
+            {
+              "role": "affected",
+              "refs": [
+                "p1"
+              ]
+            }
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "predicate": "covered_school_count",
+          "subject": "e2",
+          "value": {
+            "surface": "12 schools",
+            "refs": [
+              "p2"
+            ]
+          },
+          "status": "stated",
+          "attributed_to": "e1",
+          "support_refs": [
+            "p2"
+          ]
+        }
+      ],
+      "participants_overflow": false,
+      "facts_overflow": false
+    }
+  }
+}

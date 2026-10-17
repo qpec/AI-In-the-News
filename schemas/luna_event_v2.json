@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "focus", "reason", "refs", "excluded", "event"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["luna-event-v2"]},
+    "focus": {"type": "string", "enum": ["single", "multiple", "none", "uncertain"]},
+    "reason": {"type": "string", "enum": ["main_occurrence", "coequal_occurrences", "no_particular_occurrence", "boundary_unclear", "focus_unclear", "insufficient_evidence", "insufficient_body"]},
+    "refs": {"$ref": "#/$defs/refs"},
+    "excluded": {"type": "array", "maxItems": 2, "items": {"$ref": "#/$defs/excluded"}},
+    "event": {"anyOf": [{"$ref": "#/$defs/event"}, {"type": "null"}]}
+  },
+  "$defs": {
+    "refs": {"type": "array", "minItems": 1, "maxItems": 4, "items": {"type": "string", "pattern": "^(t0|p[1-9][0-9]*)$"}},
+    "literal": {
+      "type": "object", "additionalProperties": false, "required": ["surface", "refs"],
+      "properties": {"surface": {"type": "string", "minLength": 1, "maxLength": 160}, "refs": {"$ref": "#/$defs/refs"}}
+    },
+    "excluded": {
+      "type": "object", "additionalProperties": false, "required": ["reason", "refs"],
+      "properties": {
+        "reason": {"type": "string", "enum": ["related_story", "boilerplate"]},
+        "refs": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "string", "pattern": "^p[1-9][0-9]*$"}}
+      }
+    },
+    "role": {
+      "type": "object", "additionalProperties": false, "required": ["role", "refs"],
+      "properties": {
+        "role": {"type": "string", "enum": ["initiator", "operator", "developer", "affected", "authority", "claim_source", "event_place", "subject"]},
+        "refs": {"$ref": "#/$defs/refs"}
+      }
+    },
+    "participant": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "named", "surface", "refs", "roles"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^e([1-9]|1[0-2])$"},
+        "kind": {"type": "string", "enum": ["person", "organization", "group", "place", "product", "artifact", "object"]},
+        "named": {"type": "boolean"},
+        "surface": {"type": "string", "minLength": 1, "maxLength": 160},
+        "refs": {"$ref": "#/$defs/refs"},
+        "roles": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/$defs/role"}}
+      }
+    },
+    "fact": {
+      "type": "object", "additionalProperties": false, "required": ["predicate", "subject", "value", "status", "attributed_to", "support_refs"],
+      "properties": {
+        "predicate": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$"},
+        "subject": {"type": ["string", "null"], "pattern": "^e([1-9]|1[0-2])$"},
+        "value": {"$ref": "#/$defs/literal"},
+        "status": {"type": "string", "enum": ["stated", "alleged", "denied", "planned", "unclear"]},
+        "attributed_to": {"type": ["string", "null"], "pattern": "^e([1-9]|1[0-2])$"},
+        "support_refs": {"$ref": "#/$defs/refs"}
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["summary", "action", "time", "status", "status_refs", "participants", "facts", "participants_overflow", "facts_overflow"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 200},
+        "action": {"$ref": "#/$defs/literal"},
+        "time": {"anyOf": [{"$ref": "#/$defs/literal"}, {"type": "null"}]},
+        "status": {"type": "string", "enum": ["reported", "alleged", "planned", "unclear"]},
+        "status_refs": {"$ref": "#/$defs/refs"},
+        "participants": {"type": "array", "maxItems": 12, "items": {"$ref": "#/$defs/participant"}},
+        "facts": {"type": "array", "maxItems": 6, "items": {"$ref": "#/$defs/fact"}},
+        "participants_overflow": {"type": "boolean"},
+        "facts_overflow": {"type": "boolean"}
+      }
+    }
+  }
+}

@@ -1,5 +1,10 @@
 # Luna excerpt screening and event extraction
 
+**Historical v1.** The current proposed input and entity contract is
+[full retained text with compact event extraction, v2](LUNA_EVENT_METHOD_V2.md).
+The v1 files and measured workload below remain unchanged historical evidence;
+their token costs do not price the new v2 prompt/schema or output distribution.
+
 Status: proposed inference method, with implemented offline excerpt construction,
 prompt, JSON Schema, validators and workload audit. No Luna execution, batch
 upload, new embeddings, article exclusions or dossier membership changes are

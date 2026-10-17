@@ -527,3 +527,41 @@ required before inference/exclusion. No paid batch was uploaded or authorized.
 are protected. `record_presentation` does not support this technical-note kind.
 Exact method/literature/result-discussion note:
 `75497929adb519bde154851a317558f9074a12fd5c0c5aee476626b5aafcbeba`.
+
+## Source-informed compact event contract — 2026-10-17
+
+The [v2 full-text event method](docs/LUNA_EVENT_METHOD_V2.md) supersedes the v1
+entity/input recommendation, preserving v1 code and its workload results. It
+uses generic participant types, separate evidence-backed roles, literal values
+and paragraph refs, per-fact status/attribution, minimal non-single output and
+explicit uncertainty for source-boundary or title/body problems. Malware is not
+a required entity category. Seven types, up to 12 participants/six extra facts
+are provisional design choices, not validated extraction completeness.
+
+Actual model-free source inspections: existing 12 development articles/253
+passages under original owner, note
+`58d95bf1b7d390d250010b7f2ce120577ff1be0a135facfe5e6b4650ba86278d`;
+and eight fixed-seed cybercrime articles/38 passages, separate manifest-bound
+owner `entity-design-cybercrime-20261017-v1`, note
+`f3f343ae28df46f0a2f2d3195ae9b6817c386f3bc4c3fe5391c0f2de6ed89072`.
+Zero failed/pending inspection slots. These are exploratory examples, not
+entity-frequency or accuracy estimates. The 12-source inspection does not
+newly verify later corpus-manifest membership; do not call it a representative
+incident-reports sample. Sealed bodies and model queues remain untouched.
+
+Six official NLP documentation pages and two exact spaCy 3.8.0 model metadata
+files were retrieved and retained through the research runtime; all eight
+succeeded. Documentation owner `entity-design-library-docs-20261017-v1` retains
+notes `df901909ca1ada9c6e2791b613f5743abc250db973a2c954cff42fd24f24f35c`
+and `143c757724db83d4ccbed01d2e71019aeb9bf6bfb2dd32322931ecf229e757b7`.
+No NLP model was benchmarked. 136 focused synthetic checks, Ruff and mypy passed.
+Exact technical-note overviews are protected; record_presentation has no adapter.
+
+Pure full-text builder, prompt/schema and validators are implemented, but v2
+paid inference, corpus-wide Batch lifecycle, partition-bound production input
+adapter, updated complete cost estimates and independent evaluation remain
+unexecuted/unfinished. No new embeddings, article exclusions or memberships.
+Do not resume the stopped 12-article pilot or transfer its approval to v2.
+V2 method/prompt/schema registration note:
+`071a294d7699ed055141b75370baf6a0d715abec8f7413343b0bed4cf9eddafa`;
+contract digest `61d5829d9d97457867dbaa59f8dce5588f8fa575e2a0e0f669ee5b4a142519a7`.
