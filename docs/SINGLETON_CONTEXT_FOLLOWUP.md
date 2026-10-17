@@ -65,3 +65,19 @@ Proportionate validation: `tests/test_singleton_context_api.py`, immediate
 contract dependency tests, Ruff on the new files, mypy on the new production
 modules and `git diff --check`. All fixtures are synthetic and use fake transport;
 their results establish software behavior only.
+
+## Frozen preparation — 2026-10-17
+
+Plan `70f4aa23a49baab7f7e89f13c3fb799b3dbbce465b6a96c3c6d500c881e886e9`
+contains 132/132 prepared comparisons, zero source-unavailable packets, and three
+explicit retry links. There are 173 distinct retained articles: all stored
+paragraph text is supplied for 171 and context is capped for two. The original
+56 settled anchors are unchanged. No model calls, retrieval, embeddings or
+membership changes occurred during preparation. Exact prepared presentation:
+`bbe333a3e9a908143071246709cf27f3d6a615aaeba79fb8cdfdc8510f53640a`.
+
+Use the tested implementation committed as `8c0e83a`; code hashes are bound in
+the protected plan. Six new focused checks passed, plus 32 existing pair-contract
+checks; Ruff, mypy on both new modules and `git diff --check` passed. These are
+software checks, not corpus judgments. The concrete user request above authorizes
+this exact bounded follow-up; persist its plan-bound permission before dispatch.
