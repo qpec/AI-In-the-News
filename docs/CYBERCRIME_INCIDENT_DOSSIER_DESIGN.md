@@ -1,11 +1,21 @@
 # Cybercrime incident dossiers: provider seeds, Luna extraction and verification
 
-Design v1, 2026-10-17. Objective: assign Dutch-language cybercrime reporting to
+Design v2, 2026-10-17. Objective: correctly group cybercrime incident mentions
+into dossiers, with correctness taking priority over throughput or cost. This
+amends v1 (retained in Git commit `2cdde99`) following the user's clarification
+that correct grouping, conditional on cybercrime, is the main purpose. Assign
+Dutch-language cybercrime reporting to
 the underlying cybercrime incident, using saved data, provider event IDs first,
 and OpenAI API Luna for bounded extraction and matching. Actor for this design:
 Codex. Status: literature/documentation review and proposed method only. No new
 corpus processing, API/model dispatch, embedding, membership change or accepted
 finding occurred. This file is not an executable approved run plan.
+
+The [grouping acceptance and validation contract](CYBERCRIME_GROUPING_QUALITY.md)
+defines the two necessary decisions, membership rules, benchmark denominators
+and proposed release gates. It controls acceptance where earlier exploratory
+wording in this design is less specific. No method is called validated until
+the corresponding independent evaluation has actually passed.
 
 ## Scope specific to this study
 
@@ -101,8 +111,8 @@ The following are proposed schema fields, not generated research outputs:
 
 | Level | Fields |
 | --- | --- |
-| Article | source version; cybercrime yes/no/uncertain; specific incident yes/no/uncertain; complete/segmented/missing evidence coverage |
-| Incident mention | local mention ID; focal/background role; action; victim/target and aliases; affected system; incident identifiers; occurrence interval and precision; discovery/disclosure date; location and Netherlands connection; perpetrator/malware only if stated; reported factuality; source-span references |
+| Article | source version; derived summary of mention-level cybercrime eligibility; specific incident yes/no/uncertain; complete/segmented/missing evidence coverage |
+| Incident mention | local mention ID; cybercrime yes/no/uncertain with evidence; focal/background role; action; victim/target and aliases; affected system; incident identifiers; occurrence interval and precision; discovery/disclosure date; location and Netherlands connection; perpetrator/malware only if stated; reported factuality; source-span references |
 | Candidate comparison | mention ID; candidate dossier/version; same/related/different/insufficient label; supporting source-span IDs from both sides; conflict codes; missing decisive facts; concise explanation |
 | Membership proposal | local dossier ID/version; mention ID; initial-report/disclosure/remediation/investigation/legal-follow-up/background relation; status and review provenance |
 
@@ -180,11 +190,12 @@ independently reviewed benchmark. An article sample plus searched related report
 does not establish corpus incident recall without an incident sampling frame,
 inclusion probabilities and adequate membership closure; corpus recall otherwise
 remains unavailable. Do not
-report singleton-heavy accuracy alone. Proposed development targets are at
-least 98% accepted-link precision and 95% candidate recall in the independently
-reviewed benchmark, with confidence intervals and incident-level dependence
-accounted for. These targets are not achieved results. Sparse or broad
-intervals require more evidence; they do not justify a reliability claim.
+report singleton-heavy accuracy alone. V1's 98% accepted-link precision and 95%
+candidate-recall development targets are strengthened into the explicit proposed
+release gates in [the quality contract](CYBERCRIME_GROUPING_QUALITY.md), including
+missed-grouping checks and confidence bounds. These targets are not achieved
+results. Sparse or broad intervals require more evidence; they do not justify a
+reliability claim.
 
 Evaluate exact-copy and provider-ID strata separately. Provider agreement is a
 diagnostic, not human gold. Test both the existing-ID and new-dossier paths.
