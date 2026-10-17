@@ -51,3 +51,65 @@ Validation: 20 targeted tests passed (event coverage, minimal recovery and
 presentation); Ruff passed on the touched implementation/runner/tests and mypy
 passed for the new operation. Synthetic classifier tests establish software
 behavior; the saved-frame totals above come from the actual audited run.
+
+## Fetch and retention diagnosis — 2026-10-17
+
+The follow-up `nl-cyber-event-uri-fetch-diagnosis-v1` binds that exact coverage
+result, registers its method before inspection and runs offline through the same
+audited collection adapter. The entry script is
+`scripts/diagnose_nl_cyber_event_ids.py`. No new API/model calls occurred.
+
+The check inspected all 61,095 saved article records through 618 original or
+supplement receipts. For 47,895 records on 486 receipts, retained provider bytes
+match their SHA-256 and the parsed response exactly. Original raw bytes are
+unavailable for the other 13,200 records, whose retained parsed records and
+locators/hashes remain checked. Quarantine omitted whole original response
+artifacts for affected pages, not just the 251 screened records; these are
+different missingness denominators.
+
+All 616 original page requests leave `includeArticleEventUri` unset. The official
+[SDK source](https://raw.githubusercontent.com/EventRegistry/event-registry-python/master/eventregistry/ReturnInfo.py)
+defines its default as true and omits default-valued flags. 611 original pages
+contain both populated IDs and explicit nulls. All 251 absent fields are
+quarantine metadata; no ordinary retained article omits the field. All six
+newly recovered articles explicitly contain null. This supports provider-reported
+nonassignment at retrieval as the main explanation, rather than a disabled flag.
+
+All 27 already-saved fresh-window raw pages (2,700 IDs) were independently
+checked. Against original records, 2,109 remain null and 576 retain the exact
+same ID. Eight quarantined records have later permitted metadata: two populated
+IDs and six nulls. One original populated ID later becomes null; six records
+are the newly recovered articles. No null-to-populated transition was observed
+in this paired window. The protected proof retains both observations and exact
+locators; it does not overwrite the original snapshot or claim a current-state
+refresh of the entire corpus. An additional 2,898 saved list/detail observations
+are retained separately as repeated observations, not distinct articles.
+
+The normalized auxiliary metadata projection drops `eventUri`, including 578
+populated values from the fresh window. This is a real projection limitation,
+but does not explain the earlier 18.49% because that check used original receipt
+records. Its frozen historical implementation is preserved to keep existing
+proof replays reproducible; the new diagnosis proof independently retains these
+event values. All 9,646 provider-flagged duplicates have null IDs, as do 39,897
+nonduplicates. These descriptive strata do not establish a clustering rule.
+
+The provider's [definition](https://help.eventregistry.org/what-are-events/)
+emphasizes shared happenings covered by multiple publishers; its
+[official examples](https://newsapi.ai/intro-python) contain explicit nulls too.
+Technical documentation was inspected through external web tools on 2026-10-17;
+URLs, observed defaults and access date are registered, while exact remote bytes
+and a pinned upstream commit were not captured. No individual article's
+clustering cause, permanent nonassignment or provider-internal archive behavior
+was established. No explicit-true live intervention was performed.
+
+Costs remain 431 reported tokens and 561 conservatively accounted out of the
+original 583, retaining 26 unitemized-fee reservations. Remaining conservative
+capacity is 22; no reservation was released or reduced. Diagnostic failures and
+pending processing are both zero. Exact-version reuse supports re-presenting the
+completed immutable result without rescanning or dispatching.
+
+Result: `6f7660bb1c09c0aebbe1abda032eb6d7004ae10d399394c90f6ba826225e2773`.
+Protected proof artifact:
+`1aacfbfcb15717bdd74b4386d80b48ab01356bace059f2226d357a41933467b2`.
+The original presentation remains retained; the amended exact overview gives
+the eight quarantine recoveries and one changed assignment explicitly.

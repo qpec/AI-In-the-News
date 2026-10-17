@@ -152,6 +152,9 @@ def save_cost(engine: Research, session: str, identifier: str, receipt: Json) ->
 
 def run(engine: Research, session: str, context: Context, data: Json) -> Json:
     require_active(engine, session)
+    if data.get("action") == "event_uri_diagnosis":
+        from .newsapi_event_diagnosis import run as event_uri_diagnosis
+        return event_uri_diagnosis(engine, session, context, data)
     if data.get("action") == "event_uri_coverage":
         from .newsapi_event_coverage import run as event_uri_coverage
         return event_uri_coverage(engine, session, context, data)

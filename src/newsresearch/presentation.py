@@ -34,6 +34,7 @@ RESULT_KINDS = {
     "newsapi_id_manifest_minimal_preparation",
     "newsapi_id_manifest_minimal_recovery",
     "newsapi_event_coverage",
+    "newsapi_event_diagnosis",
     "newsapi_topic_export",
     "keyword_study",
     "newsapi_probe",
