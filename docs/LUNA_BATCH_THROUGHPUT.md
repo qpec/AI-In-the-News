@@ -83,3 +83,45 @@ stops further dispatch rather than silently increasing permissions or retrying.
 At this documentation checkpoint, the offline diagnosis and software checks have
 run; the faster scheduler has not yet been launched. Live results must be
 appended below after verification and actual submission.
+
+### Verified launch and supervision — 2026-10-18
+
+The tested implementation was committed as `8c7e89e` (37 focused synthetic tests,
+Ruff and mypy passed). It launched at 2026-10-17 22:04:57 UTC in exec session
+`58044`, using the saved-key wrapper, the existing plan/continuation/diagnostic
+above and one protected owner. The initial audit check completed and the
+outstanding 250-request remote job was reconciled before new admission.
+
+The first verified parallel checkpoint has **3,016 requests submitted / 2,266
+assessed**, with **750 requests in three unfinished provider batches** and
+3,372,837 of the provisional 20,000,000 queued input tokens. Two more separate
+250-request files were then staged. The controller was actively counting the
+next incident-report file with the configured 16 workers. This is actual paid
+submission, not a synthetic concurrency demonstration, and it is not completion
+of the 199,228-request population.
+
+Conservative recorded usage was **USD0.876669**, with **USD1.076683 reserved**
+at displayed precision. Current parser counts were 1,364 valid / 901 invalid /
+one preserved historical error / zero unknown; raw counts remained 1,362 valid /
+899 invalid / five errors. Four final-phase derivations remain separately
+identified. Valid focus labels: 530 single, 139 multiple, 655 none, 40 uncertain.
+Literal-subset projection already covered 2,016 assessments; the newest 250
+were awaiting that offline projection. Mechanical validation is not human
+accuracy, event identity, two-publisher qualification or accepted dossiers.
+There were no retries, embeddings or membership changes.
+
+The user then explicitly requested continued operation and problem repair.
+Active thread heartbeat `supervise-luna-batch-extraction` checks every 15 minutes,
+stays quiet during healthy progress and reports meaningful repairs, blockers,
+completion or budget/deadline deferral. It must check the live controller first,
+never launch a second writer, preserve all stops and exact accounting, and use
+tested append-only amendments for recoverable implementation problems. The
+original admission deadline remains **2026-10-18 15:44:53 UTC (17:44:53
+Europe/Amsterdam)**. Already-submitted remote jobs may be reconciled afterward.
+The monitor pauses after reconciliation and final presentation; it does not
+archive this chat. Future readers must inspect live state rather than treating
+this checkpoint as current completion or a restart instruction.
+
+Each controller status and reconciliation report retains its exact protected
+Markdown. `record_presentation` does not support these technical result kinds;
+there is no claim of supported presentation capture or verified chat delivery.

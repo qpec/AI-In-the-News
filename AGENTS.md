@@ -27,6 +27,44 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Parallel Batch controller and supervision — 2026-10-18
+
+The user's "all processed asap" / "Parallel?" instruction is implemented in
+`scripts/run_luna_budget_fast.py`, committed as `8c7e89e`; see
+[the throughput method and actual launch](docs/LUNA_BATCH_THROUGHPUT.md).
+The original controller exited on an exact successful token-count receipt
+collision, before paid dispatch for that task. Audited offline diagnostic
+`1bbf9672da3f89308d41f2fbda2ea35de569e125424f465e3959eb3159a23a1e`
+proved reuse through the original successful action key. The gateway guard
+and all historical stops remain unchanged. The new append-only operational
+protocol binds that diagnostic, the existing phase continuation, original
+deadline, implementation hashes and the same shared plan/authorization/book.
+
+The single fast controller launched in exec session `58044` at 2026-10-17
+22:04:57 UTC. **Check its live process/output before any restart; never start
+a second controller.** It uses 16 token-count HTTP workers, one audit writer,
+unchanged separate-corpus 250-request files and a provisional 20M-token queue
+cap; actual account capacity remains unverified. Exact whole-file maximum
+cost reservations, USD120 operating/USD150 maximum, unchanged full text and
+4096 output cap, no paid retries and no new embeddings remain enforced.
+
+Verified early checkpoint: 3,016 submitted / 2,266 assessed, 750 pending in
+three unfinished provider batches; charge USD0.876669, reserved USD1.076683
+at displayed precision. Current parser: 1,364 valid / 901 invalid / one retained
+historical error / zero unknown; raw: 1,362 valid / 899 invalid / five errors,
+with four separately retained phase derivations. The newest 250 assessments
+await literal-subset projection; original 2,016 projection coverage is retained.
+These are provisional mechanical results, not accuracy or accepted dossiers.
+
+The user also requested "Ensure this keeps running and that problems get fixed."
+Active heartbeat `supervise-luna-batch-extraction` checks this thread every 15
+minutes, permits tested append-only repairs within existing authorization and
+notifies on meaningful changes. It must preserve the original admission deadline
+**2026-10-18 15:44:53 UTC**, then reconcile existing remote jobs without new
+admission, finish retained-output projections and pause after final presentation.
+No budget/reset/retry/deadline extension is implied. All 37 focused tests, Ruff
+and mypy passed before launch; do not infer whole-queue completion from this note.
+
 ## Shared USD150 full-text Batch authorization — 2026-10-17
 
 The user explicitly authorized the prepared API Batch workflow subject to a
