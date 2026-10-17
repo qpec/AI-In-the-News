@@ -206,6 +206,18 @@ remain but generic grid code hashes changed. See the method's metadata-error
 note: the old v2 question said .25 while its actual candidate/cutoffs were .05;
 the v3 question is margin-specific. Never silently rewrite the old question.
 
+The approved fine-grid queue is now **completed** as
+`4ec5b1ada0424f40ee77f17339e6de7c99b26375c426959018737fc2e64fdbe3`:
+68 valid responses, 136 exposures, zero retries/failures/unknowns/pending,
+132.492 seconds. Within references: 42 same/11 different/3 uncertain out of 56;
+tail: eight different. Precision point null; sample diagnostics 75.0%–80.4%,
+conditional 95% interval 59.9%–90.7%. **90% was not demonstrated.** Do not
+rerun/refill/extend this completed queue. No candidate was adopted; original
+groups remain unchanged. Compact presentation record
+`0bb3402158ae1cbffce0bed1fced81edd4725cfd8ed1c35d587c9e8c4c6f5521`
+was shown. Historical v2 metadata discrepancy is now an append-only protected
+note `cdd4ffb6ef754916c4b5748f116138a867e7b6dea1ee0bcd5eccc0133ade5271`.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

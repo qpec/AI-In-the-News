@@ -284,3 +284,40 @@ instructions and lead evidence, not that question text or the cutoff. The
 v2 record is preserved without silent correction; the v3 question explicitly
 uses its actual frozen margin. This limits the precision of the old metadata
 description, not the reported v2 pair counts or executed cutoff values.
+
+## Executed fine-grid evaluation — 2026-10-17
+
+Result `4ec5b1ada0424f40ee77f17339e6de7c99b26375c426959018737fc2e64fdbe3`
+completed all **68 calls / 136 article exposures / zero retries** in
+**132.492 seconds**. All 68 responses were structurally valid; no failures,
+unknown outcomes or pending calls. Four canaries passed (three same/one
+different) and are excluded from the estimates.
+
+| Evaluation stratum | Same event | Different event | Uncertain | Total |
+| --- | ---: | ---: | ---: | ---: |
+| Within the delta-0.07 candidate | 42 | 11 | 3 | 56 |
+| Random between-group tail | 0 | 8 | 0 | 8 |
+
+**90% was not demonstrated.** The precision point remains null; sample
+missingness diagnostics are **75.0%–80.4%**, and the conditional 95% interval
+is **59.9%–90.7%**. Complete-case 42/53 = 79.2% is only a diagnostic. These
+draws and candidate frames differ, so the lower observed score does not prove
+that increasing the cutoff caused poorer population accuracy. It does show
+that this experiment failed to demonstrate the intended target.
+
+Recall remains null, with a conditional interval approximately
+**0.0019%–100%**. Zero matches among eight tail draws does not prove perfect
+recall. Whole-group purity and human accuracy remain unmeasured. The candidate
+is not adopted; original memberships and all earlier failures are preserved.
+No further model queue is authorized by this completed approval.
+
+Original exact presentation artifact:
+`b4cf8391d93e13aa1121d817f5778ef7e4314bb79030f4cd797d05e11100682b`.
+Compact diagnostic `d30107468c695ae6bf4931c22c5a274da19b0768a35e7ab096c5122584232e34`,
+presentation record
+`0bb3402158ae1cbffce0bed1fced81edd4725cfd8ed1c35d587c9e8c4c6f5521`,
+was shown in chat with retained model examples and exact cited prefixes.
+Reporting made zero new model calls. An audited metadata check also appended
+note `cdd4ffb6ef754916c4b5748f116138a867e7b6dea1ee0bcd5eccc0133ade5271`
+about the historical v2 question typo, preserving its original text and actual
+candidate rule without rewriting any record.
