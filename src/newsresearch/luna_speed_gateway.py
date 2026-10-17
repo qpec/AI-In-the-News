@@ -34,6 +34,7 @@ class SpeedGateway(Gateway):
         workers: int = 4,
         canaries: int = 2,
         cap: int = 2000,
+        continue_validation_failures: bool = False,
         clock: Callable[[], float] = time.perf_counter,
     ) -> Json:
         """Run one window, including preparation, CLI startup and retention.
@@ -55,6 +56,14 @@ class SpeedGateway(Gateway):
         Callback/audit exceptions abort scheduling immediately. Already-issued
         work keeps its durable unknown intent; worker threads never write to
         the research store after the coordinator has failed.
+
+        The optional validation-failure mode belongs to a separately registered
+        benchmark. It continues only after an explicitly completed, error-free
+        transport returned a payload. Those rejected outputs remain invalid.
+        Two such transport canaries can open parallel execution; they need not
+        both pass mechanical content validation. Unknown/failed transport or
+        audit failures still stop scheduling. The default retains the original
+        first-invalid stop and requires two mechanically valid canaries.
         """
         require_active(self.engine, session)
         if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
@@ -66,6 +75,8 @@ class SpeedGateway(Gateway):
             raise ResearchError("luna_speed_invalid_cap")
         if type(canaries) is not int or not 0 <= canaries <= cap:
             raise ResearchError("luna_speed_invalid_canaries")
+        if type(continue_validation_failures) is not bool:
+            raise ResearchError("luna_speed_invalid_validation_failure_policy")
 
         pool = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="luna-speed")
         pending: dict[Future[tuple[ProviderResponse, float | None, float]], str] = {}
@@ -73,6 +84,8 @@ class SpeedGateway(Gateway):
         observations: list[Json] = []
         submitted = 0
         canary_valid = 0
+        canary_returned = 0
+        canary_completed = 0
         not_dispatched = 0
         peak_in_flight = 0
         stop_reason: str | None = None
@@ -81,6 +94,12 @@ class SpeedGateway(Gateway):
 
         def elapsed() -> float:
             return max(0.0, clock() - started)
+
+        def clean_transport_return(response: ProviderResponse) -> bool:
+            raw = response.raw_response
+            return (isinstance(raw, dict) and raw.get("transport_status") == "returned"
+                    and raw.get("failure") is None and raw.get("unknown_outcome") is False
+                    and response.payload is not None)
 
         def provider_call(call: PreparedCodexInvocation) -> tuple[ProviderResponse, float | None, float]:
             dispatch_offset = elapsed()
@@ -118,6 +137,8 @@ class SpeedGateway(Gateway):
                 "provider_returned_within_window": dispatched is not None and returned <= seconds,
                 "mechanically_valid": valid and dispatched is not None,
                 "valid_persisted_within_window": valid and dispatched is not None and persisted <= seconds,
+                "validation_failure_continued": bool(continue_validation_failures and not valid
+                    and dispatched is not None and clean_transport_return(response)),
             })
             return valid
 
@@ -176,18 +197,28 @@ class SpeedGateway(Gateway):
                     attempt = pending.pop(future)
                     response, dispatched, returned = future.result()
                     valid = retain(attempt, response, dispatched, returned)
+                    transport_returned = clean_transport_return(response)
+                    if dispatched is not None and canary_completed < canaries:
+                        canary_completed += 1
+                        canary_valid += int(valid)
+                        canary_returned += int(transport_returned)
                     if dispatched is None:
                         not_dispatched += 1
-                        if stop_reason != "first_invalid_response":
+                        if stop_reason is None:
                             stop_reason = "deadline"
-                    elif not valid:
-                        stop_reason = "first_invalid_response"
-                    elif canary_valid < canaries:
-                        canary_valid += 1
+                    elif (not valid and not (continue_validation_failures and transport_returned)):
+                        if stop_reason is None:
+                            stop_reason = "first_invalid_response"
+                    elif continue_validation_failures and not transport_returned:
+                        # The separate mode requires explicit successful
+                        # transport observations, even if a callback errs.
+                        if stop_reason is None:
+                            stop_reason = "first_invalid_response"
                 if stop_reason is None:
                     if any(future.done() for future in pending):
                         continue
-                    capacity = 1 if canary_valid < canaries else workers
+                    passed_canaries = canary_returned if continue_validation_failures else canary_valid
+                    capacity = 1 if passed_canaries < canaries else workers
                     if len(pending) < capacity:
                         if submit_one():
                             continue
@@ -216,6 +247,8 @@ class SpeedGateway(Gateway):
             "peak_in_flight": peak_in_flight,
             "canaries_required": canaries,
             "canaries_valid": canary_valid,
+            "canaries_returned": canary_returned,
+            "continue_validation_failures": continue_validation_failures,
             "attempt_cap": cap,
             "submitted": submitted,
             "attempted": len(attempted_rows),
@@ -225,6 +258,7 @@ class SpeedGateway(Gateway):
             "valid_total": sum(row["mechanically_valid"] for row in attempted_rows),
             "valid_persisted_within_window": sum(row["valid_persisted_within_window"] for row in attempted_rows),
             "invalid_or_unknown_total": sum(not row["mechanically_valid"] for row in attempted_rows),
+            "continued_validation_failures": sum(row["validation_failure_continued"] for row in attempted_rows),
             "observations": observations,
             "timings": [{"attempt": row["attempt_id"], "persistence_offset": row["persisted_offset_seconds"],
                          "dispatch_offset": row["dispatch_offset_seconds"], "return_offset": row["return_offset_seconds"]}

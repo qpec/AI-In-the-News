@@ -31,33 +31,50 @@ bounded operational benchmark on saved articles. Read
 
 Use the original protected owner
 `C:/Users/ynhan/AppData/Local/AI-In-the-News/luna-seven-day-validation-20261016-v1`
-through `--workspace`, with new study key `luna-fulltext-codex-speed-20261017-v1`.
-Do not export/import duplicate source bodies. Preparation takes `--data-root`
-and a 2,000-task queue limit; run binds the returned `--plan` and the user's
-`--authorization-text`; report binds the saved `--result`. Check `--help` for
-exact command ordering. Existing source-owner records and old counters remain.
+through `--workspace`. Do not export/import duplicate source bodies.
+Preparation takes `--data-root` and a 2,000-task queue limit; run binds the
+returned `--plan` and the user's `--authorization-text`; report binds the saved
+`--result`. Check `--help` for exact command ordering. Existing source-owner
+records and old counters remain.
 
-The 2026-10-17 request covers one new 600-second Codex-account run, not an API
-Batch submission. The benchmark's default is incident-reports development
-articles only. Use separate manifest/source bindings if a later request
-explicitly adds another corpus; do not infer cybercrime throughput from this run.
+The original study `luna-fulltext-codex-speed-20261017-v1` is closed: two calls,
+one valid `none`, one content-invalid, 12.022 seconds, no parallel stage. Its
+single-run authorization is spent. Never restart it to obtain ten minutes.
+The separate candidate `luna-fulltext-codex-speed-20261017-v2` uses
+`--benchmark-v2` for preparation/execution and needs its own explicit bounded
+run authorization. Candidate preparation or the old request does not supply
+that authorization. If the user later authorizes the concrete v2 run, preserve
+that instruction and proceed without asking again.
+
+The default remains incident-reports development articles only, using the
+Codex account, with no API Batch submission. Use separate manifest/source
+bindings if a later request explicitly adds another corpus; do not infer
+cybercrime throughput from this run.
 
 ## Preserve the benchmark
 
-Use the unchanged full-retained-text v2 prompt/schema with one article per
-request. Preparation must reconcile corpus membership, sealed validation body
-hashes, unresolved earlier attempts and the stopped twelve-article extraction
-plan. Retain exclusion reasons. Freeze a seeded eligible queue before judging;
-do not choose shortest articles or inspect answers to optimize selection.
+Use the unchanged full-retained-text v2 event prompt/schema with one article per
+request; the benchmark version is separate from the extraction-contract version.
+Preparation must reconcile corpus membership, sealed validation body hashes,
+unresolved earlier attempts and the stopped twelve-article extraction plan.
+The new benchmark also excludes both source versions attempted by the closed
+v1 speed run. Retain exclusion reasons. Freeze a seeded eligible queue before
+judging; do not choose shortest articles or inspect answers to optimize selection.
 
-The measured window begins immediately before preparing and reserving the first canary invocation after
-offline preparation and initial preflight. It includes two sequential canaries,
-then rolling refill of four workers. The ceiling is 2,000 attempts/exposures,
-including canaries and unknowns, with no retries. Each local timeout is the
-lesser of 180 seconds and the remaining window. Stop new dispatch at the
-deadline, attempt cap, queue exhaustion or first invalid/incomplete/unknown
-outcome; reconcile all already-started calls. Never reset the clock or clear
-the stop to improve the total.
+The measured window begins immediately before preparing and reserving the first
+canary invocation after offline preparation and initial preflight. It includes
+two sequential canaries, then rolling refill of four workers. The ceiling is
+2,000 attempts/exposures, including canaries and unknowns, with no retries.
+Each local timeout is the lesser of 180 seconds and the remaining window.
+
+For the v2 benchmark, two completed, error-free transport returns with payloads
+open the parallel phase. Content/schema/literal-invalid outputs are retained
+as rejected, counted separately, and scheduling continues; validation rules
+are unchanged. Unknown execution, authentication failure, forbidden tools or
+delegation, wrong observed model, transport failure and audit/storage failure
+still stop new scheduling. The deadline, attempt cap and queue exhaustion also
+stop dispatch. Reconcile already-started calls. Never reset the clock or clear
+a stop. The historical v1 first-validation-failure stop remains unchanged.
 
 Use the shared gateway and fresh ephemeral Codex CLI workers with configured
 model `gpt-6-luna` and existing account authentication. Persist exact permitted
@@ -74,7 +91,7 @@ unattempted counts. The primary speed count is results both durably stored and
 validated by the 600-second cutoff; show early stops and actual elapsed time.
 Keep responses received before the cutoff but validated afterward separate.
 Show preparation/reconciliation time separately, maximum observed concurrency,
-available usage and configured versus observed model identity.
+available usage and configured versus observed model identity. For the v2 benchmark, distinguish transport-completed canaries from content-valid canaries and report continued content-validation failures.
 
 Show valid focus totals and a small deterministic set of actual event/entity
 examples with source links and evidence references. Missing or invalid is never
@@ -84,6 +101,7 @@ unsupported by `record_presentation`, say so and retain exact Markdown instead.
 Describe the result as one throughput measurement, not human accuracy, an
 optimal worker count, a serial speedup, a free-cost claim or a guaranteed
 full-corpus duration. No new run occurred when only preparing or reporting.
+
 
 
 

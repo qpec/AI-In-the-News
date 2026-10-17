@@ -1,5 +1,100 @@
 # Ten-minute Luna Codex throughput benchmark
 
+## Executed checkpoint — 2026-10-17
+
+Plan `e6460ba6fac85098c22f5b4208231b07f7b54e1a0f65f940874fec2351bb2c2e`
+prepared 2,000 complete-text incident-report articles from 13,647 eligible
+development sources. The 19,549-source frame excluded 5,888 sealed validation
+sources, 12 stopped-pilot sources and two unresolved prior-attempt sources.
+There were no missing/oversized preparation exclusions, 9,788,776 body
+characters and 42,348 canonical passages. Preparation work after initial
+preflight took 21.987 seconds; this excludes the additional initial preflight.
+
+The authorized run completed **early and stopped**, result
+`e8743129284355d3dcd163546d12137dd46d2149b32ea88cf6f310af031f8057`:
+two provider calls, one mechanically valid `none` output, one invalid output,
+1,998 unattempted/pending, no retries/unknowns/late returns/new embeddings.
+The second canary failed `event.participants.3:surface_not_grounded`.
+Elapsed measured window was **12.022 seconds**, with peak concurrency one.
+The parallel stage never opened: **ten-minute parallel throughput was not
+measured**. Do not extrapolate this censored two-article observation.
+
+Observed usage for the two responses was 40,613 input / 445 output tokens,
+zero reported cached input, cache-write input or reasoning output tokens.
+Configured model was `gpt-6-luna` / low; model identity was unavailable in both
+returned CLI streams. Usage is not an invoice or proof of zero monetary cost.
+No event/entity extraction passed validation and no dossiers were adopted.
+The valid focus output remains an unreviewed model interpretation, not gold.
+
+Exact generated overview:
+`459306ad51a26a0391be91360d4880f15c82b439222c1738f156e10c0cfedc05`.
+This custom result kind is unsupported by `record_presentation`; exact Markdown
+is retained in protected artifact storage with preparation/delivery status,
+not a claim of observed reading. The original first-failure stop remains
+latched; this completed queue must not be restarted or retried by default.
+
+Implementation checkpoint `3d75605`; additional test checkpoint `fc49060`.
+153 focused synthetic/transport/contract checks passed, with Ruff and provider/
+gateway mypy checks. These tests establish software behavior, not extraction
+quality. The reusable skill is installed as `luna-speed-test` in the user's
+personal Codex skills directory, with the versioned source in this repository.
+
+The unconditional first-validation-failure stop was too restrictive for
+estimating throughput: a single rejected model field censored the measurement
+before parallelism. A future, separately registered and authorized benchmark
+should preserve invalid outputs and continue to measure valid-output throughput,
+while still stopping on audit failure, unsafe transport activity or unknown
+execution. The prompt and validator need not be weakened to count failures.
+
+## Separate v2 benchmark candidate — not yet authorized
+
+The offline diagnostic result is retained in protected storage as
+`c29c33a11fc5db7b92400473bdad54cb52963e0afb5c7fcde6e5519b8ad29375`.
+Its record kind is `luna_speed_diagnosis`; it includes the permitted raw output
+and cited source units. The description here contains no source text.
+The rejected participant cited paragraph `p2`, which did not contain its exact
+surface phrase; that phrase occurred elsewhere in `p6`. An occurrence in a
+different paragraph cannot validate the supplied citation. The rejected output
+remains invalid: this diagnosis does not repair it, retry the article or infer
+that its semantic role was correct. Source text and quoted evidence remain in
+protected storage.
+
+The candidate uses fresh study key `luna-fulltext-codex-speed-20261017-v2`
+and the script's `--benchmark-v2` flag for `prepare` and `run`. It changes only
+the benchmark's treatment of completed but content-invalid responses. The
+full retained input, event prompt, JSON schema and literal validator remain
+unchanged. Keep the original v1 run closed and exclude both of its attempted
+source versions from the new frozen queue; these are not retries or repaired
+answers. Existing sealed-body, unresolved-attempt, stopped-pilot and corpus
+exclusions still apply.
+
+Two sequential **transport-completed** canaries open the four-worker phase.
+For this benchmark, transport completion means a completed, error-free Codex
+return with a payload and no disallowed activity or model mismatch. A payload
+can fail content/schema/literal validation and still count as a completed
+transport canary. Such outputs are retained, rejected and counted explicitly;
+they never become usable extractions or accepted findings. The rolling queue
+continues after these content-validation failures so their rate contributes
+to the measured usable-output throughput.
+
+Unknown execution, authentication errors, forbidden tool/delegation activity,
+wrong observed model, transport failure and audit/storage failure still stop
+new scheduling. Retain and reconcile already-started calls. Keep the same
+600-second window, 2,000-attempt/exposure maximum, four-worker ceiling, full
+text, per-call timeout and zero-retry policy. The clock includes the transport
+canaries and their rejected outputs. Report transport-completed and content-valid
+canaries separately, as well as the valid and rejected parallel-phase totals.
+
+This is a **new candidate**, not a continuation under the spent v1 approval.
+It requires a new explicit authorization for its concrete bounded plan before
+live execution. At this method checkpoint no such authorization or v2 result
+has been established. Offline preparation is allowed; do not create a new
+execution merely to complete the originally censored ten-minute observation.
+Later authorization must be retained against the exact new plan without
+altering the v1 result, stop or counter.
+
+## Original registered method
+
 The user requested one parallel speed test on 2026-10-17 using their existing
 Codex account, the current event-extraction prompt and full retained article
 text. The objective is to measure how many articles the complete audited

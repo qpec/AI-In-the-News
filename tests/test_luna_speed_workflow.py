@@ -63,6 +63,23 @@ def test_duplicate_body_fold_is_a_hard_audit_failure():
         workflow.freeze_selection(*inputs, 2000)
 
 
+def test_prior_speed_attempts_remain_excluded_from_new_selection():
+    result = workflow.freeze_selection(*selection_inputs(), 2000, prior_speed={"eligible_a"})
+    assert result["selected"] == ["eligible_b"]
+    assert result["exclusions"]["eligible_a"] == "prior_speed_attempt"
+    assert result["exclusion_counts"]["prior_speed_attempt"] == 1
+
+
+def use_v2(monkeypatch):
+    for name in ("STUDY", "METHOD", "FAILURE_POLICY"):
+        monkeypatch.setattr(workflow, name, getattr(workflow, name))
+    original_digest = contract.contract_digest()
+    workflow.configure_v2()
+    assert workflow.STUDY.endswith("-v2") and workflow.METHOD.endswith("-v2")
+    assert workflow.FAILURE_POLICY == "continue_content_invalid_stop_transport"
+    assert contract.contract_digest() == original_digest
+
+
 class FixtureResearch(workflow.SpeedResearch):
     @audited_handler
     def _status(self, session, context, data):
@@ -107,7 +124,9 @@ def call(engine, operation, data):
 
 
 @pytest.fixture
-def prepared_speed(tmp_path, monkeypatch):
+def prepared_speed(tmp_path, monkeypatch, request):
+    if getattr(request, "param", "v1") == "v2":
+        use_v2(monkeypatch)
     for variable in ("OPENAI_API_KEY", "CODEX_API_KEY", "OPENAI_BASE_URL", "OPENAI_API_BASE", "CODEX_BASE_URL"):
         monkeypatch.delenv(variable, raising=False)
     engine = FixtureResearch(tmp_path / "protected", config=Config(offline=True))
@@ -128,15 +147,17 @@ def prepared_speed(tmp_path, monkeypatch):
         engine.close()
 
 
-def mock_runner(monkeypatch, invalid=False):
+def mock_runner(monkeypatch, invalid=False, invalid_calls=(), unknown=False):
     _, answer = contract.fictional_example()
     seen = []
     def runner(*args, **kwargs):
         seen.append(kwargs)
-        output = {} if invalid else answer
+        output = {} if invalid or len(seen) in invalid_calls else answer
         events = [{"type": "thread.started"}, {"type": "turn.started"},
                   {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(output)}},
                   {"type": "turn.completed", "usage": {"input_tokens": 42, "output_tokens": 18}}]
+        if unknown:
+            events[-1] = {"type": "turn.failed", "error": {"message": "fictional unknown outcome"}}
         return SimpleNamespace(stdout="\n".join(json.dumps(event) for event in events), stderr="", returncode=0)
     original = SpeedProvider.__init__
     def injected(self, *args, **kwargs):
@@ -242,6 +263,7 @@ def test_deadline_reservation_is_pending_not_a_provider_return(prepared_speed, m
     engine.ledger.verify()
 
 
+@pytest.mark.parametrize("prepared_speed", ["v1", "v2"], indirect=True)
 def test_missing_permission_fails_before_dispatch(prepared_speed, monkeypatch):
     engine, plan = prepared_speed
     seen = mock_runner(monkeypatch)
@@ -250,3 +272,92 @@ def test_missing_permission_fails_before_dispatch(prepared_speed, monkeypatch):
         call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"], "authorization_text": ""})
     assert seen == []
     assert engine.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("prepared_speed", ["v2"], indirect=True)
+def test_v2_keeps_content_invalid_but_processes_remaining_queue(prepared_speed, monkeypatch):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch, invalid_calls=(1, 4))
+    engine.config = replace(engine.config, offline=False)
+    result = call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+        "authorization_text": "Run only this fictional separate v2 validation-failure benchmark"})
+    assert len(seen) == 6
+    assert result["counts"] == {"invalid": 2, "valid": 4}
+    assert result["pending"] == 0 and result["provider_calls"] == 6
+    assert result["valid_persisted_by_deadline"] == 4
+    assert plan["failure_policy"] == "continue_content_invalid_stop_transport"
+    assert result["method"].endswith("-v2")
+    assert "Content-invalid outputs remain rejected" in plan["markdown"]
+    for outcome in result["outcomes"]:
+        if outcome["status"] == "invalid":
+            assert outcome["output"] is None and outcome["errors"]
+            assert engine.ledger.artifacts.read(outcome["response"])["payload"] == {}
+            assert engine.ledger.get(outcome["assessment"], "luna_speed_assessment")["status"] == "invalid"
+    assert engine.ledger.db.execute("SELECT count(*) FROM records WHERE kind='luna_speed_stop'").fetchone()[0] == 0
+    approval = engine.ledger.get(result["approval_policy"], "policy")["content"]
+    assert approval["failure_policy"] == plan["failure_policy"]
+    assert approval["plan"] == plan["id"]
+    engine.ledger.verify()
+
+
+@pytest.mark.parametrize("prepared_speed", ["v2"], indirect=True)
+def test_v2_all_invalid_is_zero_usable_not_a_successful_extraction(prepared_speed, monkeypatch):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch, invalid=True)
+    engine.config = replace(engine.config, offline=False)
+    result = call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+        "authorization_text": "Run only this fictional all-invalid v2 throughput fixture"})
+    assert len(seen) == 6 and result["counts"] == {"invalid": 6}
+    assert result["valid_returned_by_deadline"] == result["valid_persisted_by_deadline"] == 0
+    assert result["pending"] == 0
+    assert "Zero usable extraction records" in result["markdown"]
+    assert all(row["output"] is None and row["accepted"] is False for row in result["outcomes"])
+    engine.ledger.verify()
+
+
+@pytest.mark.parametrize("prepared_speed", ["v2"], indirect=True)
+def test_v2_unknown_transport_stops_and_remains_unresolved(prepared_speed, monkeypatch):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch, unknown=True)
+    engine.config = replace(engine.config, offline=False)
+    result = call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+        "authorization_text": "Run only this fictional unknown-transport v2 fixture"})
+    assert len(seen) == 1 and result["counts"] == {"unknown": 1}
+    assert result["pending"] == 5
+    assert len(engine.ledger.unresolved) == 1
+    assert engine.ledger.db.execute("SELECT count(*) FROM records WHERE kind='luna_speed_stop'").fetchone()[0] == 1
+    engine.ledger.verify()
+
+
+@pytest.mark.parametrize("binding", ["STUDY", "METHOD", "FAILURE_POLICY"])
+def test_frozen_method_and_failure_policy_cannot_change_at_execution(prepared_speed, monkeypatch, binding):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch)
+    engine.config = replace(engine.config, offline=False)
+    monkeypatch.setattr(workflow, binding, "changed-after-preparation")
+    with pytest.raises(ResearchError, match="execution_binding_changed"):
+        call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+            "authorization_text": "Fictional scope must not authorize a changed frozen plan"})
+    assert seen == []
+    assert engine.ledger.db.execute("SELECT count(*) FROM attempts").fetchone()[0] == 0
+
+
+def test_new_v2_preparation_excludes_failed_v1_source_without_retry(prepared_speed, monkeypatch):
+    engine, plan = prepared_speed
+    seen = mock_runner(monkeypatch, invalid=True)
+    engine.config = replace(engine.config, offline=False)
+    first = call(engine, "luna_group_validation", {"phase": "run", "plan": plan["id"],
+        "authorization_text": "Fictional bounded v1 run only"})
+    failed_source = first["outcomes"][0]["source_version"]
+    assert first["counts"] == {"invalid": 1}
+    use_v2(monkeypatch)
+    engine.config = replace(engine.config, offline=True)
+    second = call(engine, "luna_group_validation", {"phase": "prepare", "queue_limit": 6,
+        "data_root": "unused-fictional-root"})
+    assert second["id"] != plan["id"] and second["method"].endswith("-v2")
+    assert second["selection"]["exclusion_counts"]["prior_speed_attempt"] == 1
+    assert len(second["tasks"]) == 5
+    assert failed_source not in {task["source_version"] for task in second["tasks"]}
+    assert second["model_calls"] == 0 and len(seen) == 1
+    assert engine.ledger.get(first["outcomes"][0]["assessment"], "luna_speed_assessment")["status"] == "invalid"
+    engine.ledger.verify()

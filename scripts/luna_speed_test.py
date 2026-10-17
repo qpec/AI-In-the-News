@@ -22,9 +22,18 @@ from scope_reduction_replay import assign_corpus, partition_binding
 ROOT = Path(__file__).resolve().parents[1]
 STUDY = "luna-fulltext-codex-speed-20261017-v1"
 METHOD = "luna-fulltext-codex-speed-v1"
+FAILURE_POLICY = "first_invalid_stop"
 STOPPED_PLAN = "c532c7ce77af1ad916f17aaa15055132d16fb52ae635488d0c4f300bb1a68bce"
 LIMITS = {"seconds": 600, "workers": 4, "canaries": 2, "max_attempts": 2000, "retries": 0}
 SEED = "luna-fulltext-speed-development-order-v1"
+
+
+def configure_v2() -> None:
+    """Explicit new method identity; never reopen the closed v1 run."""
+    global STUDY, METHOD, FAILURE_POLICY
+    STUDY = "luna-fulltext-codex-speed-20261017-v2"
+    METHOD = "luna-fulltext-codex-speed-v2"
+    FAILURE_POLICY = "continue_content_invalid_stop_transport"
 
 
 def implementation() -> Json:
@@ -36,7 +45,7 @@ def implementation() -> Json:
 
 
 def freeze_selection(membership: Json, metadata: Json, frame: Json, unavailable: set[str],
-                     stopped: set[str], corpora: Json, limit: int) -> Json:
+                     stopped: set[str], corpora: Json, limit: int, prior_speed: set[str] | None = None) -> Json:
     folds = {row["body_sha256"]: row["fold"] for row in frame["representatives"]}
     if len(folds) != len(frame["representatives"]):
         raise AuditError("speed_duplicate_body_folds")
@@ -47,6 +56,7 @@ def freeze_selection(membership: Json, metadata: Json, frame: Json, unavailable:
                   "sealed_body_validation" if folds[body] != "development" else
                   "unresolved_prior_attempt" if source in unavailable else
                   "stopped_extraction_lineage" if source in stopped else
+                  "prior_speed_attempt" if source in (prior_speed or set()) else
                   "other_corpus" if corpora[source] != "incident-reports" else None)
         if reason:
             exclusions[source] = reason
@@ -59,6 +69,8 @@ def freeze_selection(membership: Json, metadata: Json, frame: Json, unavailable:
 
 
 def render_plan(plan: Json) -> str:
+    stop = ("First invalid/unknown output stops new dispatch." if plan["failure_policy"] == "first_invalid_stop" else
+            "Content-invalid outputs remain rejected and are counted while scheduling continues; transport/unknown/audit failures stop scheduling.")
     lines = ["Offline Luna speed-test preparation completed.", "",
              f"Corpus: incident-reports. Frozen queue: {len(plan['tasks']):,} full-text articles; "
              f"eligible development frame {plan['selection']['eligible']:,}/{plan['selection']['frame_count']:,}. "
@@ -66,7 +78,7 @@ def render_plan(plan: Json) -> str:
              f"Full retained text: {plan['body_characters']:,} characters, {plan['passage_count']:,} canonical passages. "
              "No truncation, new embeddings, model calls, event results or membership changes. All queued articles are pending.",
              "Test: 600 seconds including two sequential canaries, then four continuously refilled workers; "
-             "at most 2,000 attempts, zero retries. First invalid/unknown output stops new dispatch. "
+             "at most 2,000 attempts, zero retries. " + stop + " "
              "Configured gpt-6-luna, low reasoning, Codex account transport. This is a throughput test, not an accuracy evaluation.", "",
              "Prepared examples (not extracted events):"]
     lines.extend(f"- {_link(t)}" for t in plan["tasks"][:3])
@@ -86,7 +98,7 @@ def render_result(value: Json, plan: Json) -> str:
              f"Offline preparation {plan['preparation_seconds']:.3f}s (initial runtime preflight additional); "
              f"peak in-flight jobs {value['timing']['peak_in_flight']}. Reserved but not dispatched: {value['counts'].get('not_dispatched', 0)}.",
              f"Valid focus outputs: {dict(focus)}. Configured model gpt-6-luna / low; "
-             f"observed model unavailable for {sum(r['observed_model'] is None for r in rows)} responses. "
+             f"observed model unavailable for {sum(r['observed_model'] is None and r['dispatch_offset'] is not None for r in rows)} responses. "
              f"Observed usage totals (only reported responses): {value['usage']}; missing usage {value['usage_missing']}.",
              "Mechanical validation checks schema and literal grounding, not semantic accuracy or event identity. "
              "These are unreviewed article results, not accepted dossiers. Failed, unknown and pending processing are not negative findings. "
@@ -144,7 +156,7 @@ class SpeedResearch(Research):
         started = time.perf_counter()
         protocol = {"method": METHOD, "limits": LIMITS, "seed": SEED,
                     "timing": "600 monotonic seconds includes canaries, CLI startup, audit and validation; offline preparation/preflight excluded",
-                    "failure_policy": "First invalid/unknown stops new dispatch; drain in-flight; no retry or resume",
+                    "failure_policy": FAILURE_POLICY,
                     "selection": "Seeded development order, incident-reports only; sealed bodies, unresolved prior sources and stopped extraction queue excluded",
                     "contract_digest": contract.contract_digest(), "implementation": implementation()}
         protocol_id = self._version(session, context, {"kind": "protocol", "key": STUDY, "content": protocol})["id"]
@@ -169,8 +181,12 @@ class SpeedResearch(Research):
                 unavailable.update(original_tasks[key]["source_versions"])
         stopped_plan = self.ledger.get(STOPPED_PLAN, "luna_group_validation_plan")
         stopped = {t["source_version"] for t in stopped_plan["tasks"]}
+        prior_sql = ("SELECT json_extract(payload,'$.source_version') AS source FROM records "
+                     "WHERE kind='luna_speed_assessment' AND json_extract(payload,'$.dispatch_offset') IS NOT NULL")
+        self.ledger.append(session, "speed.previous_attempts.inspection.intended", {"sql": prior_sql, "purpose": "Exclude previously attempted speed sources; never retry"})
+        prior_speed = {r["source"] for r in self.ledger.db.execute(prior_sql)}
         selection = freeze_selection(original["membership"], inputs["metadata"], inputs["frame"], unavailable,
-                                     stopped, corpora, data["queue_limit"])
+                                     stopped, corpora, data["queue_limit"], prior_speed)
         selection_ref = save(self, session, selection, "Frozen benchmark queue and exclusions before source-body access")
         config = {"codex_executable": original["config"]["codex_executable"], "model": "gpt-6-luna", "effort": "low",
                   "timeout_seconds": 180, "max_input_bytes": 1_000_000, "max_output_bytes": 262144}
@@ -229,7 +245,7 @@ class SpeedResearch(Research):
             raise ResearchError("speed_canary_unavailable_no_replacement")
         value = {"study_key": STUDY, "method": METHOD, "owner_workspace": str(self.ledger.root), "versions": versions,
                  "implementation": protocol["implementation"], "contract_digest": contract.contract_digest(),
-                 "limits": LIMITS, "config": config, "corpus_id": "incident-reports", "manifest_sha256": manifest_hash,
+                 "limits": LIMITS, "failure_policy": FAILURE_POLICY, "config": config, "corpus_id": "incident-reports", "manifest_sha256": manifest_hash,
                  "partition": partition, "tasks": tasks, "selection_artifact": selection_ref,
                  "selection": {k: v for k, v in selection.items() if k not in {"selected", "exclusions"}},
                  "preparation_exclusions": dict(excluded), "body_characters": characters,
@@ -244,6 +260,8 @@ class SpeedResearch(Research):
         plan = self.ledger.get(plan_id, "luna_speed_plan")
         if (self.config.offline or (context.versions and context.versions != plan["versions"])
                 or plan["implementation"] != implementation()
+                or plan["method"] != METHOD or plan["study_key"] != STUDY
+                or plan["failure_policy"] != FAILURE_POLICY
                 or plan["limits"] != LIMITS or plan["contract_digest"] != contract.contract_digest()
                 or Path(plan["owner_workspace"]).resolve() != self.ledger.root.resolve()):
             raise ResearchError("speed_execution_binding_changed")
@@ -268,7 +286,7 @@ class SpeedResearch(Research):
             raise ResearchError("speed_sources_became_unresolved")
         approval = self._version(session, context, {"kind": "policy", "key": STUDY + "-authorization", "content": {
             "method": METHOD + "-authorization", "plan": plan_id, "approved_by": "user:current-chat",
-            "instruction": data["authorization_text"], "limits": LIMITS, "transport": "codex-account-cli",
+            "instruction": data["authorization_text"], "limits": LIMITS, "failure_policy": FAILURE_POLICY, "transport": "codex-account-cli",
             "api_fallback": False, "new_embeddings": False, "retries": 0}})["id"]
         batch = self.ledger.record(session, "luna_speed_execution", STUDY, {
             "plan": plan_id, "approval_policy": approval, "tasks": plan["tasks"], "started_at": utc(),
@@ -319,7 +337,10 @@ class SpeedResearch(Research):
             if not unknown:
                 self.ledger.unresolved.pop(attempt, None)
             outcomes.append({**value, "assessment": assessment})
-            if status not in {"valid", "not_dispatched"}:
+            content_invalid_continues = (FAILURE_POLICY == "continue_content_invalid_stop_transport"
+                and status == "invalid" and (response.raw_response or {}).get("transport_status") == "returned"
+                and (response.raw_response or {}).get("failure") is None)
+            if status not in {"valid", "not_dispatched"} and not content_invalid_continues:
                 self.ledger.record(session, "luna_speed_stop", STUDY, {"plan": plan_id, "attempt": attempt,
                     "status": status, "errors": errors, "stop_remains_latched": True})
             print(json.dumps({"progress_attempts": len(outcomes), "valid": sum(r["status"] == "valid" for r in outcomes),
@@ -327,7 +348,8 @@ class SpeedResearch(Research):
             return status == "valid"
 
         timing = self.gateway.run_window(session, provider, next_call=next_call, record_response=record_response,
-            seconds=600, workers=4, canaries=2, cap=2000)
+            seconds=600, workers=4, canaries=2, cap=2000,
+            continue_validation_failures=FAILURE_POLICY == "continue_content_invalid_stop_transport")
         persisted = {row["attempt"]: row["persistence_offset"] for row in timing["timings"]}
         for row in outcomes:
             row["persistence_offset"] = persisted[row["attempt"]]
@@ -356,7 +378,10 @@ def main() -> int:
     parser.add_argument("--plan")
     parser.add_argument("--authorization-text")
     parser.add_argument("--result")
+    parser.add_argument("--benchmark-v2", action="store_true", help="Separate v2 study: count content-invalid outputs; still stop on transport/audit failure")
     args = parser.parse_args()
+    if args.benchmark_v2:
+        configure_v2()
     if args.phase == "prepare" and not args.data_root:
         parser.error("prepare requires --data-root")
     if args.phase == "run" and not (args.plan and args.authorization_text):
