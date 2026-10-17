@@ -112,6 +112,24 @@ anchor requests failed validation, so recall remains unavailable. No memberships
 changed. Do not retry, refill the unused call or relaunch this exhausted queue
 by default. See [the final checkpoint](docs/LUNA_GROUP_VALIDATION.md#v2-final-eligible-queue-checkpoint--2026-10-17).
 
+The [replacement evaluator](docs/FAST_EVENT_EVALUATION.md) now has an executed
+offline diagnosis and preparation. New plan
+`98f9d19f9345e502685538a1c1bee7435bdeff65e30918ea522f56961c360d3b`,
+study `fast-event-pair-evaluation-20261017-v1`, has four sequential canaries and
+64 full-support probability-sampled pair checks (32 within, 24 retrieved between,
+eight random-tail), all 68 prepared, zero new model calls or model approval.
+Use `scripts/fast_event_evaluation.py` through its audited Research subclass,
+the same owning workspace and its exact frozen bindings. Maximum proposed
+run is 68 calls/136 article exposures/zero retries; it needs fresh concrete
+plan-bound approval. First invalid/unknown response durably stops scheduling;
+do not bypass the canaries, reset the stop or silently reuse old-contract labels
+as new executions. Deterministic replay of original outputs is separately marked
+and leaves old statuses unchanged. Pair precision, whole-group purity,
+candidate-pool recall and full-frame pair recall are different estimands.
+The 191-million-pair random tail can leave recall very uncertain at small budgets.
+Human-review templates are blinded; self-asserted reviewers do not establish
+independently validated gold. Original memberships remain unchanged.
+
 Commit each major completed work step to the appropriate `AI-In-the-News` or `AI-In-the-News-Data` repository. Keep commits focused, preserve unrelated work, and run applicable validation before committing. Research audit records, restricted sources, model payloads, working databases and logs still belong in protected storage outside Git; commit the associated code, methods or documentation instead. Do not push unless requested.
 
 

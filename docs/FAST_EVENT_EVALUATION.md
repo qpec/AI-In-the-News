@@ -114,3 +114,49 @@ wire prompt was 6,249 bytes versus 42,936 bytes for a 21-article old prompt
 (85.4% smaller per invocation). Scopes differ; individual pairs repeat anchor
 text and CLI startup. This is not a same-workload throughput, live latency or
 accuracy comparison. Actual research results belong in the execution checkpoint.
+
+## Executed offline checkpoint — 2026-10-17
+
+Diagnostic `166726cdc783c791be23fd18240d1d1eaeaa9ac092dcdfcc2a6e2e255b867680`
+retained all 1,918 original candidate relations and made **zero model calls**.
+The original 99 anchor requests averaged 20.18 articles; their median observed
+local duration was 49.15 s, versus 10.43 s for the smaller group requests.
+Primary anchor failures included 41 incomplete passage checklists, 27 incomplete
+source lists and 16 uncited factual-field responses. These explain mechanical
+failure, not the semantic truth of the labels.
+
+New-contract structural projection retained 81 same-event, 675 different-event
+and 150 uncertain relations. Another 993 remained failed/unusable and 19 pending.
+There were 25 same-event pairs inside current groups and 56 outside; 25 inside
+and 1,137 outside remain unknown. Complete-case candidate-pool recall is 30.9%,
+with missingness bounds 2.1%–47.2%. These are conditional **original-model-output
+diagnostics**, not confidence intervals, human gold, or full-corpus recall.
+All original attempt statuses, prompts, batched context and memberships remain
+unchanged. The exact presentation artifact
+`229d080471c32186be47a065dba2448f65d4a74e42440520dccd6ecfadc0ca60`
+was shown in chat, including source-linked examples.
+
+Prepared plan `98f9d19f9345e502685538a1c1bee7435bdeff65e30918ea522f56961c360d3b`
+contains four separate canaries and 64 evaluation pairs: all **68 prepared**,
+zero missing/oversize/quarantined selected tasks, **zero new model calls and no
+new model approval**. The 19,549-article frame has 4,225 within-group pairs,
+1,860 retrieved between-group pairs and 191,065,841 remaining between-group pairs.
+The 32/24/8 draw preserves the corresponding inclusion probabilities. The two
+historically unresolved sources remain quarantined; none was selected here.
+The complete audited diagnosis/preparation operation took 65.070 s. This is not
+a live model-speed benchmark. Its exact plan presentation
+`8998aa0a372a9800ea638c809215613e1d3ddd08433648668c4ea8469a758e07`
+was shown in chat.
+
+Blinded human-review template result
+`2bb26286f13a4f95e7a87592e8ca95a5e96b59b05d9f10507dd08272479c1047`
+contains all 64 evaluation pairs and zero unavailable requests, human references
+or model calls. The private template artifact is
+`b1a26579432adcbcfd25bf083c5bd6602ed5202480f6cbf9066d9603174cc17d`;
+copy it inside the protected workspace before editing. That audited operation
+took 38.651 s, including complete-store verification; preflight was not timed
+separately. Exact presentation
+`8e219c66a23fd729a75a36f433977efbc618a25e462b02f9549e0ef3a5ae15dc`
+was shown in chat. No empirical new-contract precision/recall or independently
+validated accuracy is claimed. The remaining execution gate is concrete approval
+for this new 68-call/136-exposure/zero-retry plan; the old approval is exhausted.
