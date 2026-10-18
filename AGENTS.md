@@ -27,16 +27,58 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
-## Active cost diagnostic — 2026-10-18 00:49 UTC
+## Drained results and exact held-cost recovery preparation — 2026-10-18
+
+Cost diagnostic `3117` completed as
+`971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`,
+presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`.
+All **10,766 submitted articles are assessed**, zero pending provider jobs:
+5,258 cybercrime and 5,508 incident reports. Recorded conservative charge is
+**USD4.175503012**, with **USD0.001402432 still reserved**. Exactly 10,765 cost
+entries are settled and one is unknown; the book is not frozen and no gateway
+stop was found. Current parser: 6,518 valid / 4,243 invalid / five errors.
+188,462 eligible requests remain unsubmitted. These are provisional records.
+
+The new settled error `b5bea8f050d313c543dcf803a2d8b57dcd6f286f65cb20316c18f7d7d86158e5`
+is an exact 4,096-output-token truncation. The other,
+`a4ce76d3976b0db7d5efab9fc994092731e0ce201a5a3197c8817b5972452472`,
+is a terminal HTTP400 `invalid_prompt` rejection with unavailable model/usage.
+Its full original reservation stays held; never call it free, release it, retry,
+reformulate or reroute that rejected request. Both outputs remain failed.
+
+Offline projection `68044` completed as
+`1402a246c3feb6a3c911ac29697dae9b70fe2d2a21a7eabf1ad35d2460cc9d9d`,
+presentation `c36bdbf05b73e74307efd5bcaf44115ca88909171bd14f23c60ce41f6e9fe542`:
+all 10,766 assessed outputs covered, 8,780 derived valid / 1,986 derived invalid,
+2,262 mechanical recoveries, zero new models/retries/original-status changes.
+Its temporary guard `15210` released. This does not establish semantic accuracy
+or accepted dossiers. Exact protected reports are retained; `record_presentation`
+does not support these technical result kinds.
+
+New `luna_budget_held_history.py`, `luna_budget_held_cost.py` and
+`run_luna_budget_held_cost.py` implement an explicit finite amendment within the
+authorized untouched queue. Original strict loaders, stops, BudgetBook and
+gateway stay unchanged. The real unknown liability remains fully counted under
+the same USD120/USD150 limits. Exact retained terminal response, unique dispatch,
+request bytes, provider count 4,015, requested model, 4,096 output cap, price,
+original stop/ack/protocol/deadline and reserve-to-unknown history must all match.
+Every other unknown, frozen/overrun cost, ambiguity or new technical error stops.
+The actual two original blockers are preserved and explicitly verified.
+Fifty focused tests, Ruff, scoped mypy, wrapper syntax and independent code review
+passed. The new runner is prepared, not yet launched at this checkpoint; check
+current processes before any launch. Its future stopped-run GET-only diagnostic
+still needs a dedicated adapter; old-lineage diagnostics must not be misused.
+
+## Historical cost diagnostic launch — 2026-10-18 00:49 UTC
 
 The earlier GET-only drain `48951` exited before any provider request at
 `continuation_unknown_or_frozen_cost`, after passing full preflight. The old
 admission proof rejects unknown/frozen/overrun entries, not ordinary pending
 reservations. Its failed intent and frozen implementation remain unchanged.
 
-**Current sole owner process:** `scripts/diagnose_luna_budget_costs.py`, launched
+**At this historical checkpoint the sole owner process was** `scripts/diagnose_luna_budget_costs.py`, launched
 once through its saved-key/sleep-guard wrapper from commit `77b17fa` in exec
-`3117` at 00:49:30 UTC; worker PID `123964`, launcher `19028`. It is running
+`3117` at 00:49:30 UTC; worker PID `123964`, launcher `19028`. It was running
 full preflight before GET-only reconciliation and exact budget-anomaly reporting.
 It binds historical stop/run/ack/phase/code identities for read access without
 using admission loaders; unknown costs remain reserved and block inference.

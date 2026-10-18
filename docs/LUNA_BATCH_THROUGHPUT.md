@@ -1,6 +1,80 @@
 # Luna Batch throughput amendment
 
-## Active cost diagnostic — 2026-10-18 00:49 UTC
+## Exact held-cost continuation preparation — 2026-10-18
+
+The completed GET-only diagnostic is
+`971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`
+(presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`).
+It reconciled all 10,766 submitted requests, with no pending jobs or drain
+obstacles. Cybercrime contributes 5,258 assessed of 60,775 eligible; incident
+reports 5,508 of 138,453. Current parser totals are 6,518 valid, 4,243 invalid
+and five errors. There are 188,462 unsubmitted eligible requests.
+
+Known conservative usage is USD4.175503012. One request has unavailable usage
+and retains its full USD0.001402432 reservation; 10,765 others are settled.
+The book is not frozen, with no gateway stop. The new failures are a settled
+4,096-token truncation (`b5bea8f050d313c543dcf803a2d8b57dcd6f286f65cb20316c18f7d7d86158e5`)
+and a terminal HTTP400 `invalid_prompt` rejection
+(`a4ce76d3976b0db7d5efab9fc994092731e0ce201a5a3197c8817b5972452472`).
+The rejection supplies no model or usage; neither is inferred. It remains failed
+and must never be retried, reworded or rerouted. The rejected request hash is
+`0cc065e90dff38d051eab8733bb5993f7df6d030b58e6739aee4643559d60fd5`.
+
+The finite amendment uses NEW historical-proof, held-cost proof and runner files;
+all previous implementations and stops remain unchanged. This follows the user's
+authorization to repair recoverable implementation problems through tested,
+append-only audited amendments while preserving all reservations and the original
+queue, budget and deadline. It changes admission around one precisely proved
+historical held liability, not the source/model contract or scientific acceptance.
+BudgetBook already counts the full unknown reservation in committed spend; neither
+BudgetBook nor the shared gateway is changed, replaced or supplied a fictitious
+clean state.
+
+Before registration/admission, the adapter replays the original phase and finite
+failure proofs, then proves the unique retained terminal HTTP400 row, exact
+attempt/manifest/upload/create/job provenance and absence of ambiguous or duplicate
+dispatch. The full request bytes/hash, requested Luna model, exact provider input
+count of 4,015, output cap of 4,096 and original price fingerprint must agree.
+The original reserve-to-unknown event history must retain exactly 1,402,432
+nanoUSD, zero recorded charge, unavailable usage and no accepted extraction.
+The separate new truncation must pass the unchanged settled-failure verifier.
+The original recovery finish must retain exactly its technical-error and
+unknown-charge blockers, with unchanged run/protocol/ack/deadline linkage.
+
+The runner uses the same real book, stable request/action identities, manifests,
+source partitions, full text, output cap, dispatch methods, up to 16 exact token
+counters and provisional 20M-token queue cap. It rechecks the held-entry invariant
+before paid creates and after reconciliation. Every additional unknown/error,
+frozen/overrun cost, gateway stop, changed proof or dispatch ambiguity stops.
+Unknown billing remains unknown; the hold is the original contractual maximum
+estimate, not a provider invoice. The USD120 operating/USD150 maximum and original
+2026-10-18 15:44:53 UTC admission deadline are unchanged.
+
+Reconciliation calls the unchanged per-job implementation inside a newly registered
+audited handler using the same gateway/policy. This avoids calling an old admission
+entry point that necessarily rejects the preserved hold, without masking cost or
+assessment records. Reports explicitly display the held unknown amount and exact
+finite failure scope. A later stopped/deadline held-run GET-only diagnostic still
+requires an adapter bound to this new run/finish; old-lineage helpers cannot be
+reused as if they accepted it. No blanket future-failure exemption is created.
+
+Fifty focused tests, Ruff, scoped mypy and launcher syntax passed. Independent
+review caught and verified repair of the actual two-blocker integration case.
+This tooling is prepared but unlaunched at this checkpoint. The saved-key launcher
+holds a temporary idle-sleep guard only for its child lifetime. Check existing
+processes first, and never open a second protected owner writer.
+
+The separately completed offline projection is
+`1402a246c3feb6a3c911ac29697dae9b70fe2d2a21a7eabf1ad35d2460cc9d9d`
+(presentation `c36bdbf05b73e74307efd5bcaf44115ca88909171bd14f23c60ce41f6e9fe542`).
+It covers all 10,766 assessments: 8,780 derived valid, 1,986 derived invalid and
+2,262 mechanical recoveries, with no new models, retries or original-status
+changes. Session68044 and its scoped guard15210 exited. These are provisional
+mechanical results, not accuracy, event eligibility or accepted dossiers. The
+exact protected reports are retained; `record_presentation` is unsupported for
+these technical kinds.
+
+## Historical cost diagnostic launch — 2026-10-18 00:49 UTC
 
 Drain `48951` passed full preflight but exited before any provider GET at the
 historical admission predicate `continuation_unknown_or_frozen_cost`. That
