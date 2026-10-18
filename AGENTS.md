@@ -50,6 +50,16 @@ continues; paid dispatch is not yet confirmed at this checkpoint. Reuse this
 same new AckRef for an authorized exact restart only after resolving the prior
 process outcome and remote jobs. Never register another or duplicate inference.
 
+**Verified resumed dispatch at 04:45 UTC:** startup verification passed and exec
+`71840` confirmed 15,516 submitted / 15,016 assessed, 500 pending in two provider
+jobs, 2,325,010 own queued input tokens and no stop. Recorded charge USD5.821009;
+total reserved USD0.724447 at displayed precision, including the unchanged
+USD0.001402432 historical hold. There are 183,712 eligible unsubmitted articles.
+The controller next staged 500 untouched requests in two separate-corpus files
+and entered a 250-request incident-report count/admit/submit phase with 16 workers.
+The current parser totals and 4,250 awaiting literal projection are unchanged.
+This verifies resumed parallel dispatch, not whole-queue completion or capacity.
+
 Held controller `55955` exited with `technical_stop` at **03:18:29 UTC** and
 released its temporary sleep guard. Do not restart it or any older controller.
 Final wrapped result `a6581d988b3e8ddf927683b35e22e79c0d68a376357d9d431b97fb3cb1cd9edc`

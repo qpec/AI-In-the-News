@@ -34,6 +34,17 @@ new paid dispatch is not yet confirmed. Reuse this same new AckRef after resolvi
 the prior process outcome and remote jobs; never register a replacement or infer
 dispatch from successful registration.
 
+At the **04:45 UTC observation**, the same controller confirmed resumed paid
+dispatch: **15,516 submitted / 15,016 assessed**, **500 pending in two provider
+jobs**, with 2,325,010 own queued input tokens and no stop. Recorded conservative
+usage remained USD5.821009; total reservations were USD0.724447 at displayed
+precision, including the full unchanged USD0.001402432 unknown hold. There were
+183,712 eligible unsubmitted articles. It then staged 500 untouched requests in
+two separate-corpus files and began the next 250-request incident-report phase
+with 16 exact-token counters. Current parser counts and 4,250 awaiting literal
+projection remain unchanged. This is observed parallel submission, not a claim
+of later completion, actual account capacity or semantic validation.
+
 ### Exact preceding stop and diagnosis
 
 The held controller in exec `55955` stopped at **03:18:29 UTC** after returning
