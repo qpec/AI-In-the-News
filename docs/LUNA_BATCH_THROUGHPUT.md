@@ -1,5 +1,87 @@
 # Luna Batch throughput amendment
 
+## Launch validation — 2026-10-18
+
+The combined focused suite passed **19 tests in 113.45 seconds**, plus Ruff,
+scoped mypy, LF checks and PowerShell wrapper syntax. Independent review traced
+the complete 1,000-request dispatch/count/gateway/upload path and found no hidden
+250-request limit or blocking defect. All tasks receive exact provider-count
+provenance, full output reservations and durable attempt intent before create.
+Current book, retained proof identities, action completeness and the original
+deadline are rechecked at each write gate; the final transport boundary also
+blocks late creates. These synthetic checks do not establish extraction quality
+or production throughput. No production call occurred during verification.
+
+Additional supplementary-hook denials interrupted coordination. The fallback
+journal verified at 37,901 events and the session journal at 34,051, then 34,180
+events, all with zero unresolved model attempts. One verification attempt
+observed exact concurrent workspace-lock contention and passed after release.
+The denials' own original exception details were unavailable; no history or
+hook settings were changed. Agent tool windows remain serialized.
+
+## User-authorized throughput revision — 2026-10-18
+
+The user instructed: “Fix and do it now. Ensure maximum speed. Remove blocks.”
+The new operational policy removes the whole-queue stop for independently proved,
+fully settled terminal output-cap truncations. Such articles stay failed and are
+never retried or accepted. The separate original unknown liability remains fully
+reserved. Other unknown, frozen, overrun, ambiguous-dispatch, unqualified technical
+and audit failures still stop admission. This changes scheduling and failure
+handling, not the full-text extraction prompt, schema, 4,096-token cap or outcomes.
+
+The new files are `luna_budget_truncation_policy.py`,
+`run_luna_budget_throughput.py` and its saved-key wrapper. Historical controllers
+remain unchanged. They register a policy before admission, bind the exact latest
+diagnostic/stop/predecessor and replay the historical proof once in the locked
+audited session. New qualifying failures receive individual retained raw-response
+and real-settlement proofs; exact session-bound reuse avoids replaying the entire
+predecessor chain each cycle. Current costs, held liability, action identity,
+new failures and the deadline remain checked. No inference is retried.
+
+New files contain at most 1,000 same-corpus requests and 64,000,000 bytes. Existing
+250-request manifests and all stable article/request identities remain intact.
+One writer retains 16 concurrent exact token counters, fills the queue and polls
+existing jobs while processing new work. Incremental reads inspect new immutable
+record projections after the initial snapshot. The provisional local 20M queued
+input-token cap remains: the account limits page required login, so higher actual
+project capacity was not verified. This is an implementation improvement, not a
+measured speedup or a guarantee that the whole frame finishes by the deadline.
+
+The same owner, plan, USD120 operating/USD150 maximum and admission deadline
+**2026-10-18 15:44:53 UTC** remain. All new inference requires exact counts and
+maximum-cost reservations. After the deadline only submitted-job reconciliation
+and retained-output projection remain authorized. Invalid or truncated outputs
+remain missing analysis, not negative event findings. Exact technical Markdown
+is retained; these result kinds are unsupported by `record_presentation`.
+
+### Baseline actually diagnosed
+
+The prior GET-only diagnostic `90104` completed and released ownership. Result
+`06ae1c0c56f7cf4445c1d92183edc6f8b23653c25fbddabf23e12e0bcd458f20`,
+presentation `0131688f366db7a0a8c66be18ba723f865f2f300fe01904445c530d4d27e2ebf`,
+confirms **19,266 assessed/submitted**, zero pending jobs, obstacles or gateway
+stops, 19,265 settled entries and one unchanged unknown hold. Conservative charge
+is **USD7.470690793**, held reservation **USD0.001402432**. Cybercrime has
+9,508/60,775 submitted and incident reports 9,758/138,453; **179,962** remain
+unsubmitted, including 250 staged. Current parser totals are 11,753 valid,
+7,505 invalid and eight errors. 8,500 outputs await literal projection.
+
+The new exact failure
+`f282f3bc842e96240cb31b85473edb221631ea37cd64b56f949071c6a3e052a8`
+has retained HTTP200 `gpt-6-luna`, `incomplete/max_output_tokens`, 3,922 input
+and 4,096 output tokens, complete usage and settled cost. It remains failed.
+The terminal run is `e17af57d4fbdb8a58f3e26d5fffeda59f5ce6cb246db2afc97eeee33cb71bebc`,
+finish `64527250b0a721c1e8486239915eb55168afc9aec6909a4248fd4d058d3cf457`,
+wrapped stop `5123bc4f09cdc2896d90dba9f3917ad02d8b1eac5843dac64c6323ff362a12bf`.
+The previous finite acknowledgment stays historical evidence. The new policy
+must pass tests and independent review before registration and launch; this
+preparation checkpoint reports **no new paid dispatch**.
+
+The supplementary hook failure observed during preparation was followed by
+audited verification of both existing hook journals (37,897 and 32,417 events,
+zero unresolved attempts). Its exact cause was unavailable; no journal history
+or hook/global settings were changed. Shell tool windows remain serialized.
+
 ## Held-chain terminal stop and diagnostic launch — 2026-10-18
 
 At the **06:15 UTC observation**, exec `71840` had reconciled all **19,266

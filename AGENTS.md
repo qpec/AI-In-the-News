@@ -27,6 +27,44 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Throughput revision verified for launch — 2026-10-18
+
+The new controller/helper passed all 19 focused tests together, Ruff, scoped
+mypy, LF and PowerShell syntax checks. Independent review traced the complete
+1,000-request path through dispatch, counting, gateway intent/reservation and
+upload validation: no inherited 250-request dispatch limit remains. It also
+checked current-book/proof/action validation at every write gate and the final
+before-create deadline check. These are software checks, not new research results.
+The revision is ready for one launch from its commit checkpoint; actual launch
+and paid dispatch must be recorded separately. Existing unrelated dirty work
+was preserved.
+
+## New throughput revision in preparation — 2026-10-18
+
+The latest human instruction is “Fix and do it now. Ensure maximum speed.
+Remove blocks.” It authorizes the new registered operational revision described
+in [LUNA_BATCH_THROUGHPUT](docs/LUNA_BATCH_THROUGHPUT.md): continue untouched work
+after independently proved settled terminal 4,096-token truncations, preserving
+their failed status, exact accounting, unknown hold and no-retry rule. All other
+unknown/ambiguous/frozen/audit/unqualified errors still stop. Historical scripts,
+stops and acknowledgments remain unchanged. This supersedes the operational
+first-new-settled-truncation stop, not the budget, deadline or extraction contract.
+
+Diagnostic exec `90104` has completed and released ownership. Exact result
+`06ae1c0c56f7cf4445c1d92183edc6f8b23653c25fbddabf23e12e0bcd458f20` proves the one
+new failed assessment `f282f3bc842e96240cb31b85473edb221631ea37cd64b56f949071c6a3e052a8`
+is a fully settled terminal truncation. Current totals remain 19,266 assessed,
+zero pending provider jobs, 179,962 unsubmitted, USD7.470690793 charge and the
+unchanged USD0.001402432 hold. No new inference occurred during diagnosis.
+
+New helper/controller/wrapper are being tested; do not restart the old terminal
+controllers or overlap a protected writer. The new design uses one full startup
+proof, exact session-bound caching, incremental record reads, up to 1,000 requests
+per separate-corpus file, 16 exact counters and the provisional 20M-token queue.
+Actual project capacity remains unverified. USD120/USD150, full text, v2 contract,
+4,096 output cap and 2026-10-18 15:44:53 UTC admission deadline are unchanged.
+No new paid launch is confirmed at this preparation checkpoint.
+
 ## Held-chain stop and GET-only diagnosis — 2026-10-18 06:15 UTC observation
 
 Controller exec `71840` has exited with `technical_stop`; its temporary guard
