@@ -1,5 +1,38 @@
 # Luna Batch throughput amendment
 
+## Held-chain terminal stop and diagnostic launch — 2026-10-18
+
+At the **06:15 UTC observation**, exec `71840` had reconciled all **19,266
+submitted articles** and exited with `technical_stop`, releasing its temporary
+sleep guard. The final wrapped result is
+`5123bc4f09cdc2896d90dba9f3917ad02d8b1eac5843dac64c6323ff362a12bf`, presentation
+`3d7989e5481c7a7e3420d30960ea3771b2d58ba85026a9d849354d31f0f9c0e3`.
+There are zero pending provider jobs and zero reconciliation obstacles. Current
+parser counts are 11,753 valid / 7,505 invalid / eight errors, compared with
+11,731 valid / 7,486 invalid / 49 errors in the raw envelope view. One new
+technical failure needs exact retained-response diagnosis; no cause is inferred.
+
+Recorded conservative charge is USD7.470691 at displayed precision, with the
+full historical unknown reservation USD0.001402432. Of the 199,228 eligible
+articles, 179,962 remain unsubmitted, including 250 staged; 179,712 are not yet
+manifested. Literal projection covers 10,766 of the 19,266 assessed outputs,
+leaving 8,500 awaiting that deterministic step. Invalid or missing processing
+does not establish negative eligibility, and no accepted dossiers are claimed.
+
+After verifying that no prior owner process remained, the existing reviewed
+GET-only adapter `drain_luna_budget_held_chain.py` launched once through its
+saved-key/sleep-guard wrapper at **06:17:06 UTC**, exec `90104`. Launcher parent
+PID `107168`, shim `97872`, worker `126684`. It binds the final wrapped result
+above and acknowledgment
+`93a2bee1a170014b5828ee47405d8a2486c2ec76f1f74255d2c58de54020bba8`, with
+`AllowExistingJobReads` and `MaxWaitSeconds 1800`. At launch mandatory integrity
+preflight is running; no diagnostic outcome is yet confirmed. This is the sole
+protected owner writer. It cannot count, create, upload, retry or acknowledge a
+new inference continuation. All reservations, failures, stops, budget and the
+original 15:44:53 UTC deadline remain. Any later finite amendment requires the
+new diagnostic and independent exact raw proof; the old acknowledgment cannot
+be reused to exempt the new failure.
+
 ## Stopped held controller and finite chain preparation — 2026-10-18
 
 ### Verified launch of the finite chain

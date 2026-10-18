@@ -27,6 +27,34 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Held-chain stop and GET-only diagnosis — 2026-10-18 06:15 UTC observation
+
+Controller exec `71840` has exited with `technical_stop`; its temporary guard
+released. Final wrapped result
+`5123bc4f09cdc2896d90dba9f3917ad02d8b1eac5843dac64c6323ff362a12bf`,
+presentation `3d7989e5481c7a7e3420d30960ea3771b2d58ba85026a9d849354d31f0f9c0e3`.
+All **19,266 submitted requests are assessed**, zero pending jobs or reconcile
+obstacles. Current parser: 11,753 valid / 7,505 invalid / eight errors; raw:
+11,731 valid / 7,486 invalid / 49 errors. One additional technical failure is
+not yet diagnosed. Recorded charge USD7.470691 at displayed precision, full
+historical unknown hold USD0.001402432. There are 179,962 eligible unsubmitted,
+including 250 staged, and 8,500 assessed outputs awaiting literal projection.
+All results remain provisional. Do not reuse the old acknowledgment to exempt
+this new failure, restart the terminal run or infer its failure cause.
+
+**Current sole owner:** `scripts/drain_luna_budget_held_chain.py`, launched once
+through its saved-key/sleep-guard wrapper at **06:17:06 UTC**, exec `90104`;
+launcher parent `107168`, shim `97872`, worker `126684`. It binds the exact
+wrapped stop above and acknowledgment
+`93a2bee1a170014b5828ee47405d8a2486c2ec76f1f74255d2c58de54020bba8`, with explicit
+existing-job GET permission and a 1,800-second drain wait limit. Mandatory full
+preflight is running; no diagnostic result is confirmed yet. Check its existing
+process/output first and never overlap an owner writer. It grants no new
+inference or retry, retains the unknown hold, and may exit nonzero despite a
+completed report. Inspect exact persisted results, pending jobs and obstacles.
+Any later finite amendment requires the new completed diagnosis and exact raw
+proof; all original caps, full-text/4096 contract and 15:44:53 UTC deadline remain.
+
 ## Held controller stopped; exact finite chain prepared — 2026-10-18
 
 **Current sole owner process:** `scripts/run_luna_budget_held_chain.py`, launched
