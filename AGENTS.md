@@ -27,6 +27,17 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Throughput controller launched — 2026-10-18 07:28 UTC
+
+Current sole owner is `scripts/run_luna_budget_throughput.py`, launched once via
+its saved-key/sleep-guard wrapper from commit `f893ac7` at **07:28:31 UTC**, exec
+`80389`. Wrapper PID `124280`, Python shim `84448`, worker `129568`. Startup
+confirms the audited workflow with 16 counters and new 1,000-request files.
+Mandatory full preflight is running; no new policy or paid dispatch is confirmed
+at launch. Check this process/output first; never start another owner writer.
+Capture the printed policy reference before any authorized exact restart. The
+monitor follows this process. All prior terminal controllers remain stopped.
+
 ## Throughput revision verified for launch — 2026-10-18
 
 The new controller/helper passed all 19 focused tests together, Ruff, scoped

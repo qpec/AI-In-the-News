@@ -1,5 +1,17 @@
 # Luna Batch throughput amendment
 
+## Actual revised-controller launch — 2026-10-18 07:28 UTC
+
+After confirming no previous controller process remained, the reviewed revision
+launched once from commit `f893ac7` at **07:28:31 UTC**, exec `80389`, using
+`run_luna_budget_throughput_with_key.ps1`. Wrapper PID `124280`, shim `84448`,
+worker `129568`; its temporary idle-sleep guard lasts only for the child.
+Startup output confirms entry into the audited workflow. Full integrity
+preflight is running: policy registration and new paid dispatch are not yet
+confirmed. This process is the sole protected owner writer. Supervision was
+updated to follow it, with no old-controller restart or competing diagnostic.
+Capture its printed policy, registration and run references for exact recovery.
+
 ## Launch validation — 2026-10-18
 
 The combined focused suite passed **19 tests in 113.45 seconds**, plus Ruff,
