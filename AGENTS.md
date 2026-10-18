@@ -55,6 +55,13 @@ completed report. Inspect exact persisted results, pending jobs and obstacles.
 Any later finite amendment requires the new completed diagnosis and exact raw
 proof; all original caps, full-text/4096 contract and 15:44:53 UTC deadline remain.
 
+The additional synthetic recursive-chain regression passed with 24 relevant
+tests, Ruff, scoped mypy and independent review. It exercises a second finite
+acknowledgment with one new settled truncation, exact reuse, unchanged hold and
+history, deadline restart and the next-error stop. Production helpers were not
+changed. The original phase dependency is mocked in this fixture; it proves
+software behavior only. The actual new failure still awaits diagnosis.
+
 ## Held controller stopped; exact finite chain prepared — 2026-10-18
 
 **Current sole owner process:** `scripts/run_luna_budget_held_chain.py`, launched
