@@ -2,6 +2,16 @@
 
 ## Exact held-cost continuation preparation — 2026-10-18
 
+The prepared implementation was subsequently launched once from `2a49053`
+through `scripts/run_luna_budget_held_cost_with_key.ps1` into
+`scripts/run_luna_budget_held_cost.py`, exec `55955`, at **01:41:50 UTC** on
+2026-10-18. Launcher PID `118136`, worker `88432`, shim `117852`. Its temporary
+idle-sleep guard is active and mandatory full preflight is initially running.
+No acknowledgment or paid dispatch is confirmed yet at this checkpoint. Read
+the existing process output and retain its exact acknowledgment IDs before any
+restart; never launch a competing writer or old controller. The monitor now
+points to this process. Preflight can take about twenty minutes without stdout.
+
 The completed GET-only diagnostic is
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`
 (presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`).
@@ -60,7 +70,7 @@ reused as if they accepted it. No blanket future-failure exemption is created.
 
 Fifty focused tests, Ruff, scoped mypy and launcher syntax passed. Independent
 review caught and verified repair of the actual two-blocker integration case.
-This tooling is prepared but unlaunched at this checkpoint. The saved-key launcher
+These preparation checks preceded the single launch recorded above. The saved-key launcher
 holds a temporary idle-sleep guard only for its child lifetime. Check existing
 processes first, and never open a second protected owner writer.
 

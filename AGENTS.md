@@ -29,6 +29,15 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 ## Drained results and exact held-cost recovery preparation — 2026-10-18
 
+**Current sole owner process:** `scripts/run_luna_budget_held_cost.py`, launched
+once through its saved-key/sleep-guard wrapper from commit `2a49053` in exec
+session `55955` at **2026-10-18 01:41:50 UTC**. Launcher PID `118136`, Python
+worker `88432` (shim `117852`). Full mandatory preflight is running; it can take
+about twenty minutes without stdout. Check this existing process first; never
+start a second writer or an old controller. Capture its actual acknowledgment
+reference/result before any exact restart; no acknowledgment or new paid dispatch
+is yet confirmed at this launch checkpoint. The 15-minute monitor follows it.
+
 Cost diagnostic `3117` completed as
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`,
 presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`.
@@ -65,7 +74,7 @@ original stop/ack/protocol/deadline and reserve-to-unknown history must all matc
 Every other unknown, frozen/overrun cost, ambiguity or new technical error stops.
 The actual two original blockers are preserved and explicitly verified.
 Fifty focused tests, Ruff, scoped mypy, wrapper syntax and independent code review
-passed. The new runner is prepared, not yet launched at this checkpoint; check
+passed. These preparation checks preceded the single launch recorded above; check
 current processes before any launch. Its future stopped-run GET-only diagnostic
 still needs a dedicated adapter; old-lineage diagnostics must not be misused.
 
