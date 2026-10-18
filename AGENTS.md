@@ -1,3 +1,25 @@
+# Current extraction infrastructure direction — 2026-10-18
+
+The user stopped the audit-heavy Luna extraction workflow and explicitly requests
+a fresh path that logs exact prompts once, saves results, and retains only the
+minimal request/job/cost state needed for deduplication and the existing budget.
+Follow [the lean workflow](docs/LUNA_LEAN_WORKFLOW.md) for the replacement.
+Research.execute, registered methods, protected storage and the audited shared
+gateway remain required by the current runtime instructions. Optimize redundant
+history reads and per-item bookkeeping; do not bypass that boundary. The initial
+standalone migration snapshot is engineering state, not an authorized research run.
+Preserve historical data, the same authorization/costs/holds, separate corpora,
+full-text prompt, deadline and no-retry rule. Do not restart the stopped controller.
+Document specifically requested steps precisely and provide a shareable explanation;
+avoid automatic audit-history narration. Other research workflows remain unchanged.
+
+All prior extraction controllers are stopped; the fill worker in exec `56054`
+exited and released its sleep guard. The supervision monitor is paused. The last
+verified state is 24,516 submitted/assessed, zero pending jobs, USD9.519585417
+recorded cost and USD1.434141870 reserved. The replacement passed offline
+preparation, regression checks and independent review; live throughput remains
+unmeasured. Do not infer permission to restart from historical launch notes.
+
 # Mandatory research rules
 
 Read [RESEARCH_PROTOCOL](docs/RESEARCH_PROTOCOL.md) and [AUDITABILITY](docs/AUDITABILITY.md) before research work. These rules apply to every Codex session and every project-wide research operation.
