@@ -75,8 +75,19 @@ Every other unknown, frozen/overrun cost, ambiguity or new technical error stops
 The actual two original blockers are preserved and explicitly verified.
 Fifty focused tests, Ruff, scoped mypy, wrapper syntax and independent code review
 passed. These preparation checks preceded the single launch recorded above; check
-current processes before any launch. Its future stopped-run GET-only diagnostic
-still needs a dedicated adapter; old-lineage diagnostics must not be misused.
+current processes before any launch.
+
+The NEW `drain_luna_budget_held_cost.py` and saved-key wrapper now support a
+future terminal held-run diagnostic. They require the final **wrapped** status
+result (not its `base_status_ref`) plus the printed held acknowledgment. Within
+one audited session they resolve and retain the exact run/latest terminal finish,
+reject conflicting optional overrides, bind code/history/deadline/unchanged hold,
+and permit only existing-job GETs. Later unknown/frozen costs remain retained;
+gateway stops suppress GETs. No inference or acknowledgment registration occurs.
+Forty-two focused tests, Ruff, mypy, wrapper syntax and independent review passed;
+this adapter has not been launched. Exit 2 is expected while the original hold
+remains: inspect pending jobs and obstacles separately. Use only after the current
+controller releases ownership. Old-lineage diagnostic helpers are not substitutes.
 
 ## Historical cost diagnostic launch — 2026-10-18 00:49 UTC
 

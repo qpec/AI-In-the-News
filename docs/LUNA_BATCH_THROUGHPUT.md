@@ -64,9 +64,26 @@ Reconciliation calls the unchanged per-job implementation inside a newly registe
 audited handler using the same gateway/policy. This avoids calling an old admission
 entry point that necessarily rejects the preserved hold, without masking cost or
 assessment records. Reports explicitly display the held unknown amount and exact
-finite failure scope. A later stopped/deadline held-run GET-only diagnostic still
-requires an adapter bound to this new run/finish; old-lineage helpers cannot be
-reused as if they accepted it. No blanket future-failure exemption is created.
+finite failure scope. No blanket future-failure exemption is created.
+
+The separate `drain_luna_budget_held_cost.py` and its saved-key wrapper now provide
+the later terminal-run diagnostic without changing this active runner. After the
+controller exits, supply `-Plan`, `-StopResultRef` with its final wrapped result,
+`-HeldAckRef` with the printed acknowledgment, `-AllowExistingJobReads`, and an
+optional `-MaxWaitSeconds 1800`. Do not use the wrapped result's `base_status_ref`.
+Exact run and terminal finish IDs are resolved from that immutable result inside
+the same audited session. Optional `-HeldRunRef`/`-HeldFinishRef` overrides must
+match exactly. SQL, resolution origins, resolved IDs and code hashes are retained
+and bound to the diagnostic protocol before any provider GET.
+
+The diagnostic preserves the historical HTTP400 entry/raw evidence, all later
+unknown/frozen costs and the original deadline without invoking admission loaders.
+It only polls/downloads previously known jobs; a retained gateway stop suppresses
+all GETs. It cannot count, upload, create, retry, release costs or acknowledge
+new inference. Forty-two focused tests, Ruff, mypy, PowerShell syntax and independent
+review passed. It has not been launched. Exit 2 indicates that a held/blocked cost
+remains, even if reconciliation succeeded; pending jobs and obstacles determine
+drain completeness separately. Never overlap it with the active owner writer.
 
 Fifty focused tests, Ruff, scoped mypy and launcher syntax passed. Independent
 review caught and verified repair of the actual two-blocker integration case.
