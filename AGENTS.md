@@ -29,6 +29,17 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 ## Held controller stopped; exact finite chain prepared — 2026-10-18
 
+**Current sole owner process:** `scripts/run_luna_budget_held_chain.py`, launched
+once through its saved-key/sleep-guard wrapper from commit `b985512` at
+**03:50:51 UTC**, exec `71840`. Launcher parent PID `56484`, shim `42752`, Python
+worker `130788`. Mandatory integrity preflight is running; no new acknowledgment
+or paid dispatch is yet confirmed at this launch checkpoint. Capture its printed
+new `ack_ref`/`ack_result` before any exact restart. Reuse that new acknowledgment
+only after resolving the previous outcome and remote jobs; never launch a second
+writer. The monitor now follows this process. For a future terminal chain run,
+use the NEW `drain_luna_budget_held_chain.py` and wrapper with its exact wrapped
+StopResultRef and new HeldAckRef; old-lineage diagnostics are not substitutes.
+
 Held controller `55955` exited with `technical_stop` at **03:18:29 UTC** and
 released its temporary sleep guard. Do not restart it or any older controller.
 Final wrapped result `a6581d988b3e8ddf927683b35e22e79c0d68a376357d9d431b97fb3cb1cd9edc`

@@ -2,6 +2,28 @@
 
 ## Stopped held controller and finite chain preparation — 2026-10-18
 
+### Verified launch of the finite chain
+
+The reviewed chain was launched once from commit `b985512` at **03:50:51 UTC**
+through `scripts/run_luna_budget_held_chain_with_key.ps1`, into
+`scripts/run_luna_budget_held_chain.py` in exec `71840`. Launcher parent PID
+`56484`, Python shim `42752`, Python worker `130788`. A temporary idle-sleep
+guard lasts only for this child. It uses the exact stop/diagnostic and both named
+failure IDs below, under the same protected owner. Root repeated all 73 focused
+tests successfully after normalizing only new-file line endings; sandbox cache
+and temporary-directory restrictions were resolved without changing tests or
+production data. Unrelated dirty work remains untouched.
+
+At this launch checkpoint mandatory integrity preflight is still running, with
+no newly registered acknowledgment or paid dispatch confirmed. Full preflight
+can take twenty minutes or more without stdout. Check this existing process;
+never start a competing writer. Capture its printed new acknowledgment reference
+and result before an exact restart. The active 15-minute monitor now follows it.
+Future post-stop reconciliation must use the new held-chain GET-only adapter and
+the exact wrapped terminal result plus new HeldAckRef.
+
+### Exact preceding stop and diagnosis
+
 The held controller in exec `55955` stopped at **03:18:29 UTC** after returning
 all **15,016 submitted articles**, 7,508 in each separate corpus. Its exact
 wrapped terminal result is
