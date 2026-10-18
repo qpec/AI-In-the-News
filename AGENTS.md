@@ -35,8 +35,16 @@ session `55955` at **2026-10-18 01:41:50 UTC**. Launcher PID `118136`, Python
 worker `88432` (shim `117852`). Full mandatory preflight is running; it can take
 about twenty minutes without stdout. Check this existing process first; never
 start a second writer or an old controller. Capture its actual acknowledgment
-reference/result before any exact restart; no acknowledgment or new paid dispatch
-is yet confirmed at this launch checkpoint. The 15-minute monitor follows it.
+reference/result before any exact restart. The 15-minute monitor follows it.
+
+**Verified registration:** preflight passed and the finite held acknowledgment is
+`a724edd18731dec0eeedfb8a963dfc625718d200667d7b768b935f1a50c61e9d`, result
+`a20c8a41a2f0c0a801a525c21edab6b1fd14ccb74f5f43e0c3a62d8392844750`,
+printed by the existing process at the 02:05 UTC observation. Registration made
+zero provider calls. It preserves the full unknown hold and both failed outputs.
+For an authorized exact restart, use this same `-AckRef` only after establishing
+the current process's exact outcome and remote jobs; never re-register it.
+New paid dispatch was not yet confirmed at this registration checkpoint.
 
 Cost diagnostic `3117` completed as
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`,

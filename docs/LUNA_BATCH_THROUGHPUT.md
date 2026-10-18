@@ -12,6 +12,15 @@ the existing process output and retain its exact acknowledgment IDs before any
 restart; never launch a competing writer or old controller. The monitor now
 points to this process. Preflight can take about twenty minutes without stdout.
 
+At the 02:05 UTC observation, the process printed successful finite acknowledgment
+registration: ref `a724edd18731dec0eeedfb8a963dfc625718d200667d7b768b935f1a50c61e9d`,
+result `a20c8a41a2f0c0a801a525c21edab6b1fd14ccb74f5f43e0c3a62d8392844750`.
+Preflight and the first exact proof had passed. Registration made zero provider
+calls, preserving the unknown full hold and failed outputs. Reuse this exact
+acknowledgment for an authorized restart only after resolving the existing
+process's outcome; do not register another. Paid dispatch was still unconfirmed
+at registration while the same process completed startup verification.
+
 The completed GET-only diagnostic is
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`
 (presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`).
