@@ -38,6 +38,16 @@ at launch. Check this process/output first; never start another owner writer.
 Capture the printed policy reference before any authorized exact restart. The
 monitor follows this process. All prior terminal controllers remain stopped.
 
+The matching post-stop adapter is `scripts/drain_luna_budget_throughput.py`
+and its saved-key wrapper. It passed 15 focused tests, Ruff, scoped mypy,
+PowerShell syntax and independent review, without production access. Use only
+after the throughput owner exits, with explicit Plan, final wrapped StopResultRef,
+PolicyRef and AllowExistingJobReads. It binds the latest run/finish and only GETs
+existing jobs/files; later unknown/frozen costs stay visible, and gateway stops
+suppress GETs. It grants no inference admission or new failure classification.
+Nonzero exit is expected while the historical unknown hold remains; inspect
+pending jobs and obstacles separately. Never overlap this with the controller.
+
 ## Throughput revision verified for launch — 2026-10-18
 
 The new controller/helper passed all 19 focused tests together, Ruff, scoped

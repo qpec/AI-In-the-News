@@ -12,6 +12,25 @@ confirmed. This process is the sole protected owner writer. Supervision was
 updated to follow it, with no old-controller restart or competing diagnostic.
 Capture its printed policy, registration and run references for exact recovery.
 
+### Matching post-stop completion adapter
+
+`drain_luna_budget_throughput.py` and its saved-key/sleep-guard wrapper require
+explicit plan, final wrapped stop-result reference, policy reference and
+existing-job-read permission. They bind the latest exact run/finish and retained
+proof identities, use historical acknowledgment loading for identity only,
+and retain later unknown/frozen costs visibly. Only known-job and referenced-file
+GETs are allowed, including after the original deadline; gateway stops suppress
+all GETs. No inference, retry, policy grant, new failure classification or
+projection occurs. It must run only after the controller releases ownership.
+
+All **15 focused tests** passed, including real temporary-ledger completion of
+pending jobs after the deadline, unknown/frozen reporting, unchanged original
+hold, zero duplicate GETs on replay and gateway-stop suppression. Ruff, scoped
+mypy, wrapper syntax and independent review passed. Historical-loader isolation
+in the fixtures remains a software-test limitation. No production call occurred.
+The adapter may exit 2 because the historical unknown cost is still held; inspect
+pending jobs and obstacles independently of that exit status.
+
 ## Launch validation — 2026-10-18
 
 The combined focused suite passed **19 tests in 113.45 seconds**, plus Ruff,
