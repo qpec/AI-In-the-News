@@ -27,9 +27,61 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
-## Current Batch recovery checkpoint — 2026-10-18
+## Active cost diagnostic — 2026-10-18 00:49 UTC
 
-**Current sole controller:** recovery commit `c0e03dc`, launched once through
+The earlier GET-only drain `48951` exited before any provider request at
+`continuation_unknown_or_frozen_cost`, after passing full preflight. The old
+admission proof rejects unknown/frozen/overrun entries, not ordinary pending
+reservations. Its failed intent and frozen implementation remain unchanged.
+
+**Current sole owner process:** `scripts/diagnose_luna_budget_costs.py`, launched
+once through its saved-key/sleep-guard wrapper from commit `77b17fa` in exec
+`3117` at 00:49:30 UTC; worker PID `123964`, launcher `19028`. It is running
+full preflight before GET-only reconciliation and exact budget-anomaly reporting.
+It binds historical stop/run/ack/phase/code identities for read access without
+using admission loaders; unknown costs remain reserved and block inference.
+Eighteen focused tests, Ruff, mypy, wrapper syntax and independent review passed.
+Check this process/output first; never open a competing writer or relaunch paid
+work from the old finite acknowledgment. The monitor now follows this process.
+The strict finite-chain continuation tooling is prepared but unlaunched; cost
+diagnosis does not itself authorize an unknown-cost exception or release.
+
+Two supplementary hook failures occurred during agent coordination. A direct
+offline `Research.execute("status")` subsequently verified the active hook journal:
+27,828 events, zero unresolved attempts and zero sources. Exact failure causes
+were not retained; contention is plausible. No history, hook code or settings
+were changed. Tool activity is serialized and runtime auditing remains mandatory.
+
+## Earlier stopped-run drain — 2026-10-18 00:22 UTC
+
+Recovery controller `74034` has exited with `technical_stop`, result
+`198722a934de72a2bd47664e0815e8b56cc1775cff2e3301dfd94e55e5102e4d` and
+presentation `99e73c83d42beb25aa4a22c7d06b535a2ad821894fb8d20d8af2651d27741dd5`.
+It submitted 10,766 articles, assessed 10,516, and left 250 pending in one job.
+Current parser: 6,364 valid / 4,147 invalid / 5 error / 0 unknown; raw:
+6,352 valid / 4,138 invalid / 26 errors, with 21 retained phase derivations.
+Two technical errors are new and have not yet been diagnosed; the previous
+finite acknowledgment cannot exempt them. Cost was USD4.074675, reserved
+USD0.366103 at displayed precision. 188,462 requests remain unsubmitted and
+8,500 assessed outputs await literal projection. Results remain provisional.
+
+At that checkpoint the sole owner process was GET-only `scripts/drain_luna_budget_recovery.py`,
+launched through its saved-key/sleep-guard wrapper from commit `c4549ef` in exec
+session `48951`; worker PID `117600`, launcher PID `85476`. Full integrity
+preflight was running. It can only poll/download existing jobs and diagnose
+retained results, with no count/upload/create/retry operations. Check its output
+before any action; never open another writer or restart old controllers.
+Thirty-one synthetic checks, Ruff, mypy, wrapper syntax and independent review
+passed. The 15-minute monitor then followed that diagnostic. A later continuation
+needs an append-only amendment bound to this exact stop, prior acknowledgment,
+fresh drained diagnostic and explicit newly diagnosed failure IDs, preserving
+the same budget, full text, output cap and original deadline. A transient
+supplementary hook failure had no retained underlying exception; subsequent
+hooks passed, and tool activity is serialized without disabling audit checks.
+
+## Earlier Batch recovery checkpoint — 2026-10-18
+
+At this earlier checkpoint, the sole controller was recovery commit `c0e03dc`, launched once through
 `scripts/run_luna_budget_recovery_with_key.ps1` into
 `scripts/run_luna_budget_recovery.py`, exec session `74034`, at 2026-10-17
 23:16 UTC. Its Python worker is PID `120012` (launcher PID `126604`). The

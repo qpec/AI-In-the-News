@@ -1,6 +1,55 @@
 # Luna Batch throughput amendment
 
-## Current recovery checkpoint — 2026-10-18
+## Active cost diagnostic — 2026-10-18 00:49 UTC
+
+Drain `48951` passed full preflight but exited before any provider GET at the
+historical admission predicate `continuation_unknown_or_frozen_cost`. That
+predicate rejects a frozen book or unknown/frozen/overrun entry, not ordinary
+pending reservations. The failed intent and original helper are preserved.
+
+The new `diagnose_luna_budget_costs.py` from commit `77b17fa` was launched once
+through its saved-key/sleep-guard wrapper at 00:49:30 UTC in exec `3117`, worker
+`123964`, launcher `19028`. One full audited session validates the immutable
+historical stop/run/ack/phase/protocol/code identities solely for existing-job
+GET access. It does not invoke or relax inference-admission loaders. The existing
+settlement code can reconcile other known receipts while retaining earlier
+unknown reservations and any frozen state. An active gateway stop suppresses
+all GETs while still permitting the retained diagnostic. Its report preserves
+exact anomalous entries, event reasons, reservations and retained provider usage.
+Eighteen synthetic checks, Ruff, mypy, wrapper syntax and independent review
+passed. This is diagnostic tooling, not permission for new inference or proof
+that costs are resolved. Check the active process before any further operation.
+
+The supplementary hook journal also passed a separate audited offline integrity
+check: 27,828 events, no unresolved attempts or sources. Two observed hook failures
+had no retained underlying exception; shared-tool contention remains plausible,
+not established. No hook configuration/history was changed; tool activity is
+serialized. Research preflight and the shared gateway remain mandatory.
+
+## Earlier stopped-run drain — 2026-10-18 00:22 UTC
+
+Recovery session `74034` exited `technical_stop` as result
+`198722a934de72a2bd47664e0815e8b56cc1775cff2e3301dfd94e55e5102e4d`.
+At stop: 10,766 submitted / 10,516 assessed / 250 pending, estimated charge
+USD4.074675 and USD0.366103 reserved; 188,462 unsubmitted. Current parser
+counts were 6,364 valid / 4,147 invalid / 5 errors / zero unknown. Two errors
+are newly unacknowledged and not yet diagnosed; all 8,500 missing literal
+projections remain deferred. These are provisional extraction results.
+
+At that checkpoint the sole process was the GET-only diagnostic from commit `c4549ef`,
+`scripts/drain_luna_budget_recovery.py`, launched once through its saved-key
+wrapper in exec `48951` at 00:22 UTC (worker `117600`, launcher `85476`). It
+performs one full `Research.execute()` preflight, binds the exact stop/run/finish,
+prior finite acknowledgment and shared plan, then reconciles existing jobs and
+registers a separate retained-output diagnostic phase. The action boundary
+rejects all count/upload/create/retry operations and every network action in
+the diagnostic phase. Existing reservations and failed outputs remain intact.
+Thirty-one synthetic checks, Ruff, mypy, wrapper syntax and independent review
+passed. The monitor then followed that process; the preceding recovery notes
+are historical. Do not open a competing writer or reuse the earlier finite
+acknowledgment to clear these new failures.
+
+## Earlier recovery checkpoint — 2026-10-18
 
 Recovery commit `c0e03dc` was launched exactly once at 2026-10-17 23:16 UTC
 through `scripts/run_luna_budget_recovery_with_key.ps1` into
