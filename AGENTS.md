@@ -27,6 +27,44 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 
 # Commit checkpoints
 
+## Held controller stopped; exact finite chain prepared — 2026-10-18
+
+Held controller `55955` exited with `technical_stop` at **03:18:29 UTC** and
+released its temporary sleep guard. Do not restart it or any older controller.
+Final wrapped result `a6581d988b3e8ddf927683b35e22e79c0d68a376357d9d431b97fb3cb1cd9edc`
+binds run `c7f63281d31cf5951bf5bf8318fd7007687d4c503a4e299ad3581fa9584e770d`
+and finish `07dfb419a36c2d27aeafebb9078b1ff3a9aaef82a242ff15473672ee41932fd1`.
+The prepared GET-only diagnostic in exec `55761` then completed and exited;
+result `17d03d273357a1b9ccc819b7495c7eece30eb3c68b4c144fa772ededf9024868`,
+presentation `044ea99d07ce606d42e00aee8e738aa8533c356aa4396f5e12c00a2ad49855e1`.
+Its guard released. No provider jobs or diagnostic obstacles remain.
+
+There are **15,016 assessed/submitted**, 7,508 per corpus, with **184,212 eligible
+unsubmitted** (including 500 staged). Recorded conservative charge is
+**USD5.821008552**, plus unchanged unknown reservation **USD0.001402432**;
+15,015 cost entries settled, one unknown, book unfrozen and no gateway stop.
+Current parser: 9,169 valid / 5,840 invalid / seven errors. Existing combined
+derivations give 11,432 mechanically usable; 4,250 assessments still lack literal
+projection. Neither these counts nor technical validity establishes accuracy,
+event eligibility, two-publisher qualification or accepted dossiers.
+
+The two new failed assessments are
+`33aee6f9a64489b27da87e8532bb23262754b5ad322d55c207f066bae09e7f8f` and
+`dca3ef2fb25cc8fd935edeed007669ef548e594e3a0959a3798eb01850ecc61d`.
+Both are HTTP200 Luna responses, incomplete at exactly 4,096 output tokens,
+with complete usage and settled costs. They remain failed and must not retry.
+The old HTTP400 rejection and its full unknown hold remain unchanged.
+
+NEW `luna_budget_held_chain.py`, runner, GET-only diagnostic, wrappers and tests
+prepare an explicit finite amendment bound to this exact diagnostic and stop.
+It replays all historical proofs, appends only the named settled truncations,
+retains the real unknown hold and permits only untouched requests. Every later
+failure still stops. Frozen helpers, budget/gateway, prompt/cap and original
+15:44:53 UTC deadline stay unchanged. Seventy-three focused tests, Ruff, scoped
+mypy, wrapper syntax and independent review passed. This preparation checkpoint
+does not assert registration or launch; check later checkpoints and live processes.
+Protected reports are retained; `record_presentation` does not support this kind.
+
 ## Drained results and exact held-cost recovery preparation — 2026-10-18
 
 **Current sole owner process:** `scripts/run_luna_budget_held_cost.py`, launched

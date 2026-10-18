@@ -1,5 +1,68 @@
 # Luna Batch throughput amendment
 
+## Stopped held controller and finite chain preparation — 2026-10-18
+
+The held controller in exec `55955` stopped at **03:18:29 UTC** after returning
+all **15,016 submitted articles**, 7,508 in each separate corpus. Its exact
+wrapped terminal result is
+`a6581d988b3e8ddf927683b35e22e79c0d68a376357d9d431b97fb3cb1cd9edc`;
+run `c7f63281d31cf5951bf5bf8318fd7007687d4c503a4e299ad3581fa9584e770d`,
+finish `07dfb419a36c2d27aeafebb9078b1ff3a9aaef82a242ff15473672ee41932fd1`.
+Its temporary sleep guard released. Never restart that completed run or use its
+old finite acknowledgment to exempt additional failures.
+
+The GET-only diagnostic in exec `55761` completed as
+`17d03d273357a1b9ccc819b7495c7eece30eb3c68b4c144fa772ededf9024868`,
+with protected presentation
+`044ea99d07ce606d42e00aee8e738aa8533c356aa4396f5e12c00a2ad49855e1`.
+There are zero pending jobs, zero drain obstacles, no gateway stop and no budget
+freeze. Known conservative usage is **USD5.821008552**; the original
+**USD0.001402432 unknown hold remains fully reserved**. Exactly 15,015 cost
+entries are settled and one is unknown. The diagnostic process exited and its
+guard released; its printed completed result is retained despite a nonzero exit.
+
+Two new cybercrime assessments caused the stop:
+`33aee6f9a64489b27da87e8532bb23262754b5ad322d55c207f066bae09e7f8f` and
+`dca3ef2fb25cc8fd935edeed007669ef548e594e3a0959a3798eb01850ecc61d`.
+Both have terminal HTTP200 Luna responses with `max_output_tokens`, exactly
+4,096 output tokens, complete usage and settled charges. They stay failed and
+are not retried. The actual finish blocker is exactly
+`prior_technical_or_unknown_assessment`; the historical held liability remains
+separately visible and is not a second newly exempted cost.
+
+Coverage: 184,212 eligible articles remain unsubmitted, including 500 staged.
+Current parser counts are 9,169 valid / 5,840 invalid / seven errors. Existing
+phase and literal derivations yield 11,432 combined mechanically usable outputs;
+3,578 content-invalid and six technical outcomes remain unresolved in that
+combined view. Literal projection covers 10,766 of 15,016, leaving 4,250 pending
+projection. These are provisional software validation counts, not semantic
+accuracy, qualifying events, two-publisher results or accepted dossiers.
+
+The new `luna_budget_held_chain.py` and `run_luna_budget_held_chain.py` register
+an exact finite amendment. Historical identity replay is separate from current
+admission: the old raw HTTP400 response, its request/count/model/cap/price identity
+and full reserve-to-unknown history remain proved; all older settled failures
+and the original phase proof remain linked. New registration requires the exact
+wrapped stop, latest run/finish, completed diagnostic and explicitly named raw
+settled truncations. All submitted jobs must be reconciled and no extra unknown,
+failure, ambiguity, freeze or changed proof may pass. There is no error-class
+exception, retry, output acceptance, cost release, budget reset or deadline change.
+The shared USD120/USD150 limits and original **15:44:53 UTC** admission deadline
+still apply. The scheduling loop and paid data path remain unchanged.
+
+The new `drain_luna_budget_held_chain.py` and wrapper support a future terminal
+chain result, using the final wrapped StopResultRef and its HeldAckRef. They
+resolve the exact run/finish in the same audited session, allow only existing-job
+GETs, retain new unknowns and permit post-deadline reconciliation without granting
+inference admission. The historical unknown keeps cost admission blocked; inspect
+pending jobs and obstacles separately from the nonzero diagnostic exit.
+
+Seventy-three focused synthetic checks, Ruff, scoped mypy, both PowerShell
+wrapper syntax checks and independent review passed. Frozen files were unchanged.
+This is preparation, not proof of production registration or dispatch. Exact
+technical presentations are protected; `record_presentation` does not support
+these kinds. Future launch/acknowledgment checkpoints must be recorded separately.
+
 ## Exact held-cost continuation preparation — 2026-10-18
 
 The prepared implementation was subsequently launched once from `2a49053`
