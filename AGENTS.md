@@ -40,6 +40,16 @@ writer. The monitor now follows this process. For a future terminal chain run,
 use the NEW `drain_luna_budget_held_chain.py` and wrapper with its exact wrapped
 StopResultRef and new HeldAckRef; old-lineage diagnostics are not substitutes.
 
+**Verified registration at the 04:30 UTC observation:** preflight and the first
+finite proof passed. New acknowledgment
+`93a2bee1a170014b5828ee47405d8a2486c2ec76f1f74255d2c58de54020bba8`,
+result `d02e65a23a1b4ad493e2ad87a185d0f5b597329aef9b55098fbd56d37304c02c`.
+Registration made zero provider calls and retained six exact failed IDs plus the
+separate old phase proof. Exec `71840` is still active while startup verification
+continues; paid dispatch is not yet confirmed at this checkpoint. Reuse this
+same new AckRef for an authorized exact restart only after resolving the prior
+process outcome and remote jobs. Never register another or duplicate inference.
+
 Held controller `55955` exited with `technical_stop` at **03:18:29 UTC** and
 released its temporary sleep guard. Do not restart it or any older controller.
 Final wrapped result `a6581d988b3e8ddf927683b35e22e79c0d68a376357d9d431b97fb3cb1cd9edc`

@@ -22,6 +22,18 @@ and result before an exact restart. The active 15-minute monitor now follows it.
 Future post-stop reconciliation must use the new held-chain GET-only adapter and
 the exact wrapped terminal result plus new HeldAckRef.
 
+At the **04:30 UTC observation**, the existing process printed successful
+registration after full integrity preflight and its first finite proof:
+acknowledgment `93a2bee1a170014b5828ee47405d8a2486c2ec76f1f74255d2c58de54020bba8`,
+result `d02e65a23a1b4ad493e2ad87a185d0f5b597329aef9b55098fbd56d37304c02c`.
+Exactly two settled truncations were appended to the finite history, giving six
+named failed IDs plus the separate old phase proof. All remain failed; the full
+USD0.001402432 unknown hold, shared caps and deadline are unchanged. Registration
+made zero provider calls. Exec `71840` is still active during startup verification;
+new paid dispatch is not yet confirmed. Reuse this same new AckRef after resolving
+the prior process outcome and remote jobs; never register a replacement or infer
+dispatch from successful registration.
+
 ### Exact preceding stop and diagnosis
 
 The held controller in exec `55955` stopped at **03:18:29 UTC** after returning
