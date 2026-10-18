@@ -21,6 +21,15 @@ acknowledgment for an authorized restart only after resolving the existing
 process's outcome; do not register another. Paid dispatch was still unconfirmed
 at registration while the same process completed startup verification.
 
+By the 02:12 UTC observation, startup verification had passed and paid dispatch
+was confirmed: **11,016 submitted / 10,766 assessed / 250 pending in one job**,
+1,094,013 own queued input tokens, no stop. Conservative charge remained
+USD4.175503; reserved USD0.358216 at displayed precision, including the unchanged
+USD0.001402432 held unknown. It then staged another 500 exact full-text requests
+in two separate-corpus files and counted the next 250 with 16 workers. All 10,766
+previous assessments had projection coverage. This is confirmed progress, not
+whole-queue completion, semantic validation or verified project capacity.
+
 The completed GET-only diagnostic is
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`
 (presentation `6c5300c641729da1d3219babbaabb4b5ed54040872e244d2ad9d858c319c529b`).

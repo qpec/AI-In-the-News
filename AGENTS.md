@@ -32,8 +32,8 @@ Reusable workflows: `.agents/skills/research-operations`, `research-review`, and
 **Current sole owner process:** `scripts/run_luna_budget_held_cost.py`, launched
 once through its saved-key/sleep-guard wrapper from commit `2a49053` in exec
 session `55955` at **2026-10-18 01:41:50 UTC**. Launcher PID `118136`, Python
-worker `88432` (shim `117852`). Full mandatory preflight is running; it can take
-about twenty minutes without stdout. Check this existing process first; never
+worker `88432` (shim `117852`). Full mandatory preflight has passed; its initial
+integrity scan can take about twenty minutes without stdout. Check this existing process first; never
 start a second writer or an old controller. Capture its actual acknowledgment
 reference/result before any exact restart. The 15-minute monitor follows it.
 
@@ -45,6 +45,15 @@ zero provider calls. It preserves the full unknown hold and both failed outputs.
 For an authorized exact restart, use this same `-AckRef` only after establishing
 the current process's exact outcome and remote jobs; never re-register it.
 New paid dispatch was not yet confirmed at this registration checkpoint.
+
+**Verified resumed dispatch:** by the 02:12 UTC observation the controller had
+11,016 submitted / 10,766 assessed, 250 pending in one provider job, and
+1,094,013 own queued input tokens. Recorded charge remained USD4.175503;
+reserved USD0.358216 at displayed precision, including the unchanged
+USD0.001402432 held unknown. Stop: none. It then staged 500 untouched requests
+in two separate-corpus files and entered the next 250-request count/submit phase
+with 16 workers. All existing 10,766 assessments have literal-projection coverage.
+This proves resumed dispatch, not whole-queue completion or account capacity.
 
 Cost diagnostic `3117` completed as
 `971b73162158ebd7eec35c073ea28bf8c3d3a325fe98e25ade1806ef1b14f304`,
