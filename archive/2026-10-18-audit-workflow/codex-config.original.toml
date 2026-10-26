@@ -1,0 +1,30 @@
+# Verified against Codex CLI 0.162.1. Project configuration only.
+# Review these local commands in /hooks; this file does not grant its own trust.
+project_doc_max_bytes = 32768
+
+[features]
+hooks = true
+
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = "uv run --offline --frozen python -m newsresearch.hooks"
+timeout = 30
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "uv run --offline --frozen python -m newsresearch.hooks"
+timeout = 30
+
+[[hooks.PostToolUse]]
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "uv run --offline --frozen python -m newsresearch.hooks"
+timeout = 30
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "uv run --offline --frozen python -m newsresearch.hooks"
+timeout = 30

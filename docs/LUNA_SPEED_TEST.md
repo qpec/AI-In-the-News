@@ -343,7 +343,13 @@ single ten-minute result into a guaranteed full-corpus completion time.
 ## Entry point and reusable skill
 
 The project skill is
-[`luna-speed-test`](../.agents/skills/luna-speed-test/SKILL.md). The audited entry
+[`luna-speed-test`](../workbench/skills/luna-speed-test/SKILL.md); its
+[current method and Fast results](../workbench/LUNA_CODEX_FAST_ITERATION.md)
+describe the separate 18 October Fast studies: the initial 165-attempt run
+stopped with eight holds; its repaired continuation processed 450 more articles,
+with 287 valid, 163 invalid and no new unknowns. Both studies are closed. The original
+skill is preserved in [the archive](../archive/2026-10-18-audit-workflow/skills/luna-speed-test/SKILL.md).
+The audited entry
 point is `scripts/luna_speed_test.py`; `prepare`, `run` and `report` invoke a
 `Research` subclass and share the same immutable plan/result lineage. Use the
 implemented `--help` for its exact argument ordering; never invent a plan ID or

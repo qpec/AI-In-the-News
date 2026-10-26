@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "assembled_on": "2026-10-23",
+  "evidence_basis": "Repository documentation; no private corpus re-audit",
+  "originals_preserved": true,
+  "entries": [
+    {
+      "source_path": "docs/OPENAI_EMBEDDINGS.md",
+      "source_sha256": "78ddc1c21f4d621978fadc572187b2b5b4cc16536627874aec9f5ebc67f60458",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/OPENAI_EMBEDDINGS.md",
+      "snapshot_sha256": "2b21dc05b7fc7d67e9c7d2a6e373f96e39a606ae64dc75fe58a0ee3fd14e58ce",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/FULL_CORPUS_VECTOR_STORE.md",
+      "source_sha256": "604eb6932dac2d53a2cebf1de0a4d07a8eb068a34c70fc17960a8062a0b7ff16",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/FULL_CORPUS_VECTOR_STORE.md",
+      "snapshot_sha256": "f0e142cda6b0807b4e7a4499dde4577a12626397fc54761526776275efb1f2f9",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EMBEDDING_CHECKPOINT.md",
+      "source_sha256": "70a0cf3194f83049b6f1477274eb8e6b9cd9c56d3a321030d85bd8c0a16394a0",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/EMBEDDING_CHECKPOINT.md",
+      "snapshot_sha256": "0ddc92fe79d5d4ee2a38eecabf56d7d8566567acb1fb06ba46b7fc0a28241d5f",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/FAST_GROUP_VECTOR_MAPPING.md",
+      "source_sha256": "79e746129be8a4950143b0d71f1b74ce001d52a228ac291d96f81a880c2517d4",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/FAST_GROUP_VECTOR_MAPPING.md",
+      "snapshot_sha256": "fd3586480800ac4a2f70faf3b6d5e3e04665873202fd12ce7a2b0612befb199c",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_RAG_RETRIEVAL.md",
+      "source_sha256": "4a0af19a2a7c072001bb9c9dbc9709d1749274d2349f1a3e2a2fe6cabe23a67c",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/EVENT_RAG_RETRIEVAL.md",
+      "snapshot_sha256": "ff3b13fdcf06f53906e31523166f0a0dda0e4a0ddad0d531f95123a6c8f65d03",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LOCAL_CANDIDATE_SEARCH.md",
+      "source_sha256": "067286c815e50d4075debb0c1f53d3c6461e42fa81442622ca63cdf0fa70d3a0",
+      "snapshot_path": "research/shared/infrastructure/evidence/docs/LOCAL_CANDIDATE_SEARCH.md",
+      "snapshot_sha256": "9f490725724942a56b9d28c7d862760a873139e7d720a757b258422d4cc5c4cb",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    }
+  ]
+}

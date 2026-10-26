@@ -141,6 +141,7 @@ class Research:
             "replay": self._replay,
             "export": self._export,
             "status": self._status,
+            "clone_workspace": self._clone_workspace,
             "collect": self._collect,
             "newsapi_probe": self._newsapi_probe,
             "newsapi_collection": self._newsapi_collection,
@@ -670,6 +671,12 @@ class Research:
         raise ResearchError(
             "Live collection is disabled; import permitted stored responses with ingest. A live transport and run authorization are not installed."
         )
+
+    @audited_handler
+    def _clone_workspace(self, session: str, context: Context, data: Json) -> Json:
+        from .workspace_clone import clone_workspace
+
+        return clone_workspace(self, session, context, data)
 
     @audited_handler
     def _status(self, session: str, context: Context, data: Json) -> Json:

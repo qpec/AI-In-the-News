@@ -1,0 +1,5 @@
+# Lean project setup, 2026-10-18. Previous configuration is archived.
+# Codex's existing local transcripts are imported incrementally by the work journal.
+# No project PreToolUse/PostToolUse audit hooks or per-call historical scans.
+# Runtime/gateway requirements still apply to actual research operations.
+project_doc_max_bytes = 16384

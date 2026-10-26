@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "assembled_on": "2026-10-23",
+  "evidence_basis": "Repository documentation; no private corpus re-audit",
+  "originals_preserved": true,
+  "entries": [
+    {
+      "source_path": "docs/NL_CYBER_SEARCH_STRATEGY.md",
+      "source_sha256": "01f285961f70b1bbaa855d9d50495155d1db5db1eb62ee16e39a7b2c65e88345",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_SEARCH_STRATEGY.md",
+      "snapshot_sha256": "477ed4cdf441249344ed6a80cf1bfc5583c64921f69bf3fdba8b42b2c393150e",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_SEARCH_PILOT.md",
+      "source_sha256": "dcd16d4942cabe5a6265f4564475bab6b4984c9528ee88f85e56e3676fe557e0",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_SEARCH_PILOT.md",
+      "snapshot_sha256": "f002a6c25e2c22e9d6cede746d7ad5c3b3b5230a4964782b8ed970ecefab76b4",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_MINIMAL_KEYWORDS.md",
+      "source_sha256": "870127849adf7e62ef1cea05dc9503a279af4e7527d2f48bea887fe12352da25",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_MINIMAL_KEYWORDS.md",
+      "snapshot_sha256": "4469f52d96c81f822a134d07be2b60e2f41f1098ebba123e256cfd2d51c012cf",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_KEYWORD_VALIDATION.md",
+      "source_sha256": "48fdc06ff33e14484b29a5650bfeabba932b989c64934bea5de4af9c6cf32554",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_KEYWORD_VALIDATION.md",
+      "snapshot_sha256": "8c1eca35c65ce3f418bdc62a2719f01467dc5f0bb971822ede5290de3bcd2661",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_CALENDAR_COLLECTION.md",
+      "source_sha256": "bc03521c0fe74002b5af2db5521f2ca920a1efa1a3e874105c77dc602a5d6c1d",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_CALENDAR_COLLECTION.md",
+      "snapshot_sha256": "600b9a37dc6dcf03bc9cf3034b73555b96c81f19509503191c60318b4e47cc44",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_EVENT_METADATA_COVERAGE.md",
+      "source_sha256": "52637a43822f8ca50bf85d779138d907cb9aa6e6ae329ec9884cfe2ffc31a73d",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_EVENT_METADATA_COVERAGE.md",
+      "snapshot_sha256": "bcb820ad0673acdf696c21117cf360113bb69db82b8cf0b2d6e6527c308aa83a",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_ID_MANIFEST_TEST.md",
+      "source_sha256": "b58338e56c629ad0c7f9494789e2e71b46058cba3ce5551e316c65747f6eca82",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_ID_MANIFEST_TEST.md",
+      "snapshot_sha256": "9402327a7188d47b18480350546f02953ea196ef8f2d2656b2da2c8550bdfe01",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/NL_CYBER_OFFLINE_EVENT_MATCHING.md",
+      "source_sha256": "e4604ec91276860abcb7816c71c79080525edbc5e9f53583e48e7252f9bb10f3",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/NL_CYBER_OFFLINE_EVENT_MATCHING.md",
+      "snapshot_sha256": "870144a10ee98b68feba288ec1f52bd6d6083df93dcabfb84de462fcb868a961",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/CYBERCRIME_INCIDENT_DOSSIER_DESIGN.md",
+      "source_sha256": "fea3a18da317995911be5882f5bf5a7e2bfc12a6fc935c5a0c2035eb0c0fba05",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/CYBERCRIME_INCIDENT_DOSSIER_DESIGN.md",
+      "snapshot_sha256": "5bbefe526a7644749eec3bbdafebfd6f94f32a60f2841645a9e8bd24dabcf4e3",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/CYBERCRIME_GROUPING_QUALITY.md",
+      "source_sha256": "9a9845413b3a957f9bfd3861dba88cb8489455525f620089bebbfdbafd50254c",
+      "snapshot_path": "research/cybercrime_nl/evidence/docs/CYBERCRIME_GROUPING_QUALITY.md",
+      "snapshot_sha256": "1d6897f9ce91e1bcf7470e0770630e8d73444412d82ceb02c357c8033d82adc7",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    }
+  ]
+}

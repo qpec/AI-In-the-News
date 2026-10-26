@@ -1,0 +1,86 @@
+{
+  "method": "luna-lean-standard-api-v1",
+  "status": "design_only",
+  "execution_enabled": false,
+  "selection": "1498d6c42acdd922e7016431b0bda10c538a4c3d642be6c8d5f68956d5d904a0",
+  "parent_owner": "C:/Users/ynhan/AppData/Local/AI-In-the-News/luna-standard-finish-20261020-v6",
+  "parent_amendment": "82543b16f070c18984204649af04d1d151b7fb05445fd316843756101fb8cf0a",
+  "purpose": "Minimize time to process the untouched eligible remainder while preserving missingness, exact evidence, original validation and all historical liabilities.",
+  "entry": "Research.execute with a separately registered implementation and the shared audited gateway; this design record is not a launch permission or an implementation.",
+  "route": {
+    "endpoint": "https://api.openai.com/v1/responses",
+    "model": "gpt-6-luna",
+    "service_tier": "default",
+    "scientific_body": "Preserve exact frozen input, reasoning setting, max_output_tokens=4096, parser and validator.",
+    "attempts_per_article": 1,
+    "automatic_http_retries": 0,
+    "background": false,
+    "batch": false,
+    "codex": false
+  },
+  "pipeline": {
+    "writer_count": 1,
+    "article_workers_max": 64,
+    "initial_workers": 16,
+    "ramp": "16, 32, 64; after each group of 64 completed article attempts, double only if at least 90% have complete HTTP200 receipts, none reports 429, and durable saving is keeping up. Article validity is reported separately.",
+    "count_workers_max": 16,
+    "ready_queue_max": 256,
+    "prepare": "One exact-count producer reuses verified counts only for identical request bodies. Stream each counted identity to the ready queue immediately; no manifest-wide count barrier.",
+    "requests": "Persistent pooled HTTPS transport, fixed origin, redirects disabled, no implicit SDK retries; credentials remain transport-private.",
+    "timeout_proposal_seconds": {"connect": 10, "read": 300},
+    "timeout_limit": "Longer read timeout is a proposed engineering choice, not a demonstrated fix. It does not prove cancellation of remote work.",
+    "scheduling": "One rolling pool across both corpora, preserving per-corpus identity and fair admission. Refill free slots as results are durably saved.",
+    "checkpoint": "Durably journal every intent before dispatch and every observed outcome before parsing. Store bounded checkpoint and progress summaries every 30 seconds without rescanning old source artifacts.",
+    "backpressure": "Stop admitting temporarily if the writer cannot durably save outcomes; never drop receipts to preserve throughput."
+  },
+  "limits": {
+    "tokens_per_minute": 2000000,
+    "requests_per_minute": 5000,
+    "token_reservation": "exact input plus 4096 maximum output",
+    "lower_observed_headers_win": true,
+    "operating_cap_usd": 120,
+    "hard_cap_usd": 150,
+    "all_historical_charges_and_holds_included": true,
+    "deadline": "2026-10-20T20:32:43.115839+02:00"
+  },
+  "outcomes": {
+    "valid": "Save exact response, usage, unchanged validation and cost settlement.",
+    "invalid": "Save exact response and validation failure; retain as invalid, never repair or retry.",
+    "policy_rejection": "Save available receipt and error, preserve full unresolved cost, mark spent and continue other identities.",
+    "parser_failure": "Save exact response and parser failure, preserve full unresolved cost, mark spent and continue other identities.",
+    "timeout_or_connection_loss": "Preserve exact issued intent and available evidence as unknown remote outcome, retain full reservation, permanently exclude from dispatch and continue other identities only under the new registered policy.",
+    "count_failure": "Save the exact count intent and available receipt; skip the identity without a fabricated count or article request. Never retry the count.",
+    "http_429": "Retain the attempted identity and cost hold; delay all new admissions until Retry-After or rate-reset, at least 60 seconds when neither is available. Resume only on another untouched identity; never retry the failed one.",
+    "burst_transport_failure": "For each 64 completed article attempts, if at least 10% time out or return 5xx, halve target concurrency, minimum 16. Preserve existing calls and outcomes. Quarantine count alone does not stop work.",
+    "hard_stop": "Explicit user STOP, audit/hash/write failure, changed inputs, duplicate identity, auth/permission failure, provider quota exhaustion, unexplained cost overrun, budget or deadline exhaustion, and unclassified configuration errors."
+  },
+  "ownership_and_recovery": {
+    "parent": "Keep the sealed parent and all older owners unchanged; preserve their STOP files and failed checks.",
+    "carry_forward": "Before launch register and verify the full exclusion list, historical charges, reservations and every unresolved outcome. The 25 prior timeouts stay unknown with full holds; they are not reclassified as known or successful.",
+    "queue": "Only frozen identities with no prior article intent and no failed or ambiguous count intent are eligible. Match corpus, source and packet hashes across the complete lineage.",
+    "restart": "Reconstruct spent and pending state from the durable ledger. Never return an issued or uncertain intent to the ready queue. A fresh worker may claim only untouched identities after the new method's integrity gates pass.",
+    "stop": "An explicit STOP is sticky. A supervisor cannot clear it. Old monitor remains paused during design."
+  },
+  "monitor": {
+    "interval_seconds": 900,
+    "healthy_baseline_saved_per_minute": 141.13537419613695,
+    "review_below_or_equal_saved_per_minute": 14.113537419613696,
+    "review_action": "Investigate full-window useful saved-result velocity including preparation and downtime. Keep a productive worker running. During confirmed widespread transient failure, pause new admissions for 60 seconds and attempt only one new untouched identity; grow concurrency only after recovery. No retries of spent identities.",
+    "separate_metrics": ["saved results/minute", "valid results/minute", "invalid fraction", "unknown fraction", "15-minute token-reservation utilization", "inflight count", "eligible remaining", "charged plus reserved cost"],
+    "token_reservation_target_percent_diagnostic_only": 80,
+    "eta": "Use comparable cumulative outputs over 15-60 minutes. Exclude permanently spent quarantines. No current finish ETA while stopped."
+  },
+  "release_checks_required": [
+    "Preserved-history import rejects changed parent hashes, missing holds and overlapping identities.",
+    "Synthetic mixed outcomes including timeout, 429, policy error, malformed response and valid result continue only untouched identities.",
+    "Crash after durable intent but before receipt never causes redispatch.",
+    "Budget, deadline, lower rate ceilings, credential isolation and explicit STOP are enforced.",
+    "Existing parser and validation fixtures produce identical classifications.",
+    "Only after a separate launch instruction: one 15-minute run on untouched identities demonstrates throughput; this design does not claim that result."
+  ],
+  "sources": [
+    "https://developers.openai.com/api/docs/models/gpt-6-luna",
+    "https://developers.openai.com/api/docs/guides/latency-optimization",
+    "https://developers.openai.com/api/docs/guides/background"
+  ]
+}

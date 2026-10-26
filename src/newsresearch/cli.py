@@ -39,6 +39,7 @@ def main() -> int:
         "operation",
         choices=[
             "version",
+            "clone_workspace",
             "ingest",
             "import_newsapi",
             "collect",

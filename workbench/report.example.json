@@ -1,0 +1,17 @@
+{
+  "overview": "Describe the day's objective, work and observed outcome.",
+  "method": [
+    {"description": "Explain a methodological stage and the concrete work it groups.", "evidence": ["REPLACE_WITH_EVENT_ID"]}
+  ],
+  "decisions": [
+    {"description": "Explain the decision and its stated or inferred rationale.", "basis": "stated", "evidence": ["REPLACE_WITH_EVENT_ID"]}
+  ],
+  "steps": [
+    {"description": "Describe the input, action, check and observed output.", "status": "completed", "evidence": ["REPLACE_WITH_EVENT_ID"]}
+  ],
+  "results": [
+    {"description": "State the available result, unit and appropriate uncertainty.", "status": "reported_unverified", "evidence": ["REPLACE_WITH_EVENT_ID"]}
+  ],
+  "limitations": ["State capture gaps, the report cutoff and methodological limitations."],
+  "next_steps": ["List follow-up work without treating it as already authorized or performed."]
+}

@@ -1,0 +1,309 @@
+{
+  "status": "Editorial adjudication of invented development examples; not gold labels or empirical accuracy",
+  "date": "2026-10-23",
+  "fixture_sha256": "5914340797476697ecdf95ccc2e26fcfb0dbd7b4915e1877608b56f391ce69c5",
+  "rechecked_definition_draft_sha256": "093d81ba3100f804480a1adb194d81ba7b66222ae0bc0e70b4da8241dd16ca97",
+  "final_definition_sha256": "3e4a728d2b21dbe25dafcc8de17aeccae051e5bff67e821e48d829996919f9cc",
+  "cases": [
+    {
+      "id": "013",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "014",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "015",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "016",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "017",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "018",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "019",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "different_event"
+    },
+    {
+      "id": "020",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "021",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "022",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "023",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "024",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "025",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "026",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "different_event"
+    },
+    {
+      "id": "027",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "028",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "different_event"
+    },
+    {
+      "id": "029",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "030",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "031",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "032",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "033",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "034",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "035",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "036",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "037",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "038",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "039",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "040",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "041",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "not_event_focused",
+      "relation": null
+    },
+    {
+      "id": "042",
+      "eligibility_a": "not_event_focused",
+      "eligibility_b": "not_event_focused",
+      "relation": null
+    },
+    {
+      "id": "043",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "044",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "045",
+      "eligibility_a": "multiple_focal_events",
+      "eligibility_b": "clear_single_event",
+      "relation": null
+    },
+    {
+      "id": "046",
+      "eligibility_a": "multiple_focal_events",
+      "eligibility_b": "clear_single_event",
+      "relation": null
+    },
+    {
+      "id": "047",
+      "eligibility_a": "not_event_focused",
+      "eligibility_b": "clear_single_event",
+      "relation": null
+    },
+    {
+      "id": "048",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "not_event_focused",
+      "relation": null
+    },
+    {
+      "id": "049",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "not_event_focused",
+      "relation": null
+    },
+    {
+      "id": "050",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "051",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "052",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "053",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "054",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "055",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "056",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    },
+    {
+      "id": "057",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "058",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "different_event"
+    },
+    {
+      "id": "059",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "060",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "uncertain"
+    },
+    {
+      "id": "061",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "related_but_different_event"
+    },
+    {
+      "id": "062",
+      "eligibility_a": "clear_single_event",
+      "eligibility_b": "clear_single_event",
+      "relation": "same_event"
+    }
+  ]
+}

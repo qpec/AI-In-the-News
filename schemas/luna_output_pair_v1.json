@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["pair_id", "label", "common_event", "reason_codes", "reason", "support"],
+  "properties": {
+    "pair_id": {"type": "string", "minLength": 1},
+    "label": {"type": "string", "enum": ["same_event", "different_event", "uncertain"]},
+    "common_event": {"type": ["string", "null"], "maxLength": 300},
+    "reason_codes": {
+      "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true,
+      "items": {"type": "string", "enum": ["shared_occurrence", "distinct_action", "distinct_object", "distinct_edition", "distinct_context", "related_development", "granularity_unclear", "insufficient_specificity", "variant_disagreement", "time_unclear", "conflicting_details"]}
+    },
+    "reason": {"type": "string", "minLength": 1, "maxLength": 800},
+    "support": {
+      "type": "array", "maxItems": 12, "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["side", "extraction_id", "pointer", "value"],
+        "properties": {
+          "side": {"type": "string", "enum": ["A", "B"]},
+          "extraction_id": {"type": "string", "minLength": 1},
+          "pointer": {"type": "string", "minLength": 1},
+          "value": {"type": "string", "minLength": 1, "maxLength": 200}
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@
 /AI-In-the-News-Data/
 
 # Local credentials and configuration.
+/.codex-remote-attachments/
 .env
 .env.*
 !.env.example

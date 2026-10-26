@@ -1,0 +1,8 @@
+Return only the final JSON object. Apply the complete luna-event-v2 instruction in the article packet.
+Before returning, check these mechanical requirements without adding an explanation:
+- Each literal surface or value must occur exactly, including case and punctuation, in EVERY ref attached to that literal. Choose only the refs that actually repeat that exact string. Evidence for a role, attribution or whole proposition belongs in role refs or support_refs, not automatically in the literal's refs.
+- Evidence refs arrays (focus, literals, participant roles, status and support_refs) have at most four distinct refs. Use the smallest sufficient set. The separate excluded[*].refs arrays allow up to 64 paragraph refs per exclusion reason; retain all supported exclusions within that cap.
+- An attributed_to participant must also have a supported claim_source role. Include that role when the article explicitly attributes the fact to the participant; do not invent an attribution.
+- Check the schema's string lengths, required fields and array caps. The event summary is at most 200 characters; each literal surface/value is at most 160. Keep literal strings short but contiguous and faithful; never join fragments or add ellipses.
+- A single focus requires an event object. Multiple, none and uncertain require event=null. A difficult extraction is not evidence for none: choose focus from the full article according to the registered definitions.
+- Preserve all event-essential roles and material qualifications. Concision never authorizes deleting substantive evidence, changing source meaning or guessing missing values.

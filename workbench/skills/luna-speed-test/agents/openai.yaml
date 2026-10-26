@@ -1,0 +1,4 @@
+interface:
+  display_name: "Luna Fast Iteration"
+  short_description: "Tune parallel Luna article processing in Codex"
+  default_prompt: "Use $luna-speed-test to prepare a fast, bounded Codex Luna capacity test from the recorded baseline."

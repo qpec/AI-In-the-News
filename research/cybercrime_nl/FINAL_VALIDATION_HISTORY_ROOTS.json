@@ -1,0 +1,426 @@
+{
+  "schema": "cybercrime-final-validation-recorded-history-roots-v1",
+  "status": "prospective_discovery_input_not_an_audited_inventory",
+  "created_amsterdam": "2026-10-24",
+  "scope": "Recorded studies identified by the bound repository checklist, their retained source/prior/import links, and recorded manual or conversational tasks found through those links.",
+  "evidence_files": {
+    "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md": "2b30cfe3b35ec3ced9e8effa32bb1587b89e7d11e60d504d4c09d0351a819f26",
+    "workbench/run_luna_representation_comparison.py": "a368cdc6ac7d2e70dbf67100d804f182a5cc4638b933654157c439dcf482f646"
+  },
+  "roots": [
+    {
+      "id": "current-main",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-nl-dossiers-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "current_production_and_registered_ancestors",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "citation-diagnostic",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-nl-dossier-citation-diagnostics-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "dossier-diagnostic",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-nl-dossier-diagnostics-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "pilot-v2-diagnostic",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-dossier-pilot-v2-diagnosis-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fidelity-census",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v3-summary-fidelity-census-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fidelity-reason-v1",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-summary-fidelity-reason-view-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fidelity-reason-v2",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-summary-fidelity-reason-view-20261023-v2",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "pilot-v4-reason",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v4-pilot-reason-view-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "assignment-v5-view",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v5-assignment-view-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "seed-v7-technical",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v7-seed-technical-view-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "failure-v8-v1",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v8-failure-technical-view-20261023-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "failure-v8-v2",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "cybercrime-v8-failure-technical-view-20261023-v2",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "cyber-screen-v2",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-decisions-cybercrime-nl-20261023-v2",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "routine_screening_with_linked_ancestors",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "provider-pair-50",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "provider-event-label-check-20261019-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "provider_event_pair_labels",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "screen-review-100",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-incident-screening-validation-100-20261021-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "conversational_screening_review",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "screen-keep-45",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-incident-screening-keep-review-45-20261021-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "conversational_screening_review",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "screen-review-30",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-incident-screening-validation-30-20261021-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "conversational_screening_review",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "astra-incident-900",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "incident-decisions-astra-stratified-validation-20261022-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "astra_cli_screening_reference",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "representation",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-representation-comparison-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "representation_reference_and_experimental_arms",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "matching-pilot",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-matching-pilot-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_matching",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "matching-reference",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-matching-reference-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_reference",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "matching-diagnostic",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-matching-diagnostics-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "scalable-v1",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-scalable-experiment-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_development",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "scalable-rule-v2",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-scalable-rule-v2-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_development",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "scalable-v3",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-scalable-experiment-20261020-v3",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_development",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fifteen-v2",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-fifteen-experiments-20261020-v2",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "card_pair_development",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fifteen-diagnostic",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-fifteen-diagnosis-20261020-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "technical_projection",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "seven-day",
+      "selector": {
+        "kind": "owner_basename_hint",
+        "basename": "luna-seven-day-validation-20261016-v1",
+        "base_hint": "%LOCALAPPDATA%/AI-In-the-News"
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "lead_group_anchor_validation",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "cyber-screen-v1-preparation",
+      "selector": {
+        "kind": "declared_ancestor_to_resolve",
+        "from_root": "cyber-screen-v2",
+        "description": "V1 preparation and all declared source owners; resolve actual retained paths."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "screening_preparation_and_sources",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "main-summary-diagnostics",
+      "selector": {
+        "kind": "recorded_plan_family",
+        "from_root": "current-main",
+        "record_kind": "cyber_summary_fidelity_diagnostic_plan",
+        "description": "Both original and V2 diagnostic amendment; physical requests are in the main owner."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "summary_fidelity_reference",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "event-pair-cross-window",
+      "selector": {
+        "kind": "immutable_result_locator",
+        "result_id": "0f49ead5bce2a6bb04cbab86a355b00a71e4274ed8eac2f10b5abff30f82d43b",
+        "execution_key": "cross-window-event-coref-codex-20261016-v1",
+        "owner_hint": null,
+        "description": "Resolve original 54-pair study, its recorded permitted retry and later 30 cross-window judgments; do not infer owner from default_workspace()."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "full_source_event_pair_development",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "fifteen-earlier-preparation",
+      "selector": {
+        "kind": "declared_ancestor_to_resolve",
+        "from_root": "fifteen-v2",
+        "description": "Earlier failed preparation owner if retained manifests declare it; setup failure alone is not an attempt."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "historical_preparation",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "linked-manual-registry",
+      "selector": {
+        "kind": "recorded_registry_or_journal_link",
+        "description": "Resolve linked source-bound reader/RAG, extraction-canary and manual/conversational reviews from retained study registry and journal evidence; unlocalized recorded tasks remain gaps."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "recorded_manual_and_source_review",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "source-free-definition",
+      "selector": {
+        "kind": "repository_study_locator",
+        "path": "research/shared/dossiers/DEFINITION_VALIDATION.md",
+        "description": "Retain evidence for source-free invented fixtures; do not exclude separately linked source-bound reviews by this description."
+      },
+      "evidence_file": "research/cybercrime_nl/FINAL_VALIDATION_HISTORY_SCOPE.md",
+      "reported_family": "reported_invented_definition_cases",
+      "resolution": "pending_audited_resolution"
+    },
+    {
+      "id": "sealed-standard-source",
+      "selector": {
+        "kind": "producer_declared_source_hint",
+        "basename": "luna-standard-full-corpus-20261018-v2",
+        "base_binding": "retained representation selection.base",
+        "from_root": "representation",
+        "declaration": "STANDARD"
+      },
+      "evidence_file": "workbench/run_luna_representation_comparison.py",
+      "reported_family": "historical_full_source_extraction",
+      "resolution": "pending_audited_resolution"
+    }
+  ],
+  "required_retained_relationships": [
+    "source_owner",
+    "prior_owner",
+    "imported_view_origin",
+    "transferred_attempt_origin",
+    "recorded_manual_or_conversational_review"
+  ],
+  "resolution_contract": {
+    "read_prerequisite": "Completed production output freeze with no active writer, through separately registered Research.execute and protected read-only inventory.",
+    "owner_hints_are_verified_paths": false,
+    "reported_families_prove_semantics": false,
+    "family_names_prove_source_disjointness": false,
+    "required_terminals": [
+      "audited_owner_and_immutable_cutoff",
+      "verified_copy_of_included_physical_origin",
+      "evidenced_exact_source_disjoint_or_non_reference_exclusion",
+      "explicit_remaining_gap"
+    ],
+    "actual_edges": "Extract from retained producer-specific records and artifacts; unsupported link-bearing formats remain gaps.",
+    "coverage": "Require exact root, discovered-edge and full task/metadata-census disposition sets. This catalog supplies no closure certificate.",
+    "hidden_or_unrecorded_reading": "Outside recorded task scope; do not invent an attempt or declare universal unexposed status.",
+    "scope_changes": "Preserve this version and all original Study seeds; register any changed concrete scope explicitly."
+  },
+  "actual_owner_cutoffs": [],
+  "actual_discovered_edges": []
+}

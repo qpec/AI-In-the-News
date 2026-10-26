@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "assembled_on": "2026-10-23",
+  "evidence_basis": "Repository documentation; no private corpus re-audit",
+  "originals_preserved": true,
+  "entries": [
+    {
+      "source_path": "docs/LUNA_INCIDENT_SCREENING_PILOT_V1.md",
+      "source_sha256": "4db3a1a0b3466518b0eb34b2c72d7b90bb026af6aa88502f7819418d8f3a591f",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_SCREENING_PILOT_V1.md",
+      "snapshot_sha256": "dfc4c9b9e5a3119aa1d5b0990414d52756b5f4e1cf8eb90566803f583b78a102",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_INCIDENT_SCREENING_VALIDATION_100.md",
+      "source_sha256": "9557bf3e9f83a3ed05527b17c718880763da9850f71deadf8b33f15036f8a2b5",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_SCREENING_VALIDATION_100.md",
+      "snapshot_sha256": "85edcc35298468f46054595613ad58ddca8d247f981d7137886ff71097f72058",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_INCIDENT_SCREENING_PROMPT_VALIDITY_REVIEW.md",
+      "source_sha256": "9e0963a5298aa6fc7d3acd6a2c60d59c6c9f34e8dc4dd21c453bd596e10a8e50",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_SCREENING_PROMPT_VALIDITY_REVIEW.md",
+      "snapshot_sha256": "f28ae5c4c42db7cc7aa58d4a08c4fd7152b8960fe0aa971461d134772ec93079",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_INCIDENT_SCREENING_KEEP_REVIEW_45.md",
+      "source_sha256": "eba4f27c62b7afad96b599de44706f2a3344f24daee7a9723cd2101a215adbba",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_SCREENING_KEEP_REVIEW_45.md",
+      "snapshot_sha256": "e51d3d6e81b97b742b47cfa2f0056c486de81fb053befdc32f2ee5a70b4947a5",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_INCIDENT_DECISIONS_FULL_CORPUS_RESULTS.md",
+      "source_sha256": "45982d25ae0f0253869bf5e0a40ed04d4cb760d3e6692534c5663d06e937d396",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_DECISIONS_FULL_CORPUS_RESULTS.md",
+      "snapshot_sha256": "4498a4837ae24a172fd6aa78796c60de871d9bd36dc5fb0c9b58814dcb0e8a8f",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_INCIDENT_DECISIONS_ASTRA_VALIDATION.md",
+      "source_sha256": "aa711ce189a74bf961ffd0ffa7ee18743b590ccc989114493a176d58371c08c8",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_INCIDENT_DECISIONS_ASTRA_VALIDATION.md",
+      "snapshot_sha256": "2c9d0cd314e31ec9fd90c0c8b8c2ab927feacb7f43b49c32042a8c19d947f689",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_REPRESENTATION_COMPARISON.md",
+      "source_sha256": "c600937db7c28b19d3284d89cce4a018676b4311763f0a0ec097aeb987ddfcfa",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_REPRESENTATION_COMPARISON.md",
+      "snapshot_sha256": "1f86af9a16347c80f4f1feec1e1b64c0320b2623001b28f558300dc69db683fb",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_OUTPUT_MATCHING_V1.md",
+      "source_sha256": "38503a23c69e04f39f6410df4e5b497ed08f5f9c951e611b109e464ac844b784",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_OUTPUT_MATCHING_V1.md",
+      "snapshot_sha256": "39edbffa7c5f79c75e5dcccf2a7470ed4668f303cfa00099eed1f00c9d192a03",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_MATCHING_PILOT_V1.md",
+      "source_sha256": "9ca432f091e1b93774151b692236dd8475acb2bf006912560e7663010ca4d859",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_MATCHING_PILOT_V1.md",
+      "snapshot_sha256": "20807d2cf986914f040be03ec6bfaea9080c066855fecf25f2433fb3440e4661",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_SCALABLE_EXPERIMENT_V1.md",
+      "source_sha256": "a8b355c65b8fe6175451257bad37f191979802daec5be56cc2898810d9a36642",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_SCALABLE_EXPERIMENT_V1.md",
+      "snapshot_sha256": "d04a6cb86a04698a42f4808e0b1f8b64ba161806a8c3b9072562fce8b93adecb",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_MATCHING_15_EXPERIMENTS.md",
+      "source_sha256": "c488a35146d9a2bf6060054f45207d2af38e573193b6d2c1e2f352439d183473",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_MATCHING_15_EXPERIMENTS.md",
+      "snapshot_sha256": "eeef0b18051621ccb961b8e38b59abb6306dd217424e69f3ca7b1d731ae6fcdb",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_DECISIONS_MATCHING_DESIGN_V2.md",
+      "source_sha256": "cf7d34154446150ba5ad90a659ceed97e0fedb1d20fe55593478da9e1bd1910c",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_DECISIONS_MATCHING_DESIGN_V2.md",
+      "snapshot_sha256": "8e401e385ea98687cf109160acd4097a2c0305c646729a67ced2cdfae15846f5",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_FULL_ARTICLE_DOSSIER_METHOD.md",
+      "source_sha256": "27fa4ae564d31e2aa8fc320b2c489bed85fd3fe68a9aaf66c2437aac3e2278ee",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_FULL_ARTICLE_DOSSIER_METHOD.md",
+      "snapshot_sha256": "bf728e638d23b9c8398d23eec27406cf78718c3e5af20fc0d0e58a79d7b2e2ed",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_VECTOR_DOSSIERS_20_USD_FULL.md",
+      "source_sha256": "f26b74a1587a34d61af53b82ed9fd32e792cdfc3ce417381001eaf5167d71b4e",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_VECTOR_DOSSIERS_20_USD_FULL.md",
+      "snapshot_sha256": "8d1f22c7e8b6d8eb2d48b07d5673869f50565feff4ddbe133ea9a1702a4c7c59",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_VECTOR_DOSSIER_PILOT_20_EUR.md",
+      "source_sha256": "5853b0f47e3e980b6679f34e684edf9a1f846846f5b874bbf93862adacc297f0",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_VECTOR_DOSSIER_PILOT_20_EUR.md",
+      "snapshot_sha256": "2161531b751a318e927cbf42e3976f3dea3791797eb0b48a2e233b6d69065683",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_GROUP_VALIDATION.md",
+      "source_sha256": "70ba890578832deb4d30343f158b7553d51630ee8a7ab013516ad3742239eeb4",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_GROUP_VALIDATION.md",
+      "snapshot_sha256": "9fce7d748682b4e2bc66c581cc667268f654a1f913ad06b5f189db062bb30a9b",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_EXCERPT_METHOD.md",
+      "source_sha256": "a82c66b65f904ebbab06e905f859067b4f4b544cc9e3b6b290cb6825e6687700",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_EXCERPT_METHOD.md",
+      "snapshot_sha256": "2dadab84258285e2fa3de4e6c704ea059c14262f44baba830b06a6f2d036450c",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/LUNA_EVENT_METHOD_V2.md",
+      "source_sha256": "03db4e8b720113dc14690c16f211106b3d31d1d800f1b26cbfea9ba939844903",
+      "snapshot_path": "research/ai_incidents/evidence/docs/LUNA_EVENT_METHOD_V2.md",
+      "snapshot_sha256": "b25997a8a4457706d8eb342e51302b7acb715bd023017df4ca2c34ee7c7ccd98",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_MAPPING_METHOD_V1.md",
+      "source_sha256": "5e42a0a9511fc92bf62b127e6a5df752ec419b22016ce455f8af12d95b7deaf0",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_MAPPING_METHOD_V1.md",
+      "snapshot_sha256": "fe89a786ef2b820abd77ab10fa3b22d007ce00a2aa6f91d776134bc2f2dc7d99",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_PAIR_PASSAGE_EXPERIMENT.md",
+      "source_sha256": "def6630a79338663a23b1edfeab07e5005af4353c7fea69206b7d25e0d9ee875",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_PAIR_PASSAGE_EXPERIMENT.md",
+      "snapshot_sha256": "91f91c602136e5fbad980a17f0bcd7a1f9a27543c2acb0f99a47f75df3bd9f0f",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_PAIR_MONOTONE_FINAL.md",
+      "source_sha256": "77b69c887850cc35aa51c21ab0631388f6296a06a2a5f49a84a58a139821ed5c",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_PAIR_MONOTONE_FINAL.md",
+      "snapshot_sha256": "22d1742dfeaf764c5cd28b4203e12ffa5aa50f4cbb8cf08164ed390de48f1f35",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_PAIR_CUTOFF_STUDY.md",
+      "source_sha256": "a72816a0d998fa88e310369bf8d3cbc1ea74f4f7a2838b7c54a9254c18531e5d",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_PAIR_CUTOFF_STUDY.md",
+      "snapshot_sha256": "274a24a069c6afde36eaaedd348c1d669ea8739f648dad61e98c8f2d48f2c61b",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_PAIR_CONJUNCTION_AMENDMENT.md",
+      "source_sha256": "936c6177ece7ca78ea42b7488fad117c05c9a484f6211b86f00e05e58ac65717",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_PAIR_CONJUNCTION_AMENDMENT.md",
+      "snapshot_sha256": "0dffa989c4f59cce020bb8e6b163e45d88a961d9085f6c21243277ae70b525bf",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_RULE_APPLICATION.md",
+      "source_sha256": "748cb24ec3cef0dec53ab8478a2784246dff986468ce7a115e61c0a654a46a36",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_RULE_APPLICATION.md",
+      "snapshot_sha256": "0f0e77cb143b0d672b9190725c7e6cadb51fb2ae5c54ff76f59b3c1a5a4d71bd",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/FAST_EVENT_EVALUATION.md",
+      "source_sha256": "ea4d67aa05d68823979ef3c54881a4dca8ef3bc3bd8da5ad114ae156026645fe",
+      "snapshot_path": "research/ai_incidents/evidence/docs/FAST_EVENT_EVALUATION.md",
+      "snapshot_sha256": "fd0e7a470a2105401d7174a980a25c0ccf4b3c0f22f719b7ad4dd692e27d231d",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_TEMPORAL_DIAGNOSTIC.md",
+      "source_sha256": "d3b1b4df1923f2e8cc1bc0f0b1c441f9f5236e69c2defd861c98c762a58ad881",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_TEMPORAL_DIAGNOSTIC.md",
+      "snapshot_sha256": "b32cd5445f47a2fa40a8e175408eb37006c0a48357014f699e7c335ca385924f",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/AWS_CLUSTERING_EVALUATION.md",
+      "source_sha256": "8797d2cf2ce67bcee5fe2e7e78459b3025aaa1e4fc6a26316e7b25a60e107885",
+      "snapshot_path": "research/ai_incidents/evidence/docs/AWS_CLUSTERING_EVALUATION.md",
+      "snapshot_sha256": "4f65e6ec3bae1d12c01a197afa871b5b008aadaeb9757be94d491d468330ca04",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_CLUSTERING_COMPARISON.md",
+      "source_sha256": "122dc95a0796c399622fb0d5d12cc3fa5e213ee1284475ec5913a3c998c21b97",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_CLUSTERING_COMPARISON.md",
+      "snapshot_sha256": "eba0fcd7dd449404b3b3e3f675eabb4ea481cc76396825603f440987a256f54b",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_GROUP_REFINEMENT.md",
+      "source_sha256": "9d5c527b806491876dbcf64d3136c891c412189b582bc764e0d668848ca3d089",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_GROUP_REFINEMENT.md",
+      "snapshot_sha256": "6e51712462596fabd66cf74e797212659e9f2d665ada093b58f69cd721a081d2",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_GROUP_WINDOW_COMPARISON.md",
+      "source_sha256": "0ebcfa2de006fbe7bd744ca32be494d85d5241d63fb9e0e9cdf10f62204b4521",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_GROUP_WINDOW_COMPARISON.md",
+      "snapshot_sha256": "2d3e85b1cdb86614a5983744372b1d88a4a86239cd716e9f6eb569597fc40244",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/CROSS_WINDOW_EVENT_REVIEW.md",
+      "source_sha256": "b76ea5487c860ce25d541ca817f5bb21da7c225ad711a408f4d0cd7fb78fc6c8",
+      "snapshot_path": "research/ai_incidents/evidence/docs/CROSS_WINDOW_EVENT_REVIEW.md",
+      "snapshot_sha256": "9c57fb3641ee62a0ac432fa03c057210302e65f526fc7a7ac1ae0b079c107631",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/EVENT_EXTRACTION_PILOT.md",
+      "source_sha256": "9a99a7d307e93d8b46c7285801e491d1a643a7a075a5df17fa984720bbfa17f1",
+      "snapshot_path": "research/ai_incidents/evidence/docs/EVENT_EXTRACTION_PILOT.md",
+      "snapshot_sha256": "1c1607ec23213ca01f664e4f1bb453bce79e804caa27b2f62cb5a2555efa91bd",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/SCOPE_REDUCTION_METHOD.md",
+      "source_sha256": "9f348d256d379cc37a3dded593623d8ae1b919585afc185faa65b599d1252de9",
+      "snapshot_path": "research/ai_incidents/evidence/docs/SCOPE_REDUCTION_METHOD.md",
+      "snapshot_sha256": "c1cdfc04a5461c639304cc61e52070a82a446f4f579d3d5f309a6a3e6f767cbc",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/SCOPE_REDUCTION_EXPERIMENTS.md",
+      "source_sha256": "be956779589b32b0aa759eddecf5d7991f2caeebf31ef13bae6d95c37f6dcf0f",
+      "snapshot_path": "research/ai_incidents/evidence/docs/SCOPE_REDUCTION_EXPERIMENTS.md",
+      "snapshot_sha256": "93453a2629af77792201d5354afbea17baf4159f63a5bfd3d5ff72f52ef8b848",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/DOSSIER_METHOD_AUDIT.md",
+      "source_sha256": "444147932e786b2dfe868dd0907c7190ce40676e869673ab9be78d7a76dfaee1",
+      "snapshot_path": "research/ai_incidents/evidence/docs/DOSSIER_METHOD_AUDIT.md",
+      "snapshot_sha256": "ce0c3d19a28508192f6ed5d33a0a3f3168f9e8e8416b77c7734856dccc8f0807",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "docs/INCIDENT_DOSSIER_METHOD.md",
+      "source_sha256": "b4af32062658fc845722883a1945304f8b6d134e8f37c195a3398e63949ebc96",
+      "snapshot_path": "research/ai_incidents/evidence/docs/INCIDENT_DOSSIER_METHOD.md",
+      "snapshot_sha256": "df244dd1740070e1325ab585b5ac7f58066d71b129b4df857a92f976ac80251e",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "workbench/LUNA_DECISIONS_INCIDENT_CORPUS.md",
+      "source_sha256": "6ccacdcc0de33186b27fa2d69cacc4ad5b858e99742a75d2eef38192cdc8ef9f",
+      "snapshot_path": "research/ai_incidents/evidence/workbench/LUNA_DECISIONS_INCIDENT_CORPUS.md",
+      "snapshot_sha256": "0b6f50125d0f19d28ebea647c9e2aeb8b65851564cd112ddcb448219ce116074",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "workbench/LUNA_DECISIONS_FULL_CORPUS.md",
+      "source_sha256": "24b06321543b5bf9a91f9b948d9a7778f4382135579740b4eec51c6b7bd11476",
+      "snapshot_path": "research/ai_incidents/evidence/workbench/LUNA_DECISIONS_FULL_CORPUS.md",
+      "snapshot_sha256": "2dbab5f1a68e7249cfd4c0ff72916d84025e6bd7ea259a39ef11c87576ef2626",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    },
+    {
+      "source_path": "workbench/LUNA_OUTPUT_COMPARISON.md",
+      "source_sha256": "33270d70dff57ee55283a3635243f531e6795dbd7f48039ff7e71fed54bfb75f",
+      "snapshot_path": "research/ai_incidents/evidence/workbench/LUNA_OUTPUT_COMPARISON.md",
+      "snapshot_sha256": "0077e048719aade0bed058b92f6dddf86b785212b4521e79dc445c3d99e8b1eb",
+      "role": "historical_method_or_result_record",
+      "transformation": "Added provenance banner and relocated relative Markdown links; research content unchanged."
+    }
+  ]
+}
